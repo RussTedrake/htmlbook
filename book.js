@@ -46,6 +46,9 @@ function setPlatform(is_mac) {  // else display linux
 function revealChapters() {
     // generate table of contents
     {
+        var url = window.location.pathname;
+        var filename = url.substring(url.lastIndexOf('/')+1);
+
         var i,j;
 
         var toc = "<h1>Table of Contents</h1>\n<ul>\n<li><a href=#preface>Preface</a></li>\n";
@@ -76,7 +79,7 @@ function revealChapters() {
             }
 
 //            toc = toc + chapters[i].parentNode.tagName.toLowerCase();
-            var chapter_link = "<li><a href=underactuated.html?chapter="+chapterNumberToID(i+1)+">";
+            var chapter_link = "<li><a href="+filename+"?chapter="+chapterNumberToID(i+1)+">";
             if (chapterNumberToID(i+1) === "bib") {
                 chapter_link = "<p/>" + chapter_link;
             } else if (chapters[i].parentNode.tagName.toLowerCase() ==
@@ -255,13 +258,13 @@ function revealChapters() {
                 var nav = "\n<table style=\"width:100%;\"><tr style=\"width:100%\">";
                 nav += "<td style=\"width:33%;text-align:left;\">";
                 if (i>0) {
-                    nav+="<a href=underactuated.html?chapter=" +
+                    nav+="<a href="+filename+"?chapter=" +
                       chapterNumberToID(current_chapter-1) +
                       ">Previous chapter</a>";
                 }
-                nav += "</td><td style=\"width:33%;text-align:center;\"><a href=underactuated.html>Table of contents</a></td><td style=\"width:33%;text-align:right;\">";
+                nav += "</td><td style=\"width:33%;text-align:center;\"><a href="+filename+">Table of contents</a></td><td style=\"width:33%;text-align:right;\">";
                 if ((i+1)<chapters.length) {
-                    nav += "<a href=underactuated.html?chapter=" +
+                    nav+="<a href="+filename+"?chapter=" +
                       chapterNumberToID(current_chapter+1) +
                       ">Next chapter</a>";
                 }
