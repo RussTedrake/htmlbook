@@ -27,20 +27,15 @@ function chapterIDToNumber(id) {
     return -1;
 }
 
-function setPlatform(is_mac) {  // else display linux
-    if (is_mac) {
-        to_show = document.getElementsByClassName("mac");
-        to_hide = document.getElementsByClassName("linux");
-    } else {
-        to_show = document.getElementsByClassName("linux");
-        to_hide = document.getElementsByClassName("mac");
-    }
-    for (i=0; i<to_show.length; i++) {
-        to_show[i].style.display = "inline";
-    }
-    for (i=0; i<to_hide.length; i++) {
-        to_hide[i].style.display = "none";
-    }
+function setPlatform(platform) {
+    function hide(items) { for (let item of items) { item.style.display = "none"; } }
+    function show(items) { for (let item of items) { item.style.display = "inline"; } }
+
+    hide(document.getElementsByClassName("mac"));
+    hide(document.getElementsByClassName("xenial"));
+    hide(document.getElementsByClassName("bionic"));
+
+    show(document.getElementsByClassName(platform));
 }
 
 function revealChapters() {
@@ -61,8 +56,10 @@ function revealChapters() {
         var list_of_drake_examples = "";
         var bib = new Map();
 
-        // Set platform to linux unless I detect mac.
-        setPlatform(navigator.appVersion.indexOf("Mac")!=1);
+        // Set platform to bionic unless I detect mac.
+        platform = 'bionic';
+        if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
+        setPlatform(platform);
 
         for (i = 0; i < chapters.length; i++) {
             var titles=chapters[i].getElementsByTagName("h1");
