@@ -278,7 +278,10 @@ function revealChapters() {
                 if (this.readyState == 4 && this.status == 200) {
                     var data = JSON.parse(this.responseText);
 
-                    document.getElementById("drake-linux-binaries").innerHTML =
+                    document.getElementById("drake-bionic-binaries").innerHTML =
+                      data.base_url + data.build + "/drake-" + data.version +
+                      "-bionic.tar.gz";
+                    document.getElementById("drake-xenial-binaries").innerHTML =
                       data.base_url + data.build + "/drake-" + data.version +
                       "-xenial.tar.gz";
                     document.getElementById("drake-mac-binaries").innerHTML =
