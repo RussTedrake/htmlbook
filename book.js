@@ -32,7 +32,6 @@ function setPlatform(platform) {
     function show(items) { for (let item of items) { item.style.display = "inline"; } }
 
     hide(document.getElementsByClassName("mac"));
-    hide(document.getElementsByClassName("xenial"));
     hide(document.getElementsByClassName("bionic"));
 
     show(document.getElementsByClassName(platform));
@@ -281,9 +280,6 @@ function revealChapters() {
                     document.getElementById("drake-bionic-binaries").innerHTML =
                       data.base_url + data.build + "/drake-" + data.version +
                       "-bionic.tar.gz";
-                    document.getElementById("drake-xenial-binaries").innerHTML =
-                      data.base_url + data.build + "/drake-" + data.version +
-                      "-xenial.tar.gz";
                     document.getElementById("drake-mac-binaries").innerHTML =
                       data.base_url + data.build + "/drake-" + data.mac_version
                       + "-mac.tar.gz";
