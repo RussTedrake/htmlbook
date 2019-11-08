@@ -222,7 +222,7 @@ function revealChapters() {
                     var file = pysrcTags[j].innerHTML;
                     // TODO(russt): Consider checking that the file exists.
                     var tmp =
-                      '<p><pre style="margin-left:6px; display:inline"><code>python <a target="' + file +'" href="src/'+ file + '">' + file + '</a>';
+                      '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="src/'+ file + '">' + file + '</a>';
                     if (pysrcTags[j].hasAttribute("args")) {
                         tmp += ' '+ pysrcTags[j].getAttribute("args");
                     }
