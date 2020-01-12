@@ -197,6 +197,9 @@ function revealChapters() {
                         if (this.readyState == 4 && this.status == 200) {
                             var text = hljs.highlight('python',this.responseText,true)
                             codeTags[j].innerHTML =
+                            '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/underactuated_scratchpad.ipynb">' +
+                            'Colab scratchpad</a></sidenote>';
+                            codeTags[j].innerHTML +=
                             '<div><pre><code class="python">'+text.value+'</code></pre></div>';
                         }
                     } })(j);
@@ -204,9 +207,6 @@ function revealChapters() {
                     xhttp.open('GET', file, true);
                     // note: only works for files in or below current directory http://jquery-howto.blogspot.com/2008/12/access-to-restricted-uri-denied-code.html
                     xhttp.send();
-                    codeTags[j].innerHTML +=
-                    '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/underactuated_scratchpad.ipynb">' +
-                    'Colab scratchpad</a></sidenote>';
                 }
 
                 var pysrcTags = chapters[i].getElementsByTagName('pysrc');
