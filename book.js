@@ -215,6 +215,9 @@ function revealChapters() {
                     xhttp.open('GET', file, true);
                     // note: only works for files in or below current directory http://jquery-howto.blogspot.com/2008/12/access-to-restricted-uri-denied-code.html
                     xhttp.send();
+                    codeTags[j].innerHTML +=
+                    '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/underactuated_scratchpad.ipynb">' +
+                    'Colab scratchpad</a></sidenote>';
                 }
 
                 var pysrcTags = chapters[i].getElementsByTagName('pysrc');
