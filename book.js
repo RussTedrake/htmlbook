@@ -38,97 +38,40 @@ function setPlatform(platform) {
 }
 
 function revealChapters() {
-    // generate table of contents
-    {
-        var url = window.location.pathname;
-        var filename = url.substring(url.lastIndexOf('/')+1);
+    var url = window.location.pathname;
+    var filename = url.substring(url.lastIndexOf('/')+1);
 
-        var i,j;
+    var i,j;
 
-        var toc = "<h1>Table of Contents</h1>\n<ul>\n<li><a href=#preface>Preface</a></li>\n";
-        var chapters = document.getElementsByClassName("chapter");
-        var app = document.getElementsByTagName("appendix");
-        var start_appendix = chapters.length - app[0].getElementsByClassName("chapter").length;
-        var current_part = chapters[0].parentNode;
-        var part_number = 1;
+    var chapters = document.getElementsByClassName("chapter");
 
-        var list_of_drake_examples = "";
-        var bib = new Map();
+    var bib = new Map();
 
-        // Set platform to bionic unless I detect mac.
-        platform = 'bionic';
-        if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
-        setPlatform(platform);
+    // Set platform to bionic unless I detect mac.
+    platform = 'bionic';
+    if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
+    setPlatform(platform);
 
-        for (i = 0; i < chapters.length; i++) {
-            var titles=chapters[i].getElementsByTagName("h1");
-            if (!chapters[i].id) {
-                chapters[i].id = "chap"+(i+1);
-            }
-//            toc = toc + "<li><a href=#"+chapters[i].id+">";
-            if (chapters[i].parentNode != current_part) {
-                current_part = chapters[i].parentNode;
-                part_number += 1;
-                if (current_part.className=="part") {
-                    toc = toc + "<p style=\"margin-bottom: 0; text-decoration: underline; font-variant: small-caps;\"><b>" + current_part.getAttribute("title") + "</b></p>\n";
-                }
-            }
-
-//            toc = toc + chapters[i].parentNode.tagName.toLowerCase();
-            var chapter_link = "<li><a href="+filename+"?chapter="+chapterNumberToID(i+1)+">";
-            if (chapterNumberToID(i+1) === "bib") {
-                chapter_link = "<p/>" + chapter_link;
-            } else if (chapters[i].parentNode.tagName.toLowerCase() ==
-              "appendix") {
-                chapter_link += "Appendix " +
-                  String.fromCharCode(64 + i+1-start_appendix) + ": ";
-            } else {
-                chapter_link += "Chapter " + (i+1) + ": ";
-            }
-            chapter_link += titles[0].innerHTML + "</a>\n";
-            toc += chapter_link;
-
-            var sections = chapters[i].getElementsByTagName("section");
-            var level=0;
-            for (j=0; j<sections.length; j++) {
-                if (sections[j].getAttribute("data-type")=="sect1") {
-                    while (level<1) { toc += "<ul>\n"; level += 1; }
-                    while (level>1) { toc += "</ul>\n"; level -= 1; }
-                } else if (sections[j].getAttribute("data-type")=="sect2") {
-                    while (level<2) { toc += "<ul>\n"; level += 1; }
-                    while (level>2) { toc += "</ul>\n"; level -= 1; }
-                } /*
-              else if (sections[j].getAttribute("data-type")=="sect3") {
-                while (level<3) { toc += "<ul>\n"; level += 1; }
-                while (level>3) { toc += "</ul>\n"; level -= 1; }
-              } */
-                else { continue; }
-                toc += "<li>" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</li>\n";
-            }
-            while (level>0) { toc += "</ul>\n"; level -= 1; }
-
-            toc += "</li>\n";
-
-            // TODO: only do this work if I'm actually rendering the output (current_chapter id === drake)
-            if (true) { // then I'm writing the drake example list, too
-                var examples = chapters[i].getElementsByClassName("drake");
-                if (examples.length>0) {
-                    list_of_drake_examples += chapter_link + "<ul>";
-                    for (j=0; j<examples.length; j++) {
-                        var name = examples[j].getElementsByTagName("h1");
-                        if (name.length>0) {
-                            list_of_drake_examples += "<li>"+name[0].innerHTML+"</li>";
-                        }
-                    }
-                    list_of_drake_examples += "</ul>\n";
-                }
-
-            }
-
+    function chapterLink(i) {
+        var chapter_link = "<li><a href="+filename+"?chapter="+chapterNumberToID(i+1)+">";
+        if (chapterNumberToID(i+1) === "bib") {
+            chapter_link = "<p/>" + chapter_link;
+        } else if (chapters[i].parentNode.tagName.toLowerCase() ==
+            "appendix") {
+            chapter_link += "Appendix " +
+                String.fromCharCode(64 + i+1-start_appendix) + ": ";
+        } else {
+            chapter_link += "Chapter " + (i+1) + ": ";
         }
+        chapter_link += chapters[i].getElementsByTagName("h1")[0].innerHTML + "</a>\n";
+        return chapter_link;
+    }
 
-        toc = toc + "</ul>\n";
-        document.getElementById("table_of_contents").innerHTML = toc;
+    // Make sure all chapters have an id.
+    for (i = 0; i < chapters.length; i++) {
+        if (!chapters[i].id) {
+            chapters[i].id = "chap"+(i+1);
+        }
     }
 
     var elibTags = document.getElementsByTagName('elib');
@@ -151,9 +94,50 @@ function revealChapters() {
         elibTags[i].innerHTML = '[' + str + ']';
     }
 
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"mathjax_setup"]);
-
     var current_chapter = getParameterByName("chapter");
+    if (!current_chapter) { // Then write the TOC.
+        var toc = "<h1>Table of Contents</h1>\n<ul>\n<li><a href=#preface>Preface</a></li>\n";
+        var app = document.getElementsByTagName("appendix");
+        var start_appendix = chapters.length - app[0].getElementsByClassName("chapter").length;
+        var current_part = chapters[0].parentNode;
+        var part_number = 1;
+
+        for (i = 0; i < chapters.length; i++) {
+            if (chapters[i].parentNode != current_part) {
+                current_part = chapters[i].parentNode;
+                part_number += 1;
+                if (current_part.className=="part") {
+                    toc = toc + "<p style=\"margin-bottom: 0; text-decoration: underline; font-variant: small-caps;\"><b>" + current_part.getAttribute("title") + "</b></p>\n";
+                }
+            }
+
+            toc += chapterLink(i);
+
+            var sections = chapters[i].getElementsByTagName("section");
+            var level=0;
+            for (j=0; j<sections.length; j++) {
+                if (sections[j].getAttribute("data-type")=="sect1") {
+                    while (level<1) { toc += "<ul>\n"; level += 1; }
+                    while (level>1) { toc += "</ul>\n"; level -= 1; }
+                } else if (sections[j].getAttribute("data-type")=="sect2") {
+                    while (level<2) { toc += "<ul>\n"; level += 1; }
+                    while (level>2) { toc += "</ul>\n"; level -= 1; }
+                } /*
+            else if (sections[j].getAttribute("data-type")=="sect3") {
+                while (level<3) { toc += "<ul>\n"; level += 1; }
+                while (level>3) { toc += "</ul>\n"; level -= 1; }
+            } */
+                else { continue; }
+                toc += "<li>" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</li>\n";
+            }
+            while (level>0) { toc += "</ul>\n"; level -= 1; }
+
+            toc += "</li>\n";
+        }
+
+        toc = toc + "</ul>\n";
+        document.getElementById("table_of_contents").innerHTML = toc;
+    }
 
     if (current_chapter) {
         if (isNaN(current_chapter)) {
@@ -161,6 +145,8 @@ function revealChapters() {
         } else {
             current_chapter = Number(current_chapter);
         }
+
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub,"mathjax_setup"]);
 
         document.getElementById("preface").style.display = "none";
         document.getElementById("table_of_contents").style.display = "none";
@@ -170,6 +156,9 @@ function revealChapters() {
                 chapters[i].style.display = "none";
             } else {
                 chapters[i].style.display = "inline";
+
+                // render mathjax for this chapter only.
+                MathJax.Hub.Queue(["Typeset",MathJax.Hub,chapters[i]]);
 
                 // load images/videos for this chapter only
                 // TODO(russt): consider adding a lint test to make sure all
@@ -208,7 +197,7 @@ function revealChapters() {
                         if (this.readyState == 4 && this.status == 200) {
                             var text = hljs.highlight('python',this.responseText,true)
                             codeTags[j].innerHTML =
-                              '<div><pre><code class="python">'+text.value+'</code></pre></div>';
+                            '<div><pre><code class="python">'+text.value+'</code></pre></div>';
                         }
                     } })(j);
                     xhttp.overrideMimeType('text/plain');
@@ -225,14 +214,14 @@ function revealChapters() {
                     var file = pysrcTags[j].innerHTML;
                     // TODO(russt): Consider checking that the file exists.
                     var tmp =
-                      '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="src/'+ file + '">' + file + '</a>';
+                    '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="src/'+ file + '">' + file + '</a>';
                     if (pysrcTags[j].hasAttribute("args")) {
                         tmp += ' '+ pysrcTags[j].getAttribute("args");
                     }
                     pysrcTags[j].innerHTML = tmp + '</code></pre>';
                     pysrcTags[j].innerHTML +=
-                      '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/underactuated_scratchpad.ipynb">' +
-                      'Colab scratchpad</a></sidenote></p>';
+                    '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/underactuated_scratchpad.ipynb">' +
+                    'Colab scratchpad</a></sidenote></p>';
                 }
 
                 var jupyterTags = chapters[i].getElementsByTagName('jupyter');
@@ -240,11 +229,11 @@ function revealChapters() {
                     var file = jupyterTags[j].innerHTML;
                     // TODO(russt): Consider checking that the file exists.
                     var tmp =
-                      '<p><pre style="margin-left:6px; display:inline"><code>jupyter notebook <a target="' + file + '" href="http://github.com/RussTedrake/underactuated/blob/master/src/' + file + '">src/'
-                      + file + '</a>';
+                    '<p><pre style="margin-left:6px; display:inline"><code>jupyter notebook <a target="' + file + '" href="http://github.com/RussTedrake/underactuated/blob/master/src/' + file + '">src/'
+                    + file + '</a>';
                     jupyterTags[j].innerHTML = tmp + '</code></pre>\n' +
-                      '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/' + file + '">\n' +
-                      '  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a></p>';
+                    '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/' + file + '">\n' +
+                    '  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a></p>';
                 }
 
 //              document.getElementById("debug_output").innerHTML="got here";
@@ -253,19 +242,18 @@ function revealChapters() {
                     display_num=i-start_appendix;
                 }
                 chapters[i].style.counterReset = "chapter " + display_num + " sect1 example_counter theorem algorithm figure";
-                MathJax.Hub.Queue(["Typeset",MathJax.Hub,chapters[i]]);
                 var nav = "\n<table style=\"width:100%;\"><tr style=\"width:100%\">";
                 nav += "<td style=\"width:33%;text-align:left;\">";
                 if (i>0) {
                     nav+="<a href="+filename+"?chapter=" +
-                      chapterNumberToID(current_chapter-1) +
-                      ">Previous chapter</a>";
+                    chapterNumberToID(current_chapter-1) +
+                    ">Previous chapter</a>";
                 }
                 nav += "</td><td style=\"width:33%;text-align:center;\"><a href="+filename+">Table of contents</a></td><td style=\"width:33%;text-align:right;\">";
                 if ((i+1)<chapters.length) {
                     nav+="<a href="+filename+"?chapter=" +
-                      chapterNumberToID(current_chapter+1) +
-                      ">Next chapter</a>";
+                    chapterNumberToID(current_chapter+1) +
+                    ">Next chapter</a>";
                 }
                 nav += "</td></tr></table>\n";
                 chapters[i].innerHTML = nav + chapters[i].innerHTML + nav;
@@ -274,6 +262,22 @@ function revealChapters() {
         if (chapters[current_chapter-1].id === "drake") {
             // then i'm in the drake appendix, so fill in that content
 
+            // Find the examples throughout the text.
+            var list_of_drake_examples = "";
+            for (i = 0; i < chapters.length; i++) {
+                var examples = chapters[i].getElementsByClassName("drake");
+                if (examples.length>0) {
+                    list_of_drake_examples += chapterLink(i) + "<ul>";
+                    for (j=0; j<examples.length; j++) {
+                        var name = examples[j].getElementsByTagName("h1");
+                        if (name.length>0) {
+                            list_of_drake_examples += "<li>"+name[0].innerHTML+"</li>";
+                        }
+                    }
+                    list_of_drake_examples += "</ul>\n";
+                }
+            }
+
             // read drake_version.json and set binaries info
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = ( function (j) { return function() {
@@ -281,11 +285,11 @@ function revealChapters() {
                     var data = JSON.parse(this.responseText);
 
                     document.getElementById("drake-bionic-binaries").innerHTML =
-                      data.base_url + data.build + "/drake-" + data.version +
-                      "-bionic.tar.gz";
+                    data.base_url + data.build + "/drake-" + data.version +
+                    "-bionic.tar.gz";
                     document.getElementById("drake-mac-binaries").innerHTML =
-                      data.base_url + data.build + "/drake-" + data.mac_version
-                      + "-mac.tar.gz";
+                    data.base_url + data.build + "/drake-" + data.mac_version
+                    + "-mac.tar.gz";
                 }
             } })(j);
             xhttp.overrideMimeType('text/plain');
@@ -293,7 +297,7 @@ function revealChapters() {
             xhttp.send();
 
             document.getElementById("list_of_drake_examples").innerHTML =
-              "<ul>" + list_of_drake_examples + "</ul>";
+            "<ul>" + list_of_drake_examples + "</ul>";
 
         }
         if (chapters[current_chapter-1].id === "bib") {
@@ -306,14 +310,14 @@ function revealChapters() {
             bibtags = bibtags.slice(0, -1);
 
             document.getElementById("bibliography").innerHTML =
-              "<p>I'm working on a satisfying solution for this.  For now, <a href=http://groups.csail.mit.edu/locomotion/elib.cgi?b=" +
-              bibtags + ">click here</a>.</p>";
+            "<p>I'm working on a satisfying solution for this.  For now, <a href=http://groups.csail.mit.edu/locomotion/elib.cgi?b=" +
+            bibtags + ">click here</a>.</p>";
         }
     }
 
     var drakeTags = document.getElementsByTagName('drake');
     for (j = 0; j < drakeTags.length; j++) {
         drakeTags[j].innerHTML =
-          '<a style="font-variant:small-caps; text-decoration:none;" href="http://drake.mit.edu">Drake</a>';
+        '<a style="font-variant:small-caps; text-decoration:none;" href="http://drake.mit.edu">Drake</a>';
     }
 }
