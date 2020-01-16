@@ -68,7 +68,7 @@ appendix {
 
 [data-type="chapter"] {
   counter-increment:chapter;
-  counter-reset: sect1 example_counter theorem algorithm figure;
+  counter-reset: sect1 example_counter exercise_counter theorem algorithm figure;
   display:none;
 }
 [data-type="sect1"] {
@@ -86,6 +86,9 @@ appendix {
 }
 [data-type="example"] {
   counter-increment:example_counter;
+}
+[data-type="exercise"] {
+  counter-increment:exercise_counter;
 }
 [data-type="algorithm"] {
   counter-increment:algorithm;
@@ -150,6 +153,9 @@ appendix {
 [data-type="example"] h1:before {
   content: "Example " counter(chapter) "." counter(example_counter) " (";
 }
+[data-type="exercise"] h1:before {
+  content: "Exercise " counter(chapter) "." counter(exercise_counter) " ";
+}
 [data-type="algorithm"] h1:before {
   content: "Algorithm " counter(chapter) "." counter(algorithm) " (";
 }
@@ -173,7 +179,12 @@ appendix {
   margin-bottom: 10px;
   padding: 5px;
 }
-
+[data-type="exercise"] h1 {
+  display: block;
+  font-size: 16px;
+  font-variant: normal;
+  margin: 2px;
+}
 
 figure {
   text-align: center;
@@ -224,6 +235,9 @@ appendix [data-type="theorem"] h1:before {
 
 appendix [data-type="example"] h1:before {
   content: "Example " counter(chapter, upper-alpha) "." counter(example_counter) " (";
+}
+appendix [data-type="exercise"] h1:before {
+  content: "Exercise " counter(chapter, upper-alpha) "." counter(exercise_counter) " ";
 }
 appendix [data-type="algorithm"] h1:before {
   content: "Algorithm " counter(chapter, upper-alpha) "." counter(algorithm) " (";
