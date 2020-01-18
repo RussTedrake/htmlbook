@@ -94,11 +94,10 @@ function revealChapters() {
         elibTags[i].innerHTML = '[' + str + ']';
     }
 
+    var start_appendix = chapters.length - document.getElementsByTagName("appendix")[0].getElementsByClassName("chapter").length;
     var current_chapter = getParameterByName("chapter");
     if (!current_chapter) { // Then write the TOC.
         var toc = "<h1>Table of Contents</h1>\n<ul>\n<li><a href=#preface>Preface</a></li>\n";
-        var app = document.getElementsByTagName("appendix");
-        var start_appendix = chapters.length - app[0].getElementsByClassName("chapter").length;
         var current_part = chapters[0].parentNode;
         var part_number = 1;
 
@@ -236,12 +235,13 @@ function revealChapters() {
                     '  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a></p>';
                 }
 
-//              document.getElementById("debug_output").innerHTML="got here";
+                // Set chapter counter manually, since chapters with display:none do not increment the counter.
                 var display_num = i;
-                if (i>=start_appendix) {
-                    display_num=i-start_appendix;
+                if (i >= start_appendix) {
+                    display_num = i - start_appendix;
                 }
-                chapters[i].style.counterReset = "chapter " + display_num + " sect1 example_counter theorem algorithm figure";
+                chapters[i].style.counterReset += "chapter " + display_num;
+
                 var nav = "\n<table style=\"width:100%;\"><tr style=\"width:100%\">";
                 nav += "<td style=\"width:33%;text-align:left;\">";
                 if (i>0) {
