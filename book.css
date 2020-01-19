@@ -102,7 +102,7 @@ appendix {
 }
 
 [data-type="sect1"] h1:before {
-  content: counter(chapter) "." counter(sect1) ' ';
+  content: counter(chapter) "." counter(sect1) " ";
   display: inline;
 }
 [data-type="sect2"] h1:before {

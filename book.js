@@ -315,6 +315,10 @@ function revealChapters() {
         }
     }
 
+    // Process any anchors again now that the proper elements are visible.
+    var hash = document.getElementById(location.hash.substr(1))
+    hash.scrollIntoView()
+
     var drakeTags = document.getElementsByTagName('drake');
     for (j = 0; j < drakeTags.length; j++) {
         drakeTags[j].innerHTML =
