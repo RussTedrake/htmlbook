@@ -37,7 +37,7 @@ function setPlatform(platform) {
     show(document.getElementsByClassName(platform));
 }
 
-function revealChapters() {
+function revealChapters(project) {
     var url = window.location.pathname;
     var filename = url.substring(url.lastIndexOf('/')+1);
 
@@ -213,13 +213,13 @@ function revealChapters() {
 
                 var codeTags = chapters[i].getElementsByTagName('pysrcinclude');
                 for (j = 0; j < codeTags.length; j++) {
-                    var file = 'src/' + codeTags[j].innerHTML;
+                    var file = project + '/' + codeTags[j].innerHTML;
                     var xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = ( function (j) { return function() {
                         if (this.readyState == 4 && this.status == 200) {
                             var text = hljs.highlight('python',this.responseText,true)
                             codeTags[j].innerHTML =
-                            '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/underactuated_scratchpad.ipynb">' +
+                            '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/scripts/colab_scratchpad.ipynb">' +
                             'Colab scratchpad</a></sidenote>';
                             codeTags[j].innerHTML +=
                             '<div><pre><code class="python">'+text.value+'</code></pre></div>';
@@ -236,13 +236,13 @@ function revealChapters() {
                     var file = pysrcTags[j].innerHTML;
                     // TODO(russt): Consider checking that the file exists.
                     var tmp =
-                    '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="src/'+ file + '">' + file + '</a>';
+                    '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="' + project + '/'+ file + '">' + file + '</a>';
                     if (pysrcTags[j].hasAttribute("args")) {
                         tmp += ' '+ pysrcTags[j].getAttribute("args");
                     }
                     pysrcTags[j].innerHTML = tmp + '</code></pre>';
                     pysrcTags[j].innerHTML +=
-                    '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/underactuated_scratchpad.ipynb">' +
+                    '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/scripts/colab_scratchpad.ipynb">' +
                     'Colab scratchpad</a></sidenote></p>';
                 }
 
@@ -251,10 +251,10 @@ function revealChapters() {
                     var file = jupyterTags[j].innerHTML;
                     // TODO(russt): Consider checking that the file exists.
                     var tmp =
-                    '<p><pre style="margin-left:6px; display:inline"><code>jupyter notebook <a target="' + file + '" href="http://github.com/RussTedrake/underactuated/blob/master/src/' + file + '">src/'
+                    '<p><pre style="margin-left:6px; display:inline"><code>jupyter notebook <a target="' + file + '" href="http://github.com/RussTedrake/underactuated/blob/master/' + project + '/' + file + '">' + project + '/'
                     + file + '</a>';
                     jupyterTags[j].innerHTML = tmp + '</code></pre>\n' +
-                    '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/src/' + file + '">\n' +
+                    '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/' + project + '/' + file + '">\n' +
                     '  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a></p>';
                 }
 
