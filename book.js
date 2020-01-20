@@ -173,6 +173,19 @@ function revealChapters() {
                     }
                 }
 
+                // Make sure all examples have ids and links.  (These are only unique because I am setting them ONLY for the current chapter).
+                var divs = chapters[i].getElementsByTagName("div");
+                var examplenum = 1;
+                for (j=0; j<divs.length; j++) {
+                    if (divs[j].getAttribute("data-type")=="example") {
+                        if (!divs[j].id) {
+                            divs[j].id = "example" + examplenum;
+                        }
+                        divs[j].getElementsByTagName("h1")[0].innerHTML = "<a href=#example" + examplenum + ">" + divs[j].getElementsByTagName("h1")[0].innerHTML + "</a>";
+                        examplenum += 1; 
+                    }
+                }
+
                 // render mathjax for this chapter only.
                 MathJax.Hub.Queue(["Typeset",MathJax.Hub,chapters[i]]);
 
@@ -257,7 +270,7 @@ function revealChapters() {
                 if (i >= start_appendix) {
                     display_num = i - start_appendix;
                 }
-                chapters[i].style.counterReset += "chapter " + display_num;
+                chapters[i].style.counterReset = "chapter " + display_num + " sect1 example_counter exercise_counter theorem algorithm figure";
 
                 var nav = "\n<table style=\"width:100%;\"><tr style=\"width:100%\">";
                 nav += "<td style=\"width:33%;text-align:left;\">";
@@ -282,15 +295,29 @@ function revealChapters() {
             // Find the examples throughout the text.
             var list_of_drake_examples = "";
             for (i = 0; i < chapters.length; i++) {
-                var examples = chapters[i].getElementsByClassName("drake");
-                if (examples.length>0) {
-                    list_of_drake_examples += chapterLink(i) + "<ul>";
-                    for (j=0; j<examples.length; j++) {
-                        var name = examples[j].getElementsByTagName("h1");
-                        if (name.length>0) {
-                            list_of_drake_examples += "<li>"+name[0].innerHTML+"</li>";
-                        }
+                var divs = chapters[i].getElementsByTagName("div");
+                var examplenum = 1;
+                var has_drake_example = false;
+                for (j=0; j<divs.length; j++) {
+                    if (divs[j].getAttribute("data-type")=="example") {
+                        if (divs[j].className=="drake") {
+                            if (!has_drake_example) {
+                                list_of_drake_examples += chapterLink(i) + "<ul>";
+                                has_drake_example = true;
+                            }
+                            var id = "example" + examplenum;
+                            if (divs[j].id) {
+                                id = divs[j].id;
+                            }
+                            var name = divs[j].getElementsByTagName("h1");
+                            if (name.length>0) {
+                                list_of_drake_examples += "<li><a href=?chapter="+chapterNumberToID(i+1)+"#example"+examplenum+">"+name[0].innerHTML+"</a></li>";
+                            }
+                        }    
+                        examplenum += 1; 
                     }
+                }
+                if (has_drake_example) {
                     list_of_drake_examples += "</ul>\n";
                 }
             }
