@@ -44,13 +44,14 @@ function revealChapters() {
     var i,j;
 
     var chapters = document.getElementsByClassName("chapter");
-
     var bib = new Map();
 
     // Set platform to bionic unless I detect mac.
     platform = 'bionic';
     if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
     setPlatform(platform);
+
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"mathjax_setup"]);
 
     function chapterLink(i) {
         var chapter_link = "<li><a href="+filename+"?chapter="+chapterNumberToID(i+1)+">";
@@ -67,12 +68,12 @@ function revealChapters() {
         return chapter_link;
     }
 
-    // Make sure all chapters have an id.
+    // Make sure all chapters and sections have an id.
     for (i = 0; i < chapters.length; i++) {
         if (!chapters[i].id) {
             chapters[i].id = "chap"+(i+1);
         }
-    }
+    } 
 
     var elibTags = document.getElementsByTagName('elib');
     for (i = 0; i < elibTags.length; i++) {
@@ -114,20 +115,22 @@ function revealChapters() {
 
             var sections = chapters[i].getElementsByTagName("section");
             var level=0;
+            var sect1num = 1;
             for (j=0; j<sections.length; j++) {
                 if (sections[j].getAttribute("data-type")=="sect1") {
                     while (level<1) { toc += "<ul>\n"; level += 1; }
                     while (level>1) { toc += "</ul>\n"; level -= 1; }
+                    var section_id = "section" + sect1num;
+                    if (sections[j].id) {
+                        section_id = sections[j].id;
+                    }
+                    toc += "<li><a href=?chapter=" +chapterNumberToID(i+1)+"#"+ section_id+">"+sections[j].getElementsByTagName("h1")[0].innerHTML + "</a></li>\n";
+                    sect1num+=1;
                 } else if (sections[j].getAttribute("data-type")=="sect2") {
                     while (level<2) { toc += "<ul>\n"; level += 1; }
                     while (level>2) { toc += "</ul>\n"; level -= 1; }
-                } /*
-            else if (sections[j].getAttribute("data-type")=="sect3") {
-                while (level<3) { toc += "<ul>\n"; level += 1; }
-                while (level>3) { toc += "</ul>\n"; level -= 1; }
-            } */
-                else { continue; }
-                toc += "<li>" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</li>\n";
+                    toc += "<li>" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</li>\n";
+                } 
             }
             while (level>0) { toc += "</ul>\n"; level -= 1; }
 
@@ -136,6 +139,7 @@ function revealChapters() {
 
         toc = toc + "</ul>\n";
         document.getElementById("table_of_contents").innerHTML = toc;
+        MathJax.Hub.Queue(["Typeset",MathJax.Hub,document.getElementById("table_of_contents")]);
     }
 
     if (current_chapter) {
@@ -155,6 +159,19 @@ function revealChapters() {
                 chapters[i].style.display = "none";
             } else {
                 chapters[i].style.display = "inline";
+
+                // Make sure all sections have ids and links.  (These are only unique because I am setting them ONLY for the current chapter).
+                var sections = chapters[i].getElementsByTagName("section");
+                var sect1num = 1;
+                for (j=0; j<sections.length; j++) {
+                    if (sections[j].getAttribute("data-type")=="sect1") {
+                        if (!sections[j].id) {
+                            sections[j].id = "section" + sect1num;
+                        }
+                        sections[j].getElementsByTagName("h1")[0].innerHTML = "<a href=#section" + sect1num + ">" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</a>";
+                        sect1num += 1; 
+                    }
+                }
 
                 // render mathjax for this chapter only.
                 MathJax.Hub.Queue(["Typeset",MathJax.Hub,chapters[i]]);
@@ -316,8 +333,12 @@ function revealChapters() {
     }
 
     // Process any anchors again now that the proper elements are visible.
-    var hash = document.getElementById(location.hash.substr(1))
-    hash.scrollIntoView()
+    var hash = document.getElementById(location.hash.substr(1));
+    if (hash) {
+        MathJax.Hub.Queue(function() {
+            hash.scrollIntoView();
+        });
+    }
 
     var drakeTags = document.getElementsByTagName('drake');
     for (j = 0; j < drakeTags.length; j++) {
