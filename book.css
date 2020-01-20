@@ -14,48 +14,117 @@ h1,h2,h3,h4,h5,h6 {
   font-family: Arial, Helvetica, sans-serif;
   color: rgb(153,51,51); /* mit red */
 }
-
-todo {
-  display: none;
-}
-
 a:not(.image) {
   color: rgb(153,51,51); /* mit red */
 }
+pre { margin-top: -5px; }
+b { color: rgb(153,51,51); /* mit red */ }
+i { color: rgb(153,51,51); /* mit red */ }
+em { color: rgb(153,51,51); /* mit red */ }
 
 [data-type="titlepage"] {
   font-size: 22px;
 }
-[data-type="titlepage"] h1 {
-  font-variant: small-caps;
-  margin-bottom: 0px;
-}
-[data-type="sect1"] h1 {
-  font-variant: small-caps;
-}
-[data-type="sect2"] h1 {
-  font-variant: normal;
-}
-
 [data-type="subtitle"] {
   font-weight: bold;
   font-style: italic;
   font-size: 16px;
   margin-top: 0px;
 }
-
-
-sidenote {
-float: right; margin-right: -170px;
-width: 150px; text-align: left;
+#bib h1:before {
+  content: "";
 }
 
-pre { margin-top: -5px; }
+/* Custom tags */
+sidenote {
+  float: right; margin-right: -170px;
+  width: 150px; text-align: left;
+}
+todo {
+  display: none;
+}
+definition {
+  display: block;
+  border: 1px solid;
+  border-radius: 10px;
+  background-color: rgb(242,242,242); /* light gray */
+  margin: 10px;
+  padding: 5px;
+}
+theorem {
+  display: block;
+  border: 1px solid;
+  border-radius: 10px;
+  background-color: rgb(242,242,242); /* light gray */
+  margin: 10px;
+  padding: 5px;
+}
+example {
+  display: block;
+  border: 1px solid;
+  border-radius: 0px;
+  background-color: rgb(242,242,242); /* light gray */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+exercise {
+  display: block;
+  border-radius: 0px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+figure {
+  text-align: center;
+  counter-increment: figure;
+}
+figcaption {
+  text-align: center;
+}
 
-b { color: rgb(153,51,51); /* mit red */ }
-i { color: rgb(153,51,51); /* mit red */ }
-em { color: rgb(153,51,51); /* mit red */ }
 
+/* h1 elements */
+[data-type="titlepage"] h1 {
+  font-variant: small-caps;
+  margin-bottom: 0px;
+}
+chapter section > h1 {
+  font-variant: small-caps;
+  font-size: large;
+}
+subsection > h1 {
+  font-variant: normal;
+  font-size: medium;
+}
+subsubsection > h1 {
+  display: inline;
+  font-size: medium;
+}
+definition > h1 {
+  display: inline;
+  font-size: 16px;
+  font-variant: normal;
+}
+theorem > h1 {
+  display: inline;
+  font-size: 16px;
+  font-variant: normal;
+}
+example > h1 {
+  display: block;
+  font-size: 16px;
+  font-variant: normal;
+  margin: 2px;
+}
+
+exercise > h1 {
+  display: block;
+  font-size: 16px;
+  font-variant: normal;
+  margin: -10px;
+  margin-bottom: 10px;
+}
 
 /* Counters */
 body {
@@ -66,188 +135,106 @@ appendix {
   counter-reset:chapter 0;
 }
 
-[data-type="chapter"] {
+chapter {
   counter-increment:chapter;
   /* Note: counter-reset is also used in the book.js file to set the chapter number, because counters aren't incremented for the chapters with display:none. */
   counter-reset: sect1 example_counter exercise_counter theorem algorithm figure;
   display:none;
 }
-[data-type="sect1"] {
+chapter section {
   counter-increment:sect1;
   counter-reset:sect2;
 }
-[data-type="sect2"] {
+subsection {
   counter-increment:sect2;
 }
-[data-type="definition"] {
+definition {
   counter-increment:definition;
 }
-[data-type="theorem"] {
+theorem {
   counter-increment:theorem;
 }
-[data-type="example"] {
+example {
   counter-increment:example_counter;
 }
-[data-type="exercise"] {
+exercise {
   counter-increment:exercise_counter;
 }
-[data-type="algorithm"] {
+algorithm {
   counter-increment:algorithm;
 }
 
-[data-type="chapter"] h1:before {
+chapter > h1:before {
   content: "Chapter " counter(chapter);
   display: block;
   font-variant: small-caps;
 }
-
-[data-type="sect1"] h1:before {
+chapter section > h1:before {
   content: counter(chapter) "." counter(sect1) " ";
   display: inline;
 }
-[data-type="sect2"] h1:before {
+subsection > h1:before {
   content: counter(chapter) "." counter(sect1) "." counter(sect2) " ";
 }
-
-[data-type="sect3"] h1:before {
+subsubsection > h1:before {
   content: "";
 }
-
-[data-type="sect3"] h1 {
-  display: inline;
-}
-
-[data-type="definition"] h1:before {
+definition > h1:before {
   content: "Definition " counter(definition) " (";
 }
-[data-type="theorem"] h1:before {
+theorem > h1:before {
   content: "Theorem " counter(chapter) "." counter(theorem) " - ";
 }
-[data-type="definition"] h1:after {
+definition > h1:after {
   content: ")";
 }
-[data-type="definition"] h1 {
-  display: inline;
-  font-size: 16px;
-  font-variant: normal;
-}
-[data-type="theorem"] h1 {
-  display: inline;
-  font-size: 16px;
-  font-variant: normal;
-}
-[data-type="definition"] {
-  border: 1px solid;
-  border-radius: 10px;
-  background-color: rgb(242,242,242); /* light gray */
-  margin: 10px;
-  padding: 5px;
-}
-[data-type="theorem"] {
-  border: 1px solid;
-  border-radius: 10px;
-  background-color: rgb(242,242,242); /* light gray */
-  margin: 10px;
-  padding: 5px;
-}
-
-[data-type="example"] h1:before {
+example > h1:before {
   content: "Example " counter(chapter) "." counter(example_counter) " (";
 }
-[data-type="exercise"] h1:before {
+exercise > h1:before {
   content: "Exercise " counter(chapter) "." counter(exercise_counter) " ";
 }
-[data-type="algorithm"] h1:before {
+algorithm > h1:before {
   content: "Algorithm " counter(chapter) "." counter(algorithm) " (";
 }
-[data-type="example"] h1:after {
+example > h1:after {
   content: ")";
 }
-[data-type="algorithm"] h1:after {
+algorithm > h1:after {
   content: ")";
 }
-[data-type="example"] h1 {
-  display: block;
-  font-size: 16px;
-  font-variant: normal;
-  margin: 2px;
-}
-[data-type="example"] {
-  border: 1px solid;
-  border-radius: 0px;
-  background-color: rgb(242,242,242); /* light gray */
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 5px;
-}
-[data-type="exercise"] h1 {
-  display: block;
-  font-size: 16px;
-  font-variant: normal;
-  margin: -10px;
-  margin-bottom: 10px;
-}
-[data-type="exercise"] {
-  border-radius: 0px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
-figure {
-  text-align: center;
-  counter-increment: figure;
-}
-
 figcaption:before {
   content: "Figure " counter(chapter) "." counter(figure) " - ";
 }
 
-figcaption {
-  text-align: center;
-}
-
-[data-type="drake"] h1:before{
-  content: "";
-}
-[data-type="drake"] h1:after {
-  content: "";
-}
-[data-type="drake"] h1 {
-  font-size: 16px;
-}
-
-#bib h1:before {
-  content: "";
-}
-
-appendix [data-type="chapter"] h1:before {
+/* Appendix versions */
+appendix chapter > h1:before {
   content: "Appendix " counter(chapter, upper-alpha);
 }
 
-appendix [data-type="sect1"] h1:before {
+appendix chapter section > h1:before {
   content: counter(chapter, upper-alpha) "." counter(sect1) ' ';
   display: inline;
 }
-appendix [data-type="sect2"] h1:before {
+appendix subsection > h1:before {
   content: counter(chapter, upper-alpha) "." counter(sect1) "." counter(sect2) " ";
 }
 
-appendix [data-type="sect3"] h1:before {
+appendix subsubsection > h1:before {
   content: "";
 }
 
-appendix [data-type="theorem"] h1:before {
+appendix theorem > h1:before {
   content: "Theorem " counter(chapter, upper-alpha) "." counter(theorem) " - ";
 }
 
-appendix [data-type="example"] h1:before {
+appendix example > h1:before {
   content: "Example " counter(chapter, upper-alpha) "." counter(example_counter) " (";
 }
-appendix [data-type="exercise"] h1:before {
+appendix exercise > h1:before {
   content: "Exercise " counter(chapter, upper-alpha) "." counter(exercise_counter) " ";
 }
-appendix [data-type="algorithm"] h1:before {
+appendix algorithm > h1:before {
   content: "Algorithm " counter(chapter, upper-alpha) "." counter(algorithm) " (";
 }
 

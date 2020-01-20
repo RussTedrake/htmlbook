@@ -114,25 +114,26 @@ function revealChapters() {
             toc += chapterLink(i);
 
             var sections = chapters[i].getElementsByTagName("section");
-            var level=0;
-            var sect1num = 1;
-            for (j=0; j<sections.length; j++) {
-                if (sections[j].getAttribute("data-type")=="sect1") {
-                    while (level<1) { toc += "<ul>\n"; level += 1; }
-                    while (level>1) { toc += "</ul>\n"; level -= 1; }
-                    var section_id = "section" + sect1num;
+            if (sections.length > 0) {
+                toc += "<ul>\n";
+                for (j=0; j<sections.length; j++) {
+                    var section_id = "section" + (j+1);
                     if (sections[j].id) {
                         section_id = sections[j].id;
                     }
                     toc += "<li><a href=?chapter=" +chapterNumberToID(i+1)+"#"+ section_id+">"+sections[j].getElementsByTagName("h1")[0].innerHTML + "</a></li>\n";
-                    sect1num+=1;
-                } else if (sections[j].getAttribute("data-type")=="sect2") {
-                    while (level<2) { toc += "<ul>\n"; level += 1; }
-                    while (level>2) { toc += "</ul>\n"; level -= 1; }
-                    toc += "<li>" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</li>\n";
+
+                    var subsections = sections[j].getElementsByTagName("subsection");
+                    if (subsections.length > 0) {
+                        toc += "<ul>\n";
+                        for (k=0; k<subsections.length; k++) {
+                            toc += "<li>" + subsections[k].getElementsByTagName("h1")[0].innerHTML + "</li>\n";
+                        }
+                        toc += "</ul>\n";
+                    } 
                 } 
+                toc += "</ul>\n";
             }
-            while (level>0) { toc += "</ul>\n"; level -= 1; }
 
             toc += "</li>\n";
         }
@@ -162,28 +163,20 @@ function revealChapters() {
 
                 // Make sure all sections have ids and links.  (These are only unique because I am setting them ONLY for the current chapter).
                 var sections = chapters[i].getElementsByTagName("section");
-                var sect1num = 1;
                 for (j=0; j<sections.length; j++) {
-                    if (sections[j].getAttribute("data-type")=="sect1") {
-                        if (!sections[j].id) {
-                            sections[j].id = "section" + sect1num;
-                        }
-                        sections[j].getElementsByTagName("h1")[0].innerHTML = "<a href=#section" + sect1num + ">" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</a>";
-                        sect1num += 1; 
+                    if (!sections[j].id) {
+                        sections[j].id = "section" + (j+1);
                     }
+                    sections[j].getElementsByTagName("h1")[0].innerHTML = "<a href=#" + sections[j].id + ">" + sections[j].getElementsByTagName("h1")[0].innerHTML + "</a>";
                 }
 
                 // Make sure all examples have ids and links.  (These are only unique because I am setting them ONLY for the current chapter).
-                var divs = chapters[i].getElementsByTagName("div");
-                var examplenum = 1;
-                for (j=0; j<divs.length; j++) {
-                    if (divs[j].getAttribute("data-type")=="example") {
-                        if (!divs[j].id) {
-                            divs[j].id = "example" + examplenum;
-                        }
-                        divs[j].getElementsByTagName("h1")[0].innerHTML = "<a href=#example" + examplenum + ">" + divs[j].getElementsByTagName("h1")[0].innerHTML + "</a>";
-                        examplenum += 1; 
+                var examples = chapters[i].getElementsByTagName("example");
+                for (j=0; j<examples.length; j++) {
+                    if (!examples[j].id) {
+                        examples[j].id = "example" + (j+1);
                     }
+                    examples[j].getElementsByTagName("h1")[0].innerHTML = "<a href=#" + examples[j].id + ">" + examples[j].getElementsByTagName("h1")[0].innerHTML + "</a>";
                 }
 
                 // render mathjax for this chapter only.
@@ -295,29 +288,22 @@ function revealChapters() {
             // Find the examples throughout the text.
             var list_of_drake_examples = "";
             for (i = 0; i < chapters.length; i++) {
-                var divs = chapters[i].getElementsByTagName("div");
-                var examplenum = 1;
-                var has_drake_example = false;
-                for (j=0; j<divs.length; j++) {
-                    if (divs[j].getAttribute("data-type")=="example") {
-                        if (divs[j].className=="drake") {
-                            if (!has_drake_example) {
-                                list_of_drake_examples += chapterLink(i) + "<ul>";
-                                has_drake_example = true;
+                var examples = chapters[i].getElementsByTagName("example");
+                if (examples.length > 0) {
+                    list_of_drake_examples += chapterLink(i) + "<ul>\n";
+                    for (j=0; j<examples.length; j++) {
+                        if (examples[j].className=="drake") {
+                            var id = "example" + (j+1);
+                            if (examples[j].id) {
+                                id = examples[j].id;
                             }
-                            var id = "example" + examplenum;
-                            if (divs[j].id) {
-                                id = divs[j].id;
+                            var name = examples[j].getElementsByTagName("h1");
+                            if (!name) {
+                                name = "Example " + (j+1);
                             }
-                            var name = divs[j].getElementsByTagName("h1");
-                            if (name.length>0) {
-                                list_of_drake_examples += "<li><a href=?chapter="+chapterNumberToID(i+1)+"#example"+examplenum+">"+name[0].innerHTML+"</a></li>";
-                            }
+                            list_of_drake_examples += "<li><a href=?chapter="+chapterNumberToID(i+1)+"#"+id+">"+name[0].innerHTML+"</a></li>";
                         }    
-                        examplenum += 1; 
                     }
-                }
-                if (has_drake_example) {
                     list_of_drake_examples += "</ul>\n";
                 }
             }
