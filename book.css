@@ -192,12 +192,15 @@ example > h1:before {
   content: "Example " counter(chapter) "." counter(example_counter) " (";
 }
 exercise > h1:before {
-  content: "Exercise " counter(chapter) "." counter(exercise_counter) " ";
+  content: "Exercise " counter(chapter) "." counter(exercise_counter) " (";
 }
 algorithm > h1:before {
   content: "Algorithm " counter(chapter) "." counter(algorithm) " (";
 }
 example > h1:after {
+  content: ")";
+}
+exercise > h1:after {
   content: ")";
 }
 algorithm > h1:after {
@@ -232,7 +235,7 @@ appendix example > h1:before {
   content: "Example " counter(chapter, upper-alpha) "." counter(example_counter) " (";
 }
 appendix exercise > h1:before {
-  content: "Exercise " counter(chapter, upper-alpha) "." counter(exercise_counter) " ";
+  content: "Exercise " counter(chapter, upper-alpha) "." counter(exercise_counter) " (";
 }
 appendix algorithm > h1:before {
   content: "Algorithm " counter(chapter, upper-alpha) "." counter(algorithm) " (";
