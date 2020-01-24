@@ -258,6 +258,14 @@ function revealChapters(project) {
                     '  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a></p>';
                 }
 
+                var exerciseTags = chapters[i].getElementsByTagName('exercise');
+                for (j = 0; j < exerciseTags.length; j++) {
+                    var name = exerciseTags[j].getElementsByTagName("h1")[0].innerHTML;
+                    if (name) {
+                        exerciseTags[j].getElementsByTagName("h1")[0].innerHTML = "(" + name + ")";
+                    }
+                }
+
                 // Set chapter counter manually, since chapters with display:none do not increment the counter.
                 var display_num = i;
                 if (i >= start_appendix) {
@@ -297,11 +305,11 @@ function revealChapters(project) {
                             if (examples[j].id) {
                                 id = examples[j].id;
                             }
-                            var name = examples[j].getElementsByTagName("h1");
+                            var name = examples[j].getElementsByTagName("h1")[0].innerHTML;
                             if (!name) {
                                 name = "Example " + (j+1);
                             }
-                            list_of_drake_examples += "<li><a href=?chapter="+chapterNumberToID(i+1)+"#"+id+">"+name[0].innerHTML+"</a></li>";
+                            list_of_drake_examples += "<li><a href=?chapter="+chapterNumberToID(i+1)+"#"+id+">"+name+"</a></li>";
                         }    
                     }
                     list_of_drake_examples += "</ul>\n";
