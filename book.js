@@ -256,7 +256,7 @@ function revealChapters(project) {
                     ' <a target="' + file + '_binder" href="https://mybinder.org/v2/gh/RussTedrake/' + project + '/master?filepath=' + binder_path + '">\n' + '<img style="vertical-align:bottom" src="https://mybinder.org/badge_logo.svg" alt="Open in Binder"/></a>' + ' or ' +
                     '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/' + project + '/blob/master/' + file + '">\n' +
                     '  <img style="vertical-align:bottom" src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>' + 
-                    ' (<a href="?chapter=drake">?</a>)' +
+                    ' <span style="display:inline;font-size:x-small">(<a href="?chapter=drake">more info</a>)</span>' +
                     '</p>';
                 }
 
