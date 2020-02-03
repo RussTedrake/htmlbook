@@ -250,12 +250,11 @@ function revealChapters(project) {
                 for (j = 0; j < jupyterTags.length; j++) {
                     var file = jupyterTags[j].innerHTML;
                     // TODO(russt): Consider checking that the file exists.
-                    binder_path = file.replace("/","%2F")
+                    binder_path = file.replace(/\//g,"%2F")
                     jupyterTags[j].innerHTML =
-                    '<p style="text-align:center">' + '<a target="github" href="https://github.com/RussTedrake/' + project + '/tree/master/' + project + '/' + file + '">' + 
-                    file.slice(0, -6) + '</a>' +
-                    ' <a target="' + file + '_binder" href="https://mybinder.org/v2/gh/RussTedrake/' + project + '/master?filepath=' + project + '%2F' + binder_path + '">\n' + '<img style="vertical-align:bottom" src="https://mybinder.org/badge_logo.svg" alt="Open in Binder"/></a>' + ' or ' +
-                    '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/' + project + '/blob/master/' + project + '/' + file + '">\n' +
+                    '<p style="text-align:center"> Open notebook with ' + 
+                    ' <a target="' + file + '_binder" href="https://mybinder.org/v2/gh/RussTedrake/' + project + '/master?filepath=' + binder_path + '">\n' + '<img style="vertical-align:bottom" src="https://mybinder.org/badge_logo.svg" alt="Open in Binder"/></a>' + ' or ' +
+                    '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/' + project + '/blob/master/' + file + '">\n' +
                     '  <img style="vertical-align:bottom" src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>' + 
                     ' (<a href="?chapter=drake">?</a>)' +
                     '</p>';
