@@ -363,6 +363,7 @@ function revealChapters(project) {
         });
     }
 
+    // We cannot add a link via CSS, so do it here instead.
     var drakeTags = document.getElementsByTagName('drake');
     for (j = 0; j < drakeTags.length; j++) {
         drakeTags[j].innerHTML =
