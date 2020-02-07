@@ -224,4 +224,6 @@ function loadChapter(project)  {
   }
 
   customTags();
+
+  MathJax.typeset();
 }
