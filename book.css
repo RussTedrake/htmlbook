@@ -127,7 +127,7 @@ exercise > h1 {
 }
 
 /* Counters */
-chapter {
+chapter > h1 {
   counter-increment:chapter;
   counter-reset: sect1 example_counter exercise_counter theorem algorithm figure;
 }
