@@ -226,4 +226,11 @@ function loadChapter(project)  {
   customTags();
 
   MathJax.typeset();
+
+  // Process any anchors again now that the proper elements are visible.
+  var hash = document.getElementById(location.hash.substr(1));
+  if (hash) {
+    hash.scrollIntoView();
+  }
+  
 }
