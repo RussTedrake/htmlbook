@@ -127,17 +127,12 @@ exercise > h1 {
 }
 
 /* Counters */
-body {
-  counter-reset:chapter definition;
-}
-
 appendix {
   counter-reset:chapter 0;
 }
 
 chapter {
   counter-increment:chapter;
-  /* Note: counter-reset is also used in the book.js file to set the chapter number, because counters aren't incremented for the chapters with display:none. */
   counter-reset: sect1 example_counter exercise_counter theorem algorithm figure;
 }
 chapter section {

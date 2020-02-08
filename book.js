@@ -50,28 +50,6 @@ var mathjax_setup = `
 <div id="debug_output"></div>
 `;
 
-function chapterNumberToID(number) {
-  if (number<0) { console.error("Bad chapter number"); }
-  if ((number-1) < chapter_ids.length) {
-      return chapter_ids[number-1];
-  }
-  console.error("Bad chapter number");
-}
-
-function chapterIDToNumber(id) {
-  id = id.toLowerCase();
-  for (j=0; j<chapter_ids.length; j++) {
-      if (chapter_ids[j].toLowerCase() === id) {
-          return j+1;
-      }
-  }
-  console.error("Bad chapter ID");
-  return -1;
-}
-
-function writeTOC(project) {
-
-}
 
 function customTags() {
   // We cannot add a link via CSS, so do it here instead.
@@ -129,24 +107,9 @@ function loadChapter(project)  {
   var filename = url.substring(url.lastIndexOf('/')+1);
   var chapter_id = filename.slice(0, -5);
 
-  var chapter_num = chapterIDToNumber(chapter_id);
   var chapter = document.getElementsByTagName("chapter")[0];
 
-  chapter.style.counterReset = "chapter " + (chapter_num-1);
-
-  var nav = "\n<table style=\"width:100%;\"><tr style=\"width:100%\">";
-  nav += "<td style=\"width:33%;text-align:left;\">";
-  if (chapter_num>1) {
-      nav+="<a href=" + chapterNumberToID(chapter_num-1) +
-      ".html>Previous chapter</a>";
-  }
-  nav += "</td><td style=\"width:33%;text-align:center;\"><a href="+project+".html>Table of contents</a></td><td style=\"width:33%;text-align:right;\">";
-  if ((chapter_num)<chapter_ids.length) {
-      nav+="<a href="+ chapterNumberToID(chapter_num+1) +
-      ".html>Next chapter</a>";
-  }
-  nav += "</td></tr></table>\n";
-  chapter.innerHTML = nav + mathjax_setup + chapter.innerHTML + nav;
+  chapter.innerHTML = mathjax_setup + chapter.innerHTML;
 
   // Make sure all sections have ids and links.
   var sections = chapter.getElementsByTagName("section");
