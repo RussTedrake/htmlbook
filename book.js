@@ -50,6 +50,18 @@ var mathjax_setup = `
 <div id="debug_output"></div>
 `;
 
+function setPlatform() {
+  platform = 'bionic';
+  if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
+
+  function hide(items) { for (let item of items) { item.style.display = "none"; } }
+  function show(items) { for (let item of items) { item.style.display = "inline"; } }
+
+  hide(document.getElementsByClassName("mac"));
+  hide(document.getElementsByClassName("bionic"));
+
+  show(document.getElementsByClassName(platform));
+}
 
 function customTags() {
   // We cannot add a link via CSS, so do it here instead.
@@ -187,6 +199,7 @@ function loadChapter(project)  {
   }
 
   customTags();
+  setPlatform();
 
   MathJax.typeset();
 

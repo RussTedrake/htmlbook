@@ -27,7 +27,10 @@ function chapterIDToNumber(id) {
     return -1;
 }
 
-function setPlatform(platform) {
+function setPlatform() {
+    platform = 'bionic';
+    if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
+
     function hide(items) { for (let item of items) { item.style.display = "none"; } }
     function show(items) { for (let item of items) { item.style.display = "inline"; } }
 

@@ -127,10 +127,6 @@ exercise > h1 {
 }
 
 /* Counters */
-appendix {
-  counter-reset:chapter 0;
-}
-
 chapter {
   counter-increment:chapter;
   counter-reset: sect1 example_counter exercise_counter theorem algorithm figure;
@@ -202,37 +198,32 @@ figcaption:before {
 }
 
 /* Appendix versions */
-appendix chapter > h1:before {
+chapter.appendix > h1:before {
   content: "Appendix " counter(chapter, upper-alpha);
 }
-
-appendix chapter section > h1:before {
+chapter.appendix section > h1:before {
   content: counter(chapter, upper-alpha) "." counter(sect1) ' ';
   display: inline;
 }
-appendix subsection > h1:before {
+chapter.appendix subsection > h1:before {
   content: counter(chapter, upper-alpha) "." counter(sect1) "." counter(sect2) " ";
 }
-
-appendix subsubsection > h1:before {
+chapter.appendix subsubsection > h1:before {
   content: "";
 }
-
-appendix theorem > h1:before {
+chapter.appendix theorem > h1:before {
   content: "Theorem " counter(chapter, upper-alpha) "." counter(theorem) " - ";
 }
-
-appendix example > h1:before {
+chapter.appendix example > h1:before {
   content: "Example " counter(chapter, upper-alpha) "." counter(example_counter) " (";
 }
-appendix exercise > h1:before {
+chapter.appendix exercise > h1:before {
   content: "Exercise " counter(chapter, upper-alpha) "." counter(exercise_counter) " ";
 }
-appendix algorithm > h1:before {
+chapter.appendix algorithm > h1:before {
   content: "Algorithm " counter(chapter, upper-alpha) "." counter(algorithm) " (";
 }
-
-appendix figcaption:before {
+chapter.appendix figcaption:before {
   content: "Figure " counter(chapter, upper-alpha) "." counter(figure) " - ";
 }
 
