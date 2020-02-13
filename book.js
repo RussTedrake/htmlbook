@@ -181,13 +181,21 @@ function loadChapter(project)  {
       var file = jupyterTags[j].innerHTML;
       // TODO(russt): Consider checking that the file exists.
       binder_path = file.replace(/\//g,"%2F")
-      jupyterTags[j].innerHTML =
-      '<p style="text-align:center"> Open notebook with ' + 
-      ' <a target="' + file + '_binder" href="https://mybinder.org/v2/gh/RussTedrake/' + project + '/master?filepath=' + binder_path + '">\n' + '<img style="vertical-align:bottom" src="https://mybinder.org/badge_logo.svg" alt="Open in Binder"/></a>' + ' or ' +
-      '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/' + project + '/blob/master/' + file + '">\n' +
-      '  <img style="vertical-align:bottom" src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>' + 
-      ' <span style="display:inline;font-size:x-small">(<a href="?chapter=drake">more info</a>)</span>' +
-      '</p>';
+      text = '<p style="text-align:center"> Open <a target="' + file + '_github" href="https://github.com/RussTedrake/underactuated/blob/master/' + file + '">notebook</a>';
+      if (!jupyterTags[j].hasAttribute("no_binder") || !jupyterTags[j].hasAttribute("no_colab")) {
+        text += ' with ';
+      }
+      if (!jupyterTags[j].hasAttribute("no_binder")) {
+        text += ' <a target="' + file + '_binder" href="https://mybinder.org/v2/gh/RussTedrake/' + project + '/master?filepath=' + binder_path + '">\n' + '<img style="vertical-align:bottom" src="https://mybinder.org/badge_logo.svg" alt="Open in Binder"/></a>';
+        if (!jupyterTags[j].hasAttribute("no_colab")) {
+          text += ' or ';
+        }
+      }
+      if (!jupyterTags[j].hasAttribute("no_colab")) {
+        text += '<a target="' + file + '_colab" href="https://colab.research.google.com/github/RussTedrake/' + project + '/blob/master/' + file + '">\n' +
+        '  <img style="vertical-align:bottom" src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>';
+      }
+      jupyterTags[j].innerHTML = text + ' <span style="display:inline;font-size:x-small">(<a href="?chapter=drake">more info</a>)</span></p>';
   }
 
   var exerciseTags = chapter.getElementsByTagName('exercise');
