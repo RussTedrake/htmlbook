@@ -164,7 +164,6 @@ function loadChapter(project)  {
   var pysrcTags = chapter.getElementsByTagName('pysrc');
   for (j = 0; j < pysrcTags.length; j++) {
       var file = pysrcTags[j].innerHTML;
-      // TODO(russt): Consider checking that the file exists.
       var tmp =
       '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="' + project + '/'+ file + '">' + file + '</a>';
       if (pysrcTags[j].hasAttribute("args")) {
@@ -179,7 +178,6 @@ function loadChapter(project)  {
   var jupyterTags = chapter.getElementsByTagName('jupyter');
   for (j = 0; j < jupyterTags.length; j++) {
       var file = jupyterTags[j].innerHTML;
-      // TODO(russt): Consider checking that the file exists.
       binder_path = file.replace(/\//g,"%2F")
       text = '<p style="text-align:center"> Open <a target="' + file + '_github" href="https://github.com/RussTedrake/underactuated/blob/master/' + file + '">notebook</a>';
       if (!jupyterTags[j].hasAttribute("no_binder") || !jupyterTags[j].hasAttribute("no_colab")) {
