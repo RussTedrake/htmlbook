@@ -7,6 +7,7 @@ var mathjax_setup = `
   \\newcommand{\\bc}{{\\bf c}}
   \\newcommand{\\bg}{{\\bf g}}
   \\newcommand{\\bh}{{\\bf h}}
+  \\newcommand{\\bp}{{\\bf p}}
   \\newcommand{\\bq}{{\\bf q}}
   \\newcommand{\\bv}{{\\bf v}}
   \\newcommand{\\bx}{{\\bf x}}
