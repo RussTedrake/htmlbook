@@ -42,6 +42,7 @@ var mathjax_setup = `
   \\DeclareMathOperator*{\\find}{find}
   \\newcommand{\\argmax}{\\operatorname{\\textrm{argmax}}}
   \\newcommand{\\argmin}{\\operatorname{\\textrm{argmin}}}
+  \\newcommand{\\atantwo}{\\operatorname{\\textrm{atan2}}}
   \\newcommand{\\sgn}{\\operatorname{\\textrm{sgn}}}
   \\newcommand{\\trace}{\\operatorname{\\textrm{tr}}}
   \\newcommand{\\sos}{\\text{ is SOS}}
