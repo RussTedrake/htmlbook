@@ -145,7 +145,7 @@ function loadChapter(project)  {
 
   var codeTags = chapter.getElementsByTagName('pysrcinclude');
   for (j = 0; j < codeTags.length; j++) {
-      var file = project + '/' + codeTags[j].innerHTML;
+      var file = codeTags[j].innerHTML;
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = ( function (j) { return function() {
           if (this.readyState == 4 && this.status == 200) {
@@ -167,7 +167,7 @@ function loadChapter(project)  {
   for (j = 0; j < pysrcTags.length; j++) {
       var file = pysrcTags[j].innerHTML;
       var tmp =
-      '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="' + project + '/'+ file + '">' + file + '</a>';
+      '<p><pre style="margin-left:6px; display:inline"><code>python3 <a target="' + file +'" href="' + file + '">' + file + '</a>';
       if (pysrcTags[j].hasAttribute("args")) {
           tmp += ' '+ pysrcTags[j].getAttribute("args");
       }
