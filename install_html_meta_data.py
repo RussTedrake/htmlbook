@@ -97,10 +97,10 @@ for id in chapter_ids:
 
 toc += '</ul>\n'
 
-s = get_file_as_string("underactuated.html")
+s = get_file_as_string("index.html")
 s = replace_string_between(s, '<section id="table_of_contents">', '</section>',
                            toc)
-write_file_as_string("underactuated.html", s)
+write_file_as_string("index.html", s)
 
 # Write common headers / footers
 header = get_file_as_string("header.html.in")
