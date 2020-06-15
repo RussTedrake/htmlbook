@@ -1,6 +1,10 @@
 import argparse
 from lxml.html import parse, etree
-from chapters import chapter_ids, parts
+import json
+
+chapters = json.load(open("chapters.json"))
+chapter_ids = chapters['chapter_ids']
+parts = chapters['parts']
 
 change_detected = False
 

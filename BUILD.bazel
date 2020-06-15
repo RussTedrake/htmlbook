@@ -18,8 +18,8 @@ rt_py_test(
     args = ["--read_only"],
     data = [
         "//:html",
+        "//:chapters"
     ],
-    deps = ["//:chapters"],
 )
 
 rt_py_test(
