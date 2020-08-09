@@ -156,7 +156,7 @@ for id in chapter_ids:
 
 if args.read_only and change_detected:
     print("This script would have made changes. You may need to run "
-          "'python3 tools/install_html_meta_data.py' from the root "
+          "'python3 htmlbook/install_html_meta_data.py' from the root "
           "directory.")
 
 exit(change_detected)
