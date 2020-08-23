@@ -21,6 +21,7 @@ pre { margin-top: -5px; }
 b { color: rgb(153,51,51); /* mit red */ }
 i { color: rgb(153,51,51); /* mit red */ }
 em { color: rgb(153,51,51); /* mit red */ }
+code { color: rgb(153,51,51); /* mit red */ }
 
 [data-type="titlepage"] {
   font-size: 22px;
