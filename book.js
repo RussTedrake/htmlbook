@@ -4,6 +4,7 @@ var mathjax_setup = `
 <div style="display:none" id="mathjax_setup"> 
   \\[
   \\newcommand{\\pd}[2]{\\frac{\\partial #1}{\\partial #2}}
+  \\newcommand{\\Re}{{\\mathbb{R}}}
   \\newcommand{\\bc}{{\\bf c}}
   \\newcommand{\\bg}{{\\bf g}}
   \\newcommand{\\bh}{{\\bf h}}
@@ -40,6 +41,7 @@ var mathjax_setup = `
   \\newcommand{\\minimize}{\\operatorname{\\textrm{minimize}}}
   \\newcommand{\\maximize}{\\operatorname{\\textrm{maximize}}}
   \\DeclareMathOperator*{\\find}{find}
+  \\DeclareMathOperator*{\\rank}{rank}
   \\newcommand{\\argmax}{\\operatorname{\\textrm{argmax}}}
   \\newcommand{\\argmin}{\\operatorname{\\textrm{argmin}}}
   \\newcommand{\\atantwo}{\\operatorname{\\textrm{atan2}}}
