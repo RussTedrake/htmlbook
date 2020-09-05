@@ -220,3 +220,23 @@ function loadChapter(project)  {
   }
   
 }
+
+function system_html(sys, url = null) {
+  let input_port_html = "";
+  if ('input_ports' in sys) {
+    sys.input_ports.forEach(port => {
+      input_port_html += `<tr><td align=right style=\"padding:5px 0px 5px 0px\">${port}&rarr;</td></tr>`;
+    });
+  }
+  let output_port_html = "";
+  if ('output_ports' in sys) {
+    sys.output_ports.forEach(port => {
+      output_port_html += `<tr><td align=left style=\"padding:5px 0px 5px 0px\">&rarr; ${port}</td></tr>`;
+    });
+  }
+  let name_html = sys.name;
+  if (url) {
+    name_html = `<a href="${url}">${sys.name}</a>`;
+  }
+  return `<table align=center cellpadding=0 cellspacing=0><tr align=center><td style=\"vertical-align:middle\"><table cellspacing=0 cellpadding=0>${input_port_html}</table></td><td align=center style=\"border:solid;padding-left:20px;padding-right:20px;vertical-align:middle\" bgcolor=#F0F0F0>${name_html}</td><td style=\"vertical-align:middle\"><table cellspacing=0 cellpadding=0>${output_port_html}</table></td></tr></table>`;
+}
