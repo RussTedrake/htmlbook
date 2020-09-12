@@ -23,3 +23,5 @@ export HOMEBREW_CURL_RETRIES=4
 brew bundle --file=/opt/drake/share/drake/setup/Brewfile --no-lock
 
 /usr/local/opt/python@3.8/bin/pip3 install --upgrade --requirement "/opt/drake/share/drake/setup/requirements.txt"
+
+/usr/local/opt/python@3.8/bin/pip3 install --disable-pip-version-check --upgrade --requirement "./requirements.txt"
