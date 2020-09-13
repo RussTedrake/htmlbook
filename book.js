@@ -153,9 +153,6 @@ function loadChapter(project)  {
           if (this.readyState == 4 && this.status == 200) {
               var text = hljs.highlight('python',this.responseText,true)
               codeTags[j].innerHTML =
-              '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/scripts/colab_scratchpad.ipynb">' +
-              'Colab scratchpad</a></sidenote>';
-              codeTags[j].innerHTML +=
               '<div><pre><code class="python">'+text.value+'</code></pre></div>';
           }
       } })(j);
