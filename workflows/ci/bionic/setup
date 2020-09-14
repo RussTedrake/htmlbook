@@ -22,14 +22,3 @@ apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-r
 
 # Setup xvfb for headless rendering.
 apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-recommends xvfb
-
-cat << EOF > /lib/systemd/system/xvfb.service
-[Unit]
-After=network.target
-[Service]
-ExecStart=/usr/bin/Xvfb :99 -screen 0 1280x1024x24 -ac +extension GLX +extension RANDR +render -noreset
-[Install]
-WantedBy=multi-user.target
-EOF
-
-/bin/systemctl --now --quiet enable /lib/systemd/system/xvfb.service
