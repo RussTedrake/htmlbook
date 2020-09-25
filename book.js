@@ -42,6 +42,7 @@ var mathjax_setup = `
   \\newcommand{\\maximize}{\\operatorname{\\textrm{maximize}}}
   \\DeclareMathOperator*{\\find}{find}
   \\DeclareMathOperator*{\\rank}{rank}
+  \\DeclareMathOperator{\\tr}{tr}
   \\newcommand{\\argmax}{\\operatorname{\\textrm{argmax}}}
   \\newcommand{\\argmin}{\\operatorname{\\textrm{argmin}}}
   \\newcommand{\\atantwo}{\\operatorname{\\textrm{atan2}}}
