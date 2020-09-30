@@ -68,18 +68,18 @@ for id in chapter_ids:
 
     # Write the part if this chapter starts a new one.
     if id in parts:
-        toc += ('<p style="margin-bottom: 0; text-decoration: underline;' +
-                'font-variant: small-caps;"><b>' + parts[id] + '</b></p>\n')
+        toc += ('<p style="margin-bottom: 0; text-decoration: underline;'
+                + 'font-variant: small-caps;"><b>' + parts[id] + '</b></p>\n')
         if parts[id] == 'Appendix':
             appendix_start = chapter_num
 
     if appendix_start > 0:
         appendix_label = chr(ord('A') + chapter_num - appendix_start)
-        toc += ('  <li><a href="' + filename + '">Appendix ' + appendix_label +
-                ': ' + chapter.find('h1').text + '</a></li>\n')
+        toc += ('  <li><a href="' + filename + '">Appendix ' + appendix_label
+                + ': ' + chapter.find('h1').text + '</a></li>\n')
     else:
-        toc += ('  <li><a href="' + filename + '">Chapter ' + str(chapter_num) +
-                ': ' + chapter.find('h1').text + '</a></li>\n')
+        toc += ('  <li><a href="' + filename + '">Chapter ' + str(chapter_num)
+                + ': ' + chapter.find('h1').text + '</a></li>\n')
 
     chapter_num += 1
     section_num = 1
@@ -89,8 +89,8 @@ for id in chapter_ids:
             hash = "section" + str(section_num)
             if section.get('id') is not None:
                 hash = section.get('id')
-            toc += ('    <li><a href=' + filename + '#' + hash + ">" +
-                    section.find('h1').text + '</a></li>\n')
+            toc += ('    <li><a href=' + filename + '#' + hash + ">"
+                    + section.find('h1').text + '</a></li>\n')
             section_num += 1
             if section.find('subsection') is not None:
                 toc += '    <ul>\n'
@@ -133,8 +133,8 @@ for id in chapter_ids:
     if appendix_start > 0 and chapter_num >= appendix_start:
         s = replace_string_between(
             s, "<chapter", ">",
-            ' class="appendix" style="counter-reset: chapter ' +
-            str(chapter_num - appendix_start) + '"')
+            ' class="appendix" style="counter-reset: chapter '
+            + str(chapter_num - appendix_start) + '"')
     else:
         s = replace_string_between(
             s, "<chapter", ">",
