@@ -4,8 +4,6 @@
 # Copyright 2020 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-
 # The following test is *not hermetic*.  I am using PWD (obtained in
 # WORKSPACE.bazel) to pass in the source directory here since
 # BUILD_WORKSPACE_DIRECTORY is not available during bazel test.
@@ -17,8 +15,8 @@ rt_py_test(
     srcs = ["install_html_meta_data.py"],
     args = ["--read_only"],
     data = [
+        "//:chapters",
         "//:html",
-        "//:chapters"
     ],
 )
 
