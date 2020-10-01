@@ -34,6 +34,6 @@ for filename in glob.glob("*.html"):
             index = end + len(tag) + 3
             file = s[start:end]
             if not os.path.exists(file):
-                print(filename + " tries to link to the source file " + file +
-                      " which doesn't exist")
+                print(filename + " tries to link to the source file " + file
+                      + " which doesn't exist")
                 exit(-2)
