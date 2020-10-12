@@ -171,10 +171,12 @@ function loadChapter(project)  {
       if (pysrcTags[j].hasAttribute("args")) {
           tmp += ' '+ pysrcTags[j].getAttribute("args");
       }
-      pysrcTags[j].innerHTML = tmp + '</code></pre>';
-      pysrcTags[j].innerHTML +=
-      '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/scripts/colab_scratchpad.ipynb">' +
-      'Colab scratchpad</a></sidenote></p>';
+      tmp += '</code></pre>';
+      if (!pysrcTags[j].hasAttribute("no_colab")) {
+        tmp +=
+        '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/scripts/colab_scratchpad.ipynb">' + 'Colab scratchpad</a></sidenote>';
+      }
+      pysrcTags[j].innerHTML = tmp + '</p>';
   }
 
   var jupyterTags = chapter.getElementsByTagName('jupyter');
