@@ -21,9 +21,9 @@ def rt_dependencies():
     maybe(
         http_archive,
         "rules_python",
-        sha256 = "c911dc70f62f507f3a361cbc21d6e0d502b91254382255309bc60b7a0f48de28",
-        strip_prefix = "rules_python-38f86fb55b698c51e8510c807489c9f4e047480e",
-        url = "https://github.com/bazelbuild/rules_python/archive/38f86fb55b698c51e8510c807489c9f4e047480e.tar.gz",
+        sha256 = "48f7e716f4098b85296ad93f5a133baf712968c13fbc2fdf3a6136158fe86eac",
+        strip_prefix = "rules_python-0.1.0",
+        url = "https://github.com/bazelbuild/rules_python/archive/0.1.0.tar.gz",
     )
 
 def rt_toolchains():
