@@ -19,14 +19,3 @@ rt_py_test(
         "//:html",
     ],
 )
-
-rt_py_test(
-    name = "check_html_links_exist",
-    srcs = ["check_html_links_exist.py"],
-    tags = ["no-sandbox"],  # to allow network connections
-    args = [
-        "--cwd",
-        PWD,
-    ],
-    data = ["//:html"],
-)

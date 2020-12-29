@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description='Checks my html file links.')
 parser.add_argument('--cwd',
                     default=os.path.dirname(os.path.abspath(__file__)),
                     help='Execute using this current working directory')
+parser.add_argument('files', nargs='+')
 args = parser.parse_args()
 
 # Find workspace root by searching parent directories.
@@ -43,7 +44,7 @@ def html_has_id(html, id):
 
 
 # Check that all links to code files exist.
-for filename in glob.glob("*.html"):
+for filename in args.files:
     s = get_file_as_string(filename)
 
     broken_links = []
@@ -66,7 +67,11 @@ for filename in glob.glob("*.html"):
             if id and not html_has_id(get_file_as_string(url), id):
                 broken_links.append(link)
         elif url.find("colab.research.google.com") != -1:
-            requestObj = requests.head(link)
+            try:
+                requestObj = requests.head(link)
+            except requests.ConnectionError:
+                broken_links.append(link)
+
             if requestObj.status_code == 404:
                 broken_links.append(link)
         else:
@@ -77,7 +82,11 @@ for filename in glob.glob("*.html"):
                 if not html_has_id(requestObj.text, id):
                     broken_links.append(link)
             else:
-                requestObj = requests.head(link)
+                try:
+                    requestObj = requests.head(link)
+                except requests.ConnectionError:
+                    broken_links.append(link)
+
                 if requestObj.status_code == 404:
                     broken_links.append(link)
 
@@ -97,3 +106,4 @@ for filename in glob.glob("*.html"):
                 print(filename + " tries to link to the source file " + file
                       + " which doesn't exist")
                 exit(-2)
+
