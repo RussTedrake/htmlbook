@@ -92,11 +92,18 @@ figcaption {
   margin-bottom: 10px;
   padding: 5px;
 }
+[pdf="only"] {
+  display: none;
+}
 
 /* h1 elements */
 [data-type="titlepage"] h1 {
   font-variant: small-caps;
   margin-bottom: 0px;
+}
+section > h1 { 
+  font-variant: small-caps;
+  font-size: large;
 }
 chapter section > h1 {
   font-variant: small-caps;
