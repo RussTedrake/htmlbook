@@ -70,12 +70,12 @@ def write_references(elib, s, filename):
     if not refs:
         return s
 
+    refs = map(str.strip, refs)  # Strip whitespace
     refs = list(dict.fromkeys(refs))  # Remove duplicates (preserving order)
 
     bibtex = ''
     elib_url = 'http://groups.csail.mit.edu/robotics-center/public_papers/'
     for r in refs:
-        r = r.strip()
         elib.execute(f"SELECT * FROM bibtex WHERE bibtag = '{r}'")
         x = elib.fetchone()
         if not x:
