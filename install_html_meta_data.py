@@ -3,6 +3,7 @@ from lxml.html import parse, etree
 import json
 import mysql.connector
 import os
+import shutil
 import subprocess
 import tempfile
 
@@ -17,6 +18,14 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--read_only', action='store_true')
 args = parser.parse_args()
 
+bibtex_command = shutil.which('bibtex')
+if not bibtex_command:
+    # Check a few other candidate locations
+    # TODO: Make this more robust.
+    bibtex_command = shutil.which('bibtex', path='/Library/TeX/texbin/')
+if not bibtex_command:
+    raise RuntimeError("Could not locate bibtex executable.")
+
 
 def get_file_as_string(filename):
     f = open(filename, "r")
@@ -30,6 +39,11 @@ def write_file_as_string(filename, s):
     r = get_file_as_string(filename)
     if r != s:
         change_detected = True
+        import difflib
+        print(''.join(
+            difflib.ndiff(r.splitlines(keepends=True),
+                          s.splitlines(keepends=True))),
+              end="")
         if not args.read_only:
             f = open(filename, "w")
             f.write(s)
@@ -102,10 +116,17 @@ def write_references(elib, s, filename):
         temp.write(bytes(bibtex, encoding='utf-8'))
         temp.flush()
         args = [
-            "bibtex2html", "-i", "-q", "-u", "-nodoc", "-nobibsource",
-            "-noheader", "-nofooter", temp.name
+            "bibtex2html", "-i", "-q", "-u", "-c", bibtex_command, "-nodoc",
+            "-nobibsource", "-noheader", "-nofooter", temp.name
         ]
-        subprocess.call(args, cwd=os.path.dirname(temp.name))
+        p = subprocess.run(args,
+                           cwd=os.path.dirname(temp.name),
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           universal_newlines=True)
+        if not p.returncode == 0:
+            print(p.stdout)
+            print(p.stderr)
         html = get_file_as_string(temp.name.replace(".bib", ".html"))
 
     html = html.replace("a name=", "a id=")

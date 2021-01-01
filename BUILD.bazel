@@ -14,7 +14,7 @@ rt_py_test(
     name = "install_html_meta_data",
     srcs = ["install_html_meta_data.py"],
     args = ["--read_only"],
-    tags = ["no-sandbox"],  # to allow network access to mysql.csail
+    tags = ["requires-network"],  # for mysql.csail
     data = [
         "//:chapters",
         "//:html",
