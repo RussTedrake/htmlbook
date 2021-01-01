@@ -96,6 +96,10 @@ figcaption {
   display: none;
 }
 
+.bibtexnumber {
+  vertical-align: top;
+}
+
 /* h1 elements */
 [data-type="titlepage"] h1 {
   font-variant: small-caps;

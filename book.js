@@ -76,7 +76,7 @@ function customTags() {
       '<a style="font-variant:small-caps; text-decoration:none;" href="http://drake.mit.edu">Drake</a>';
   }
 
-  var bib = new Map();
+  var bib = [];
 
   var elibTags = document.getElementsByTagName('elib');
   for (i = 0; i < elibTags.length; i++) {
@@ -84,16 +84,15 @@ function customTags() {
     var str = "";
     var index;
     c.split("+").forEach(function(b) {
-      if (bib.has(b)) {
-        index = bib.get(b);
-      } else {
-        index = bib.size+1;
-        bib.set(b, index);
+      index = bib.indexOf(b);
+      if (index == -1) {
+        index = bib.length+1;
+        bib.push(b);
       }
       if (str.length > 0) {
         str += ", ";
       }
-      str += '<a target="_blank" href="http://groups.csail.mit.edu/locomotion/elib.cgi?b=' + b + '">' + index + '</a>';
+      str += '<a href="#' + b + '">' + index + '</a>';
     });
     elibTags[i].innerHTML = '[' + str + ']';
   }

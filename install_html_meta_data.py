@@ -1,6 +1,10 @@
 import argparse
 from lxml.html import parse, etree
 import json
+import mysql.connector
+import os
+import subprocess
+import tempfile
 
 chapters = json.load(open("chapters.json"))
 chapter_ids = chapters['chapter_ids']
@@ -51,6 +55,55 @@ def replace_string_between(s, start_str, end_str, with_str):
         s = s[:start] + with_str + s[end:]
         index = start + len(with_str)
     return s
+
+
+def write_references(elib, s):
+    index = 0
+    refs = []
+    while s.find("<elib>", index) > 0:
+        start = s.find("<elib>", index) + len("<elib>")
+        end = s.find("</elib>", start)
+        refs += s[start:end].split("+")
+        index = end + len("</elib>")
+
+    if not refs:
+        return s
+
+    refs = list(dict.fromkeys(refs))  # Remove duplicates (preserving order)
+
+    bibtex = ''
+    elib_url = 'http://groups.csail.mit.edu/robotics-center/public_papers/'
+    for r in refs:
+        elib.execute(f"SELECT * FROM bibtex WHERE bibtag = '{r}'")
+        x = elib.fetchone()
+        bibtex += "@" + x['bibtype'] + "{" + x['bibtag'] + ",\n"
+        for key in x:
+            if key not in [
+                    'bibtype', 'bibtag', 'comments', 'isPublic', 'downloads',
+                    'hits', 'wwwnote', 'date', 'crossref', 'abstract', 'url',
+                    'keywords'
+            ] and x[key]:
+                bibtex += "\t" + key + " = { " + x[key] + " },\n"
+        if x['isPublic'] and x['url']:
+            if 'http' not in x['url']:
+                x['url'] = elib_url + x['url']
+            bibtex += "\turl = { " + x['url'] + " },\n"
+        bibtex += "}\n"
+
+    with tempfile.NamedTemporaryFile(suffix=".bib") as temp:
+        temp.write(bytes(bibtex, encoding='utf-8'))
+        temp.flush()
+        args = [
+            "bibtex2html", "-i", "-q", "-u", "-nodoc", "-nobibsource",
+            "-noheader", "-nofooter", temp.name
+        ]
+        subprocess.call(args, cwd=os.path.dirname(temp.name))
+        html = get_file_as_string(temp.name.replace(".bib", ".html"))
+
+    html = html.replace("a name=", "a id=")
+    html = "<section><h1>References</h1>\n" + html + "\n</section>\n"
+
+    return replace_string_between(s, '<div id="references">', '</div>', html)
 
 
 # Build TOC
@@ -106,6 +159,12 @@ s = replace_string_between(s, '<section id="table_of_contents">', '</section>',
                            toc)
 write_file_as_string("index.html", s)
 
+elib_connector = mysql.connector.connect(host="mysql.csail.mit.edu",
+                                         user="elibuser",
+                                         password="readonly678",
+                                         database="elib")
+elib = elib_connector.cursor(dictionary=True)
+
 # Write common headers / footers
 header = get_file_as_string("header.html.in")
 footer = get_file_as_string("footer.html.in")
@@ -149,6 +208,9 @@ for id in chapter_ids:
         s = replace_string_between(
             s, '<a class="next_chapter"', '</a>',
             ' href=' + chapter_ids[chapter_num] + '.html>Next Chapter')
+
+    # Write references
+    s = write_references(elib, s)
 
     write_file_as_string(filename, s)
 

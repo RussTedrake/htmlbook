@@ -50,6 +50,7 @@ for filename in args.files:
     broken_links = []
 
     for link in getLinksFromHTML(s):
+        link = link.strip()
         if '#' in link:
             url, id = link.split(sep='#', maxsplit=1)
         else:
@@ -84,8 +85,9 @@ for filename in args.files:
             else:
                 try:
                     requestObj = requests.head(link)
-                except requests.ConnectionError:
+                except requests.ConnectionError as err:
                     broken_links.append(link)
+                    print(err)
 
                 if requestObj.status_code == 404:
                     broken_links.append(link)
