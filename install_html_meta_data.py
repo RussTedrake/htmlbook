@@ -57,7 +57,8 @@ def replace_string_between(s, start_str, end_str, with_str):
     return s
 
 
-def write_references(elib, s):
+def write_references(elib, s, filename):
+    global change_detected
     index = 0
     refs = []
     while s.find("<elib>", index) > 0:
@@ -74,8 +75,15 @@ def write_references(elib, s):
     bibtex = ''
     elib_url = 'http://groups.csail.mit.edu/robotics-center/public_papers/'
     for r in refs:
+        r = r.strip()
         elib.execute(f"SELECT * FROM bibtex WHERE bibtag = '{r}'")
         x = elib.fetchone()
+        if not x:
+            print(
+                f"ELIB: Could not find reference {r} referenced from {filename}"
+            )
+            change_detected = True
+            continue
         bibtex += "@" + x['bibtype'] + "{" + x['bibtag'] + ",\n"
         for key in x:
             if key not in [
@@ -101,7 +109,7 @@ def write_references(elib, s):
         html = get_file_as_string(temp.name.replace(".bib", ".html"))
 
     html = html.replace("a name=", "a id=")
-    html = "<section><h1>References</h1>\n" + html + "\n</section>\n"
+    html = "<section><h1>References</h1>\n" + html + "\n</section><p/>\n"
 
     return replace_string_between(s, '<div id="references">', '</div>', html)
 
@@ -210,7 +218,7 @@ for id in chapter_ids:
             ' href=' + chapter_ids[chapter_num] + '.html>Next Chapter')
 
     # Write references
-    s = write_references(elib, s)
+    s = write_references(elib, s, filename)
 
     write_file_as_string(filename, s)
 
