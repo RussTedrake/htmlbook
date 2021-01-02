@@ -20,6 +20,7 @@ popd
 
 export HOMEBREW_CURL_RETRIES=4
 
+brew upgrade python@3.9 || brew link --overwrite python@3.9 # Temporary fix
 brew bundle --file=/opt/drake/share/drake/setup/Brewfile --no-lock
 
 /usr/local/opt/python@3.8/bin/pip3 install --upgrade --requirement "/opt/drake/share/drake/setup/requirements.txt"
