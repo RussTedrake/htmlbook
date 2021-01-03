@@ -4,6 +4,7 @@
 # Copyright 2020 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
+load("@pip//:requirements.bzl", "all_requirements")
 load("@rules_python//python:defs.bzl", "py_test")
 
 def rt_check_links_test(**attrs):
@@ -17,7 +18,8 @@ def rt_check_links_test(**attrs):
 #    args = [
 #        "--cwd",
 #        PWD,
-#    ],        
+#    ], 
+        deps = all_requirements,
         visibility = ["//visibility:private"],
     )
 
