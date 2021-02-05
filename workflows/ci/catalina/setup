@@ -10,7 +10,6 @@ export HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_BOTTLE_SOUR
 rm -f /usr/local/bin/2to3 # Temporary fix
 brew unlink gcc@8 gcc@9 # Temporary fix
 ./scripts/setup/mac/install_prereqs.sh
-brew install --cask basictex # Don't force this choice on users; CI only.
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
 pushd /tmp

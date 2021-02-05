@@ -1,10 +1,9 @@
 import argparse
+import bibtexparser
 from lxml.html import parse, etree
 import json
 import mysql.connector
 import os
-import shutil
-import subprocess
 import tempfile
 
 chapters = json.load(open("chapters.json"))
@@ -17,14 +16,6 @@ parser = argparse.ArgumentParser(
     description='Install ToC and Navigation into book html files.')
 parser.add_argument('--read_only', action='store_true')
 args = parser.parse_args()
-
-bibtex_command = shutil.which('bibtex')
-if not bibtex_command:
-    # Check a few other candidate locations
-    # TODO: Make this more robust.
-    bibtex_command = shutil.which('bibtex', path='/Library/TeX/texbin/')
-if not bibtex_command:
-    raise RuntimeError("Could not locate bibtex executable.")
 
 
 def get_file_as_string(filename):
@@ -71,6 +62,80 @@ def replace_string_between(s, start_str, end_str, with_str):
     return s
 
 
+def bibtex_entry_to_html(entry):
+    """Inspired by bibtex2html.py get_entry_output()"""
+    # rip out whitespace
+    for k, v in entry.items():
+        entry[k] = v.strip()
+
+    # --- Start list ---
+    out = ['\n<li id=%s>\n' % entry['ID']]
+
+    # --- author ---
+    if 'author' in entry:
+        out.append('<span class="author">%s</span>,' % entry['author'])
+        out.append('\n')
+
+    # --- chapter ---
+    chapter = False
+    if 'chapter' in entry:
+        chapter = True
+        out.append('<span class="title">"%s"</span>,' % entry['chapter'])
+        out.append('<br>')
+
+    # --- title ---
+    if not (chapter):
+        out.append('<span class="title">"%s"</span>,' % entry['title'])
+
+    # -- if book chapter --
+    if chapter:
+        out.append('in: %s, %s' % (entry['title'], entry['publisher']))
+
+    if entry['ENTRYTYPE'] == 'book':
+        out.append(entry['publisher'])
+
+    out.append('\n')
+
+    # --- journal or similar ---
+    if 'journal' in entry:
+        out.append('<span class="publisher">%s</span>' % entry['journal'])
+    elif 'booktitle' in entry:
+        out.append('<span class="publisher">')
+        out.append(entry['booktitle'])
+        out.append('</span>')
+    elif 'eprint' in entry:
+        out.append('<span class="publisher">%s</span>' % entry['eprint'])
+    elif entry['ENTRYTYPE'] == 'phdthesis':
+        out.append('PhD thesis, %s' % entry['school'])
+    elif entry['ENTRYTYPE'] == 'techreport':
+        out.append('Tech. Report, %s' % entry['number'])
+
+    # --- volume, pages, notes etc ---
+    #  print(entry)
+    if 'volume' in entry:
+        out.append(', vol. %s' % entry['volume'])
+    if 'number' in entry and entry['ENTRYTYPE'] != 'techreport':
+        out.append(', no. %s' % entry['number'])
+    if 'pages' in entry:
+        out.append(', pp. %s' % entry['pages'])
+    if 'month' in entry:
+        out.append(', %s' % entry['month'])
+
+    # --- year ---
+    out.append(', <span class="year">%s</span>' % entry['year'])
+
+    # final period
+    out.append('.\n')
+
+    # todo: add links
+    if 'url' in entry:
+        out.append(f'[&nbsp;<a href="{entry["url"]}">link</a>&nbsp;]\n')
+
+    out.append('\n</li>')
+    out.append('<br>')
+    return ''.join(out)
+
+
 def write_references(elib, s, filename):
     global change_detected
     index = 0
@@ -112,25 +177,20 @@ def write_references(elib, s, filename):
             bibtex += "\turl = { " + x['url'] + " },\n"
         bibtex += "}\n"
 
-    with tempfile.NamedTemporaryFile(suffix=".bib") as temp:
-        temp.write(bytes(bibtex, encoding='utf-8'))
-        temp.flush()
-        args = [
-            "bibtex2html", "-i", "-q", "-u", "-c", bibtex_command, "-nodoc",
-            "-nobibsource", "-noheader", "-nofooter", temp.name
-        ]
-        p = subprocess.run(args,
-                           cwd=os.path.dirname(temp.name),
-                           stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE,
-                           universal_newlines=True)
-        if not p.returncode == 0:
-            print(p.stdout)
-            print(p.stderr)
-        html = get_file_as_string(temp.name.replace(".bib", ".html"))
+    html = ''
+    with tempfile.NamedTemporaryFile(suffix=".bib") as bibfile:
+        bibfile.write(bytes(bibtex, encoding='utf-8'))
+        bibfile.flush()
 
-    html = html.replace("a name=", "a id=")
-    html = "<section><h1>References</h1>\n" + html + "\n</section><p/>\n"
+        with open(bibfile.name) as bibtex_file:
+            bibtex_database = bibtexparser.load(bibtex_file)
+
+        for e in bibtex_database.entries:
+            html += bibtex_entry_to_html(e)
+
+#        html = html.replace("a name=", "a id=")
+        html = (f"<section><h1>References</h1>\n<ol>\n{html}"
+                "\n</ol>\n</section><p/>\n")
 
     return replace_string_between(s, '<div id="references">', '</div>', html)
 
