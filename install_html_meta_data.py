@@ -1,10 +1,8 @@
 import argparse
-import bibtexparser
 from lxml.html import parse, etree
 import json
 import mysql.connector
 import os
-import tempfile
 
 chapters = json.load(open("chapters.json"))
 chapter_ids = chapters['chapter_ids']
@@ -66,38 +64,34 @@ def bibtex_entry_to_html(entry):
     """Inspired by bibtex2html.py get_entry_output()"""
     # rip out whitespace
     for k, v in entry.items():
-        entry[k] = v.strip()
+        if isinstance(v, str):
+            entry[k] = v.strip().replace("\n", " ").replace("\r", "")
+
+    # remove fields that are None
+    entry = {k: v for k, v in entry.items() if v is not None and v != ''}
 
     def field(f):
         if f not in entry:
-            raise RuntimeError(f"bibtex tag {entry['ID']} is missing"
+            raise RuntimeError(f"bibtex tag {entry['bibtag']} is missing"
                                f" required field {f}")
         return entry[f]
 
-    # --- Start list ---
-    out = ['\n<li id=%s>\n' % field('ID')]
+    out = ['\n<li id=%s>\n' % field('bibtag')]
 
     # --- author ---
     if 'author' in entry:
         out.append('<span class="author">%s</span>,' % field('author'))
         out.append('\n')
 
-    # --- chapter ---
-    chapter = False
     if 'chapter' in entry:
-        chapter = True
+        # --- chapter ---
         out.append('<span class="title">"%s"</span>,' % field('chapter'))
-        out.append('<br>')
-
-    # --- title ---
-    if not (chapter):
+        out.append('in: %s, %s' % (field('title'), field('publisher')))
+    else:
+        # --- title ---
         out.append('<span class="title">"%s"</span>,' % field('title'))
 
-    # -- if book chapter --
-    if chapter:
-        out.append('in: %s, %s' % (field('title'), field('publisher')))
-
-    if field('ENTRYTYPE') == 'book':
+    if field('bibtype') == 'book':
         out.append(field('publisher'))
 
     out.append('\n')
@@ -111,16 +105,16 @@ def bibtex_entry_to_html(entry):
         out.append('</span>')
     elif 'eprint' in entry:
         out.append('<span class="publisher">%s</span>' % field('eprint'))
-    elif field('ENTRYTYPE') == 'phdthesis':
+    elif field('bibtype') == 'phdthesis':
         out.append('PhD thesis, %s' % field('school'))
-    elif field('ENTRYTYPE') == 'techreport':
+    elif field('bibtype') == 'techreport':
         out.append('Tech. Report, %s' % field('number'))
 
     # --- volume, pages, notes etc ---
     #  print(entry)
     if 'volume' in entry:
         out.append(', vol. %s' % field('volume'))
-    if 'number' in entry and field('ENTRYTYPE') != 'techreport':
+    if 'number' in entry and field('bibtype') != 'techreport':
         out.append(', no. %s' % field('number'))
     if 'pages' in entry:
         out.append(', pp. %s' % field('pages'))
@@ -134,7 +128,10 @@ def bibtex_entry_to_html(entry):
     out.append('.\n')
 
     # todo: add links
-    if 'url' in entry:
+    elib_url = 'http://groups.csail.mit.edu/robotics-center/public_papers/'
+    if 'url' in entry and field('isPublic'):
+        if 'http' not in entry['url']:
+            entry['url'] = elib_url + entry['url']
         out.append(f'[&nbsp;<a href="{entry["url"]}">link</a>&nbsp;]\n')
 
     out.append('\n</li>')
@@ -158,8 +155,7 @@ def write_references(elib, s, filename):
     refs = map(str.strip, refs)  # Strip whitespace
     refs = list(dict.fromkeys(refs))  # Remove duplicates (preserving order)
 
-    bibtex = ''
-    elib_url = 'http://groups.csail.mit.edu/robotics-center/public_papers/'
+    html = ''
     for r in refs:
         elib.execute(f"SELECT * FROM bibtex WHERE bibtag = '{r}'")
         x = elib.fetchone()
@@ -169,34 +165,11 @@ def write_references(elib, s, filename):
             )
             change_detected = True
             continue
-        bibtex += "@" + x['bibtype'] + "{" + x['bibtag'] + ",\n"
-        for key in x:
-            if key not in [
-                    'bibtype', 'bibtag', 'comments', 'isPublic', 'downloads',
-                    'hits', 'wwwnote', 'date', 'crossref', 'abstract', 'url',
-                    'keywords'
-            ] and x[key]:
-                bibtex += "\t" + key + " = { " + x[key] + " },\n"
-        if x['isPublic'] and x['url']:
-            if 'http' not in x['url']:
-                x['url'] = elib_url + x['url']
-            bibtex += "\turl = { " + x['url'] + " },\n"
-        bibtex += "}\n"
 
-    html = ''
-    with tempfile.NamedTemporaryFile(suffix=".bib") as bibfile:
-        bibfile.write(bytes(bibtex, encoding='utf-8'))
-        bibfile.flush()
+        html += bibtex_entry_to_html(x)
 
-        with open(bibfile.name) as bibtex_file:
-            bibtex_database = bibtexparser.load(bibtex_file)
-
-        for e in bibtex_database.entries:
-            html += bibtex_entry_to_html(e)
-
-#        html = html.replace("a name=", "a id=")
-        html = (f"<section><h1>References</h1>\n<ol>\n{html}"
-                "\n</ol>\n</section><p/>\n")
+    html = (f"<section><h1>References</h1>\n<ol>\n{html}"
+            "\n</ol>\n</section><p/>\n")
 
     return replace_string_between(s, '<div id="references">', '</div>', html)
 
