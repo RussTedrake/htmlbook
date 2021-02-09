@@ -1,5 +1,6 @@
 # Constraints from existing installation on colab
-tensorflow==2.3.0
+# Use https://colab.research.google.com/drive/19mv-nL0Klga__lu_DD0njq9QktvfyKBh to test.
+tensorflow==2.4.1
 torch==1.7.0 #+cu101
 datascience==0.10.6
 albumentations==0.1.12
@@ -18,4 +19,4 @@ pytz==2018.9
 pyzmq==19.0.2
 Sphinx==1.8.5
 tornado==5.1.1
-numpy==1.18.5
+numpy==1.19.5
