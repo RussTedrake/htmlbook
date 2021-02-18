@@ -13,12 +13,12 @@ trap 'rm -rf /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb
 #LC_CTYPE=en_US.UTF-8 LANG=en_US.UTF-8 pip3 install --disable-pip-version-check --upgrade --requirement ./requirements.txt
 
 pushd /opt
-wget -nv https://drake-packages.csail.mit.edu/drake/continuous/drake-latest-bionic.tar.gz
+wget -nv https://drake-packages.csail.mit.edu/drake/nightly/drake-latest-bionic.tar.gz
 trap 'rm -rf /opt/drake-latest-bionic.tar.gz /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin /var/lib/apt/lists/* /var/log/apt/*' EXIT
 tar -xf drake-latest-bionic.tar.gz
 popd
 
-apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-recommends $(cat /opt/drake/share/drake/setup/packages-bionic.txt)
+yes | /opt/drake/share/drake/setup/install_prereqs
 
 # Setup xvfb for headless rendering.
 apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-recommends xvfb
