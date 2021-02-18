@@ -4,7 +4,7 @@
 # Copyright 2020 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
-load("@pip//:requirements.bzl", "all_requirements", "requirement")
+load("@pip//:requirements.bzl", "all_requirements")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("//htmlbook/tools/pycodestyle:def.bzl", "py_pycodestyle_test")
 load("//htmlbook/tools/pydocstyle:def.bzl", "py_pydocstyle_test")

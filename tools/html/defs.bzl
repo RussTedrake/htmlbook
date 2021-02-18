@@ -15,10 +15,10 @@ def rt_check_links_test(**attrs):
         args = ["$(location " + attrs["srcs"][0] + ")"],
         data = attrs["srcs"],
         tags = ["no-sandbox"],  # to allow network connections
-#    args = [
-#        "--cwd",
-#        PWD,
-#    ], 
+        # args = [
+        #     "--cwd",
+        #     PWD,
+        # ],
         deps = all_requirements,
         visibility = ["//visibility:private"],
     )

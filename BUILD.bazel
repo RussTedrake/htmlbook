@@ -4,19 +4,15 @@
 # Copyright 2020 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
-# The following test is *not hermetic*.  I am using PWD (obtained in
-# WORKSPACE.bazel) to pass in the source directory here since
-# BUILD_WORKSPACE_DIRECTORY is not available during bazel test.
-load("@environ//:environ.bzl", "PWD")
 load("//htmlbook/tools/python:defs.bzl", "rt_py_test")
 
 rt_py_test(
     name = "install_html_meta_data",
     srcs = ["install_html_meta_data.py"],
     args = ["--read_only"],
-    tags = ["requires-network"],  # for mysql.csail
     data = [
         "//:chapters",
         "//:html",
     ],
+    tags = ["requires-network"],  # for mysql.csail
 )
