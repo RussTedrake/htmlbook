@@ -18,7 +18,7 @@ trap 'rm -rf /opt/drake-latest-bionic.tar.gz /var/cache/apt/archives/*.deb /var/
 tar -xf drake-latest-bionic.tar.gz
 popd
 
-yes | /opt/drake/share/drake/setup/install_prereqs
+apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-recommends $(cat /opt/drake/share/drake/setup/packages-bionic.txt)
 
 # Setup xvfb for headless rendering.
 apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-recommends xvfb
