@@ -1,9 +1,9 @@
 
 # Constructs the pdf from the html content.  Run it from the textbook root directory:
-# python3 scripts/make_pdf.py && xpdf {underactuated|manipulation}.pdf
+# python3 htmlbook/make_pdf.py && xpdf {underactuated|manipulation}.pdf
 # or, this *should* work (but isn't):
 # xpdf -remote foo "openFile(manipulation.pdf)" &  
-# python3 scripts/make_pdf.py && xpdf -remote foo reload
+# python3 htmlbook/make_pdf.py && xpdf -remote foo reload
 # 
 # Requires PrinceXML
 # sudo apt install prince
@@ -84,13 +84,13 @@ for c in chapter_ids:
   s = s.replace('<script src="https://hypothes.is/embed.js" async></script>','')
 
   # links to data should point to online version
-  s = s.replace('href="data/','href="http://manipulation.csail.mit.edu/data/')
+  s = s.replace('href="data/',f'href="http://{basename}.csail.mit.edu/data/')
 
   write_file_as_string(filename, s)
-#  os.system(f"node {os.path.join(root, 'scripts/render_html.js')} http://manipulation.csail.mit.edu/{c}.html {filename}")
-  os.system(f"node {os.path.join(root, 'scripts/render_html.js')} file://{filename} {filename}")
+#  os.system(f"node {os.path.join(root, 'htmlbook/render_html.js')} http://{basename}.csail.mit.edu/{c}.html {filename}")
+  os.system(f"node {os.path.join(root, 'htmlbook/render_html.js')} file://{filename} {filename}")
   prince_input_files += ' ' + filename
   
-os.system(f"prince -s {os.path.join(root,'scripts/pdf.css')} {prince_input_files} -o {basename}.pdf")
+os.system(f"prince -s {os.path.join(root,'htmlbook/pdf.css')} {prince_input_files} -o {basename}.pdf")
 
 dir.cleanup()
