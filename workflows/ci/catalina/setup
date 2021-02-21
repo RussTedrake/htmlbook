@@ -5,10 +5,65 @@
 
 set -euxo pipefail
 
-export HOMEBREW_NO_ANALYTICS=1 HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK=1
+# Pass the --retry 4 argument when invoking curl(1).
+export HOMEBREW_CURL_RETRIES=4
 
-rm -f /usr/local/bin/2to3 # Temporary fix
-brew unlink gcc@8 gcc@9 # Temporary fix
+# Do not send brew(1) usage analytics to Google Analytics.
+export HOMEBREW_NO_ANALYTICS=1
+
+# Do not automatically update before running various brew(1) subcommands.
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+# Fail on the failure of installation from a bottle rather than falling back to
+# building from source.
+# TODO(jamiesnape): Since https://github.com/Homebrew/brew/pull/10640 this is
+# the default so this probably can be removed.
+export HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK=1
+
+# Forbid redirects from secure HTTPS to insecure HTTP.
+export HOMEBREW_NO_INSECURE_REDIRECT=1
+
+# Never automatically cleanup installed, upgraded, and/or reinstalled formulae.
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
+# Only list updates to installed formulae.
+export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
+
+# brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
+brew update || (sleep 30; brew update)
+
+# Check that GitHub Actions is running the workflow that calls this script.
+# https://docs.github.com/en/actions/reference/environment-variables
+if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
+  # The bazelisk formula conflicts with the bazel formula.
+  # https://github.com/actions/virtual-environments/issues/1365
+  # https://github.com/Homebrew/homebrew-core/blob/7250542ee8545a4545daad294c0c5fb92a13d224/Formula/bazelisk.rb#L18
+  brew uninstall -f -q bazelisk
+
+  # The python@3.8 formula and its dependents cause pip_install from
+  # @rules_python//python:pip.bzl to fail.
+  # TODO(jamiesnape): Work out why because this behavior does not match the
+  # @rules_python documentation.
+  brew uninstall -f -q $(brew uses --installed --recursive python@3.8) python@3.8
+  rm -rf /usr/local/lib/python3.8
+
+  # conda has caused trouble in the past.
+  sudo rm -rf /usr/local/bin/conda /usr/local/miniconda
+  rm -rf "${HOME}/.conda"
+
+  # Symlink installed by the Python installer package causes upgrades of the
+  # python@3.9 formula to fail.
+  # https://github.com/actions/virtual-environments/issues/2322
+  # TODO(jamiesnape): The issue is closed so this probably can be removed.
+  rm -f /usr/local/bin/2to3
+
+  # Upgrades of the gcc@8 and gcc@9 formulae fail due to conflicting symlinks.
+  # https://github.com/actions/virtual-environments/issues/2391
+  # https://github.com/Homebrew/homebrew-core/issues/68866
+  # TODO(jamiesnape): The issues are closed so this probably can be removed.
+  brew unlink gcc@8 gcc@9
+fi
+
 ./scripts/setup/mac/install_prereqs.sh
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
@@ -20,8 +75,4 @@ pushd /opt
 sudo tar -xf /tmp/drake-latest-mac.tar.gz
 popd
 
-export HOMEBREW_CURL_RETRIES=4
-
-rm -f /usr/local/bin/2to3 # Temporary fix
-
-/opt/drake/share/drake/setup/install_prereqs
+/opt/drake/share/drake/setup/install_prereqs --without-update
