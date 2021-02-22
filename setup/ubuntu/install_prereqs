@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Copyright 2021 Massachusetts Institute of Technology.
+# Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
+
+set -euo pipefail
+
+with_pip_install=0
+
+while [ -n "${1:-}" ]; do
+  case "$1" in
+    --help)
+      echo "usage: $0 [--help] [--with-pip-install]" >&2
+      exit 0
+      ;;
+    --with-pip-install)
+      with_pip_install=1
+      ;;
+    *)
+      echo "usage: $0 [--help] [--with-pip-install]" >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [[ "${EUID}" -ne 0 ]]; then
+  echo 'FATAL: This script must be run as root' >&2
+  exit 2
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+
+# APT::Acquire::Retries does not apply to apt-get update.
+apt-get update -qq || (sleep 30; apt-get update -qq)
+trap 'rm -rf /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin /var/lib/apt/lists/* /var/log/apt/*' EXIT
+
+# ca-certificates         >= 20210119
+# g++                     >= 7.4.0 via bazel
+# gnupg                   >= 2.2.4
+# python3                 >= 3.6.5
+# python3-bs4             >= 4.6.0
+# python3-lxml            >= 4.2.1
+# python3-mysql.connector >= 2.1.6
+# python3-nbconvert       >= 5.3.1
+# python3-pip             >= 9.0.1
+# python3-requests        >= 2.18.4
+# python3-snowballstemmer >= 1.2.1 via pydocstyle
+# tidy                    >= 5.2.0
+# unzip                   >= 6.0 via bazel
+# wget                    >= 1.19.4
+# xvfb                    >= 1.19.6
+# zlib1g-dev              >= 1.2.11 via bazel
+
+apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy \
+  --no-install-recommends $(cat <<- EOF
+  ca-certificates
+  g++
+  gnupg
+  python3
+  python3-bs4
+  python3-lxml
+  python3-mysql.connector
+  python3-nbconvert
+  python3-pip
+  python3-requests
+  python3-snowballstemmer
+  tidy
+  unzip
+  wget
+  xvfb
+  zlib1g-dev
+EOF
+)
+
+wget -qO- https://bazel.build/bazel-release.pub.gpg | gpg -q --dearmor \
+  > /etc/apt/trusted.gpg.d/bazel.gpg
+echo 'deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8' \
+  > /etc/apt/sources.list.d/bazel.list
+
+# APT::Acquire::Retries does not apply to apt-get update.
+apt-get update -qq || (sleep 30; apt-get update -qq)
+apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy \
+  --no-install-recommends bazel
+
+if [[ "${with_pip_install}" -eq 1 ]]; then
+  pip3 install --disable-pip-version-check --retries 4 \
+    -r "${BASH_SOURCE%/*}/requirements.txt"
+fi

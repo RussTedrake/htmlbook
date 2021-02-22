@@ -1,0 +1,71 @@
+#!/bin/zsh
+
+# Copyright 2021 Massachusetts Institute of Technology.
+# Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
+
+set -euo pipefail
+
+with_pip_install=0
+
+while [ -n "${1:-}" ]; do
+  case "$1" in
+    --help)
+      echo "usage: $0 [--help] [--with-pip-install]" >&2
+      exit 0
+      ;;
+    --with-pip-install)
+      with_pip_install=1
+      ;;
+    *)
+      echo "usage: $0 [--help] [--with-pip-install]" >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [[ "${EUID}" -eq 0 ]]; then
+  echo 'FATAL: This script must NOT be run as root' >&2
+  exit 2
+fi
+
+# Do not output a file containing dependency and system status information after
+# A successful call to brew(1) bundle.
+export HOMEBREW_BUNDLE_NO_LOCK=1
+
+# Pass the --retry 4 argument when invoking curl(1).
+export HOMEBREW_CURL_RETRIES=4
+
+# Do not send brew(1) usage analytics to Google Analytics.
+export HOMEBREW_NO_ANALYTICS=1
+
+# Do not automatically update before running various brew(1) subcommands.
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+# Forbid redirects from secure HTTPS to insecure HTTP.
+export HOMEBREW_NO_INSECURE_REDIRECT=1
+
+# Never automatically cleanup installed, upgraded, and/or reinstalled formulae.
+export HOMEBREW_NO_INSTALL_CLEANUP=1
+
+# Only list updates to installed formulae.
+export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
+
+if ! type brew &>/dev/null; then
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+fi
+
+# brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
+brew update || (sleep 30; brew update)
+trap 'brew cleanup && rm -rf $(brew --cache)/* ${HOME}/Library/Logs/Homebrew/*'
+
+# The bazelisk formula conflicts with the bazel formula because because it
+# attempts to replace the installed version of bazel.
+brew uninstall -fq bazelisk
+
+brew bundle install --file="$(dirname ${(%):-%x})/Brewfile"
+
+if [[ "${with_pip_install}" -eq 1 ]]; then
+  pip3.9 install --disable-pip-version-check --no-input --retries 4 \
+    -r "$(dirname ${(%):-%x})/requirements.txt"
+fi

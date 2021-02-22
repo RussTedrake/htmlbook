@@ -1,0 +1,48 @@
+---
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 5 * * *'
+
+jobs:
+  macos:
+    name: macos catalina
+    runs-on: macos-10.15
+    steps:
+      - name: check free space before
+        run: df -h
+        shell: zsh -efuo pipefail {0}
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install brew and pip prerequisites
+        run: ./install_prereqs --with-pip-install
+        working-directory: setup/mac
+        shell: zsh -efuo pipefail {0}
+      - name: check free space after
+        run: df -h
+        shell: zsh -efuo pipefail {0}
+
+  ubuntu:
+    name: ubuntu 18.04
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+    steps:
+      - name: check free space before
+        run: df -h
+        shell: bash
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install apt and pip prerequisites
+        run: ./install_prereqs --with-pip-install
+        working-directory: setup/ubuntu
+        shell: bash
+      - name: check free space after
+        run: df -h
+        shell: bash

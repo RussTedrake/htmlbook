@@ -1,0 +1,8 @@
+beautifulsoup4
+lxml
+mysql-connector-python
+nbconvert
+pycodestyle
+pydocstyle
+requests
+yapf

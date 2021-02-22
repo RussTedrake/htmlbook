@@ -1,0 +1,31 @@
+---
+name: codeql
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: '0 7 * * 3'
+
+jobs:
+  analyze:
+    name: analyze
+    runs-on: ubuntu-18.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install apt and pip prerequisites
+        run: sudo ./install_prereqs --with-pip-install
+        working-directory: setup/ubuntu
+        shell: bash
+      - name: codeql init
+        uses: github/codeql-action/init@v1
+        with:
+          languages: python
+          setup-python-dependencies: false
+      - name: codeql analyze
+        uses: github/codeql-action/analyze@v1
