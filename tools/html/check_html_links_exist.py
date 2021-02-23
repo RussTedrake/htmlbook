@@ -1,6 +1,7 @@
 import argparse
 import glob
 import os
+import sys
 
 import requests
 from bs4 import BeautifulSoup
@@ -43,6 +44,9 @@ def html_has_id(html, id):
     return tag is not None
 
 
+if os.environ.get('GITHUB_ACTIONS'):
+    print("**** WE ARE ON GITHUB ACTIONS ***", file=sys.stderr)
+
 # Check that all links to code files exist.
 for filename in args.files:
     s = get_file_as_string(filename)
@@ -56,13 +60,15 @@ for filename in args.files:
         else:
             url = link
             id = ''
+        print(f"Checking {url}...", file=sys.stderr)
         if len(url) == 0:
             if not html_has_id(s, id):
                 broken_links.append(link)
         elif url[:4].lower() != 'http':
             if url[:4].lower() == 'data' and os.environ.get('GITHUB_ACTIONS'):
-                # Don't require the data directory on CI.  
+                # Don't require the data directory on CI.
                 # See https://github.com/RussTedrake/htmlbook/issues/10
+                print(f"Skipping {url}...", file=sys.stderr)
                 continue
             if not os.path.exists(url):
                 broken_links.append(link)

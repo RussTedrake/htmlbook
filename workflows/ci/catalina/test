@@ -6,7 +6,7 @@
 set -euxo pipefail
 
 bazel test --cache_test_results=no --discard_analysis_cache=yes \
-  --jobs=1 --keep_going=yes --keep_state_after_build=no --repository_cache= \
-  --test_summary=detailed --test_verbose_timeout_warnings=yes \
-  --track_incremental_state=no --verbose_failures=yes \
-  --verbose_test_summary=yes //...
+  --disk_cache= --jobs=1 --keep_going=yes --keep_state_after_build=no \
+  --repository_cache= --test_env=GITHUB_ACTIONS --test_summary=terse \
+  --test_verbose_timeout_warnings=yes --track_incremental_state=no \
+  --verbose_failures=yes --verbose_test_summary=yes //...
