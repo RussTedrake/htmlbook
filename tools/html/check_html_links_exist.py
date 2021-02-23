@@ -60,6 +60,10 @@ for filename in args.files:
             if not html_has_id(s, id):
                 broken_links.append(link)
         elif url[:4].lower() != 'http':
+            if url[:4].lower() == 'data' and os.environ.get('GITHUB_ACTIONS'):
+                # Don't require the data directory on CI.  
+                # See https://github.com/RussTedrake/htmlbook/issues/10
+                continue
             if not os.path.exists(url):
                 broken_links.append(link)
             # The index is the only case where I want to allow section tags.
