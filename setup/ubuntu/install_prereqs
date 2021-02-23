@@ -27,7 +27,9 @@ apt-get update -qq || (sleep 30; apt-get update -qq)
 # python3-nbconvert       >= 5.3.1
 # python3-pip             >= 9.0.1
 # python3-requests        >= 2.18.4
+# python3-setuptools      >= 39.0.1
 # python3-snowballstemmer >= 1.2.1 via pydocstyle
+# python3-wheel           >= 0.30.0
 # tidy                    >= 5.2.0
 # unzip                   >= 6.0 via bazel
 # wget                    >= 1.19.4
@@ -46,7 +48,9 @@ apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy \
   python3-nbconvert
   python3-pip
   python3-requests
+  python3-setuptools
   python3-snowballstemmer
+  python3-wheel
   tidy
   unzip
   wget
