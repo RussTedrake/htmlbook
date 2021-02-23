@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+# Copyright 2021 Massachusetts Institute of Technology.
+# Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
+
+set -euo pipefail
+
+if [[ "${EUID}" -eq 0 ]]; then
+  echo 'FATAL: This script must NOT be run as root' >&2
+  exit 1
+fi
+
+trap 'rm -rf $(pip3.9 cache dir)/*' EXIT
+pip3.9 install --disable-pip-version-check --no-input --retries 4 \
+  -r "$(dirname ${(%):-%x})/../../mac-requirements.txt"

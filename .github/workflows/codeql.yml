@@ -5,22 +5,41 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    branches:
-      - master
   schedule:
     - cron: '0 7 * * 3'
 
 jobs:
-  analyze:
-    name: analyze
+  mac:
+    name: macos catalina 10.15
+    runs-on: macos-10.15
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: install brew prerequisites
+        run: ./setup/mac/install_prereqs
+        shell: bash
+      - name: install pip prerequisites
+        run: ./setup/mac/install_pip_prereqs
+        shell: bash
+      - name: codeql init
+        uses: github/codeql-action/init@v1
+        with:
+          languages: python
+          setup-python-dependencies: false
+      - name: codeql analyze
+        uses: github/codeql-action/analyze@v1
+
+  ubuntu:
+    name: ubuntu 18.04 bionic beaver
     runs-on: ubuntu-18.04
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: install apt and pip prerequisites
-        run: sudo ./install_prereqs --with-pip-install
-        working-directory: setup/ubuntu
+      - name: install apt prerequisites
+        run: sudo -E ./setup/ubuntu/install_prereqs
+        shell: bash
+      - name: install pip prerequisites
+        run: sudo -E ./setup/ubuntu/install_pip_prereqs
         shell: bash
       - name: codeql init
         uses: github/codeql-action/init@v1

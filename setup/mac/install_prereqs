@@ -5,28 +5,9 @@
 
 set -euo pipefail
 
-with_pip_install=0
-
-while [ -n "${1:-}" ]; do
-  case "$1" in
-    --help)
-      echo "usage: $0 [--help] [--with-pip-install]" >&2
-      exit 0
-      ;;
-    --with-pip-install)
-      with_pip_install=1
-      ;;
-    *)
-      echo "usage: $0 [--help] [--with-pip-install]" >&2
-      exit 1
-      ;;
-  esac
-  shift
-done
-
 if [[ "${EUID}" -eq 0 ]]; then
   echo 'FATAL: This script must NOT be run as root' >&2
-  exit 2
+  exit 1
 fi
 
 # Do not output a file containing dependency and system status information after
@@ -55,17 +36,13 @@ if ! type brew &>/dev/null; then
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 fi
 
+trap 'brew cleanup && rm -rf $(brew --cache)/* ${HOME}/Library/Logs/Homebrew/*' EXIT
+
 # brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
 brew update || (sleep 30; brew update)
-trap 'brew cleanup && rm -rf $(brew --cache)/* ${HOME}/Library/Logs/Homebrew/*'
 
 # The bazelisk formula conflicts with the bazel formula because because it
 # attempts to replace the installed version of bazel.
 brew uninstall -fq bazelisk
 
 brew bundle install --file="$(dirname ${(%):-%x})/Brewfile"
-
-if [[ "${with_pip_install}" -eq 1 ]]; then
-  pip3.9 install --disable-pip-version-check --no-input --retries 4 \
-    -r "$(dirname ${(%):-%x})/requirements.txt"
-fi

@@ -5,35 +5,17 @@
 
 set -euo pipefail
 
-with_pip_install=0
-
-while [ -n "${1:-}" ]; do
-  case "$1" in
-    --help)
-      echo "usage: $0 [--help] [--with-pip-install]" >&2
-      exit 0
-      ;;
-    --with-pip-install)
-      with_pip_install=1
-      ;;
-    *)
-      echo "usage: $0 [--help] [--with-pip-install]" >&2
-      exit 1
-      ;;
-  esac
-  shift
-done
-
 if [[ "${EUID}" -ne 0 ]]; then
   echo 'FATAL: This script must be run as root' >&2
-  exit 2
+  exit 1
 fi
 
 export DEBIAN_FRONTEND=noninteractive
 
+trap 'rm -rf /var/cache/apt/*.bin /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/lib/apt/lists/* /var/log/apt/*' EXIT
+
 # APT::Acquire::Retries does not apply to apt-get update.
 apt-get update -qq || (sleep 30; apt-get update -qq)
-trap 'rm -rf /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin /var/lib/apt/lists/* /var/log/apt/*' EXIT
 
 # ca-certificates         >= 20210119
 # g++                     >= 7.4.0 via bazel
@@ -83,7 +65,3 @@ apt-get update -qq || (sleep 30; apt-get update -qq)
 apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy \
   --no-install-recommends bazel
 
-if [[ "${with_pip_install}" -eq 1 ]]; then
-  pip3 install --disable-pip-version-check --retries 4 \
-    -r "${BASH_SOURCE%/*}/requirements.txt"
-fi

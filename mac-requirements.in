@@ -1,5 +1,8 @@
-beautifulsoup4>=4.9.3
+beautifulsoup4
+lxml
 mysql-connector-python
-pycodestyle>=2.6.0
-pydocstyle>=5.1.1
-yapf>=0.30.0
+nbconvert
+pycodestyle
+pydocstyle
+requests
+yapf

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Copyright 2021 Massachusetts Institute of Technology.
+# Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
+
+set -euo pipefail
+
+if [[ "${EUID}" -ne 0 ]]; then
+  echo 'FATAL: This script must be run as root' >&2
+  exit 1
+fi
+
+trap 'rm -rf ${HOME}/.cache/pip/*' EXIT
+pip3 install --disable-pip-version-check  --retries 4 \
+  -r "${BASH_SOURCE%/*}/../../ubuntu-requirements.txt"
