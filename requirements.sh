@@ -3,14 +3,42 @@
 # Runs pip-compile on the current platform and generates the shared
 # requirements.txt
 # pip-compile can be obtained via `pip3 install pip-tools`
+# On ubuntu, I need it for both python3 and python3.7 (for colab)
 
 set -euo pipefail
 
 if [[ "${OSTYPE}" == "darwin"* ]]; then
     pip-compile mac-requirements.in
 else
-    pip-compile ubuntu-requirements.in
-    pip-compile colab-requirements.in
+    # Bring in colab requirements:
+    # First (manually) generate colab-pip-freeze.txt via running "!pip3 freeze" # in a colab notebook.  Then make some local modifications:
+    # 1) Fix scipy version, because manipulation/exercises/rl:policy_gradient
+    #    hit a scipy/numpy mismatch bug.
+    # 2) googlecolab version is a lie
+    # 3) Remove -cu101 from torch versions for ubuntu
+    # 4) matplotlib version from colab doesn't work with bazel
+    #    https://github.com/RobotLocomotion/drake/issues/14250
+    # 5) traitlets==5.05 requires python3.7
+    # 6) colab's install is inconsistent (and makes warnings for my pip)
+    #    albumentations 0.1.12 has requirement imgaug<0.2.7,>=0.2.5, but you'll #    have imgaug 0.2.9 which is incompatible.
+
+    cat htmlbook/colab-pip-freeze.txt | sed \
+        -e 's/^scipy.*/scipy==1.5.3/' \
+        -e 's/^google-colab.*/git+git:\/\/github.com\/googlecolab\/colabtools\/\#egg=google-colab/' \
+        -e 's/+cu101//' \
+        -e '/^matplotlib/d' \
+        -e '/^traitlets/d' \
+        > htmlbook/colab-constraints-ubuntu.txt
+
+    python3 -m piptools compile ubuntu-requirements.in
+
+    cat htmlbook/colab-pip-freeze.txt | sed \
+        -e 's/^scipy.*/scipy==1.5.3/' \
+        -e 's/^google-colab.*/git+git:\/\/github.com\/googlecolab\/colabtools\/\#egg=google-colab/' \
+        -e '/^imgaug/d' \
+        > htmlbook/colab-constraints-colab.txt
+
+    python3.7 -m piptools compile colab-requirements.in
 
     echo ""
     echo "IMPORTANT: Don't forget to test these requirements using"
