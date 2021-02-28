@@ -35,6 +35,7 @@ else
     cat htmlbook/colab-pip-freeze.txt | sed \
         -e 's/^scipy.*/scipy==1.5.3/' \
         -e 's/^google-colab.*/git+git:\/\/github.com\/googlecolab\/colabtools\/\#egg=google-colab/' \
+        -e 's/+cu101//' \
         -e '/^imgaug/d' \
         > htmlbook/colab-constraints-colab.txt
 
