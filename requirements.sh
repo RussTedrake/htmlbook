@@ -11,7 +11,11 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
     pip-compile mac-requirements.in
 else
     # Bring in colab requirements:
-    # First (manually) generate colab-pip-freeze.txt via running "!pip3 freeze" # in a colab notebook.  Then make some local modifications:
+    # First update colab_pip_freeze.txt via
+    # a) running `node colab_pip_freeze.js` in the htmlbook directory, or
+    # b) manually running "!pip3 freeze" in colab and copying the result. 
+    # 
+    # Then make some local modifications:
     # 1) Fix scipy version, because manipulation/exercises/rl:policy_gradient
     #    hit a scipy/numpy mismatch bug.
     # 2) googlecolab version is a lie
