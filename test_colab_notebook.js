@@ -39,23 +39,22 @@ const colab = require('./colab.js');
     await page.goto(url);
     await page.waitForSelector('.codecell-input-output');
 
-/*
-    console.log('waiting for kernel');
-    await page.waitForFunction(
-      () => window.colab.global.notebook.kernel.state === 'connected' || window.colab.global.notebook.kernel.state === 'kernel idle');
-
-    await page.evaluate(() => {
-      var notebook = window.colab.global.notebook;
-      notebook.clearAllOutputs();
-
-      notebook.kernel.execute('import os');
-      notebook.kernel.execute('os.environ["COLAB_TESTING"] = "True"');
+    await page.evaluate(async () => {
+      window.colab.global.notebook.connectToKernel();
     })
 
     await page.waitForFunction(
       () => window.colab.global.notebook.kernel.isConnected());
-*/
-    await page.evaluate(() => {
+
+    await page.evaluate(async () => {
+      var notebook = window.colab.global.notebook;
+
+      //debugger;
+      notebook.clearAllOutputs();
+
+      await notebook.kernel.execute('import os');
+      await notebook.kernel.execute('os.environ["COLAB_TESTING"] = "True"');
+
       window.colab.global.notebook.runAll();
     })
   
