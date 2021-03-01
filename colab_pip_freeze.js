@@ -30,6 +30,8 @@ const fs = require('fs');
     //const browser = await puppeteer.launch({headless:false, devtools:true});
 
     const google_login_page = await browser.newPage();
+
+    // Close the default page that the browser always opens:
     const pages = await browser.pages();
     pages[0].close();
 
@@ -55,20 +57,29 @@ const fs = require('fs');
 
     const page = await browser.newPage();
     const url = "https://colab.research.google.com/drive/1Y6QZK0D_8Df9ATCa8pWiUq4ANn-_hrJa";
-    const output_file = "colab_pip_freeze.txt";
     await page.goto(url);
-    await page.waitForSelector('.codecell-input-output', 0);
-
-    //debugger;
-    await page.waitForTimeout(10000);  // would be better to find a selector.
-    await page.keyboard.down('Control');
-    await page.keyboard.press('F9');
-    await page.keyboard.up('Control');
-    await page.waitForSelector('.code-has-output', 0);
+    //await page.waitForSelector('.codecell-input-output', 0);
+    await page.waitForSelector('.monaco-list.list_id_1', 0);
 
     await page.evaluate(() => {
-      let element = document.querySelector('.stream');
-      return element.innerText;
+      window.colab.global.notebook.clearAllOutputs();
+      window.colab.global.notebook.runAll();
+    })
+    // This worked for running all cells, too:
+    //await page.keyboard.down('Control');
+    //await page.keyboard.press('F9');
+    //await page.keyboard.up('Control');
+
+    // Because the notebook was not authored by this user, I have to click 'ok'.
+    await page.waitForSelector('#ok');
+    await page.evaluate(() => {
+      document.querySelector('#ok').click()
+    })
+
+    // debugger;
+    await page.waitForSelector('.code-has-output', 0);
+    await page.evaluate(() => {
+      return window.colab.global.notebook.cells[0].outputArea.element_.innerText;
     }).then(text => {
         fs.writeFileSync("colab-pip-freeze.txt", text);
         console.log("Success!  Wrote output to colab-pip-freeze.txt.");
