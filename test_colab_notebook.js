@@ -70,6 +70,9 @@ const colab = require('./colab.js');
     console.log('running all cells');
     await page.waitForFunction(
       () => window.colab.global.notebook.busyCellIds.size > 0);
+    // it gets stuck here sometimes (despite the console confirming that the
+    // value of busyCellIds.size is zero).
+    console.log('waiting for run to complete');
     await page.waitForFunction(
       () => window.colab.global.notebook.busyCellIds.size == 0);
 
