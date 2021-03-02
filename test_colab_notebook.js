@@ -1,3 +1,6 @@
+
+// Usage: node test_colab_noteboox.js [--terminate]
+//
 // Requires puppeteer and nodejs
 // cd ~
 // curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
@@ -65,27 +68,42 @@ const colab = require('./colab.js');
     })
 
     console.log('running all cells');
-    await page.waitForSelector('.code-has-output');
+    await page.waitForFunction(
+      () => window.colab.global.notebook.busyCellIds.size > 0);
     await page.waitForFunction(
       () => window.colab.global.notebook.busyCellIds.size == 0);
 
+    console.log('checking outputs');
     await page.evaluate(() => {
       var cells = window.colab.global.notebook.cells;
 
-      var success = true;
       for (var i=0; i<cells.length; i++) {
         if (cells[i].lastExecutionFailed) {
-          success = false;
+          return cells[i].outputArea.element_.innerText;
         }
       }
-      return success;
-    }).then(success => {
-      if (success) {
-        console.log("Success!  All notebook cells ran successfully.");
+      return undefined;
+    }).then(output => {
+      if (output) {
+        console.log("Execution failed.");
+        console.log(output);
       } else {
-        console.log("One ore more cells had execution errors.")
+        console.log("Success!  All notebook cells ran successfully.");
       }
     })
+
+    // Terminate session (otherwise I'll run out).
+    if (process.argv.length > 3 && process.argv[3] === '--terminate') {
+      await page.evaluate(async () => {
+        id = window.colab.global.notebook.kernel.connection.session.kernelSessionId;
+        s = await window.colab.global.notebook.kernel.listNotebookSessions();
+        for (var i=0; i<s.length; i++) {
+          if (s[i].sessionId == id) {
+            await window.colab.global.notebook.kernel.terminateSession(s[i]);
+          }
+        }
+      })
+    }
 
     await browser.close();
   } catch (err) {
