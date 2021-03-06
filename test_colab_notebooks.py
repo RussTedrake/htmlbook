@@ -16,8 +16,10 @@ def run(cmd, **kwargs):
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                         universal_newlines=True, **kwargs)
+    if cp.stdout:
+      print(cp.stdout)
     if cp.stderr:
-        print(cp.stderr)
+      print(cp.stderr)
     assert cp.returncode == 0, cp
 
 if len(sys.argv) > 1:
