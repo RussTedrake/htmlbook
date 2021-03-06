@@ -21,11 +21,16 @@ puppeteer.use(StealthPlugin())
 const fs = require('fs');
 const colab = require('./colab.js');
 
+const argv = require('yargs')(process.argv.slice(2))
+  .usage('node test_colab_notebook.js --terminate_session --show_browser --debug').argv;
+
 (async function main() {
   try {
-    //const browser = await puppeteer.launch();
-    // or, for debugging:
-    const browser = await puppeteer.launch({headless:false, devtools:true});
+    var browser_options = {};
+    if (argv.show_browser || argv.debug) {
+      browser_options = {headless:false, devtools:true};
+    }
+    const browser = await puppeteer.launch(browser_options);
 
     // Close the default page that the browser always opens:
     const pages = await browser.pages();
@@ -34,7 +39,7 @@ const colab = require('./colab.js');
     console.log('logging in to google');
     await colab.login_to_google(browser);
 
-    const relative_path = process.argv[2];
+    const relative_path = argv._[0];
 
     const page = await browser.newPage();
     page.setDefaultTimeout(180000);
@@ -82,21 +87,27 @@ const colab = require('./colab.js');
 
       for (var i=0; i<cells.length; i++) {
         if (cells[i].lastExecutionFailed) {
-          return cells[i].outputArea.element_.innerText;
+          return cells[i].lastExecutionError;
         }
       }
       return undefined;
-    }).then(output => {
-      if (output) {
+    }).then(err => {
+      if (err) {
         console.log("Execution failed.");
-        console.log(output);
+        if (err.traceback) {
+          for (var i=0; i<err.traceback.length; i++) {
+            console.log(err.traceback[i]);
+          }
+        } else {
+          console.log(err);
+        }
       } else {
         console.log("Success!  All notebook cells ran successfully.");
       }
     })
 
     // Terminate session (otherwise I'll run out).
-    if (process.argv.length > 3 && process.argv[3] === '--terminate') {
+    if (argv.terminate) {
       await page.evaluate(async () => {
         id = window.colab.global.notebook.kernel.connection.session.kernelSessionId;
         s = await window.colab.global.notebook.kernel.listNotebookSessions();
@@ -108,7 +119,9 @@ const colab = require('./colab.js');
       })
     }
 
-    await browser.close();
+    if (!argv.debug) {
+      await browser.close();
+    }
   } catch (err) {
     console.error(err);
   }
