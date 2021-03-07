@@ -1,6 +1,7 @@
 
-# Usage python3 test_colab_notebooks.py [notebook to start from] ["--skip"]
+# Usage python3 test_colab_notebooks.py
 
+import concurrent.futures
 import os
 import pathlib
 import subprocess
@@ -11,34 +12,39 @@ htmlbook = os.path.dirname(os.path.realpath(__file__))
 root = os.path.dirname(htmlbook)
 repository = os.path.basename(root) 
 
-def run(cmd, **kwargs):
-    cp = subprocess.run(cmd,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        universal_newlines=True, **kwargs)
-    if cp.stdout:
-      print(cp.stdout)
-    if cp.stderr:
-      print(cp.stderr)
-    assert cp.returncode == 0, cp
+def test_notebook(notebook):
+    print(f'Running {notebook}')
+    return subprocess.run(
+      [
+        'node',
+        os.path.join(htmlbook,'test_colab_notebook.js'),
+        notebook,
+        '--terminate_session'
+      ], 
+      stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+      universal_newlines=True)
+    
 
-if len(sys.argv) > 1:
-  state = 'waiting'
-else:
-  state = 'run'
+jobs = {}
 
-for path in pathlib.Path(root).rglob('*.ipynb'):
-  p = str(path.relative_to(root))
-  if any(s in p for s in ['.history','bazel','.ipynb_checkpoints']):
-    continue
-  # Allow fast-forwarding to the a particular notebook: 
-  if state == 'waiting':
-    if p == sys.argv[1]:
-      state = 'skip' if len(sys.argv)>2 and sys.argv[2] == '--skip' else 'run'
-  elif state == 'skip':
-    state = 'run'
-  if state != 'run':
-    continue
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+  for path in pathlib.Path(root).rglob('*.ipynb'):
+    p = str(path.relative_to(root))
+    if any(s in p for s in ['.history','bazel','.ipynb_checkpoints']):
+      continue
 
-  print(f'testing {p}')
-  run(['node', os.path.join(htmlbook,'test_colab_notebook.js'), p, '--terminate'])
+    jobs[executor.submit(test_notebook, p)] = p 
+    
+  for f in concurrent.futures.as_completed(jobs):
+    data = f.result()
+    if data.stderr:
+      print(f'[\u001b[0;31mFAILED\u001b[0m]: {jobs[f]}')
+      print(data.stderr)
+    else: 
+      print(f'[PASSED]: {jobs[f]}')
+    assert data.returncode == 0, data
+
+
+
+
+

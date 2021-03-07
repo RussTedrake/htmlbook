@@ -22,12 +22,12 @@ const fs = require('fs');
 const colab = require('./colab.js');
 
 const argv = require('yargs')(process.argv.slice(2))
-  .usage('node test_colab_notebook.js --terminate_session --show_browser --debug').argv;
+  .usage('node test_colab_notebook.js --terminate_session --browser --debug').argv;
 
 (async function main() {
   try {
     var browser_options = {};
-    if (argv.show_browser || argv.debug) {
+    if (argv.browser || argv.debug) {
       browser_options = {headless:false, devtools:true};
     }
     const browser = await puppeteer.launch(browser_options);
@@ -73,41 +73,46 @@ const argv = require('yargs')(process.argv.slice(2))
     })
 
     console.log('running all cells');
-    await page.waitForFunction(
-      () => window.colab.global.notebook.busyCellIds.size > 0);
-    // it gets stuck here sometimes (despite the console confirming that the
-    // value of busyCellIds.size is zero).
-    console.log('waiting for run to complete');
-    await page.waitForFunction(
-      () => window.colab.global.notebook.busyCellIds.size == 0);
+    try {
+      await page.waitForFunction(
+        () => window.colab.global.notebook.busyCellIds.size > 0);
+      // it gets stuck here sometimes (despite the console confirming that the
+      // value of busyCellIds.size is zero).
+      console.log('waiting for run to complete');
+      await page.waitForFunction(
+        () => window.colab.global.notebook.busyCellIds.size == 0);
 
-    console.log('checking outputs');
-    await page.evaluate(() => {
-      var cells = window.colab.global.notebook.cells;
+      console.log('checking outputs');
+      await page.evaluate(() => {
+        var cells = window.colab.global.notebook.cells;
 
-      for (var i=0; i<cells.length; i++) {
-        if (cells[i].lastExecutionFailed) {
-          return cells[i].lastExecutionError;
+        for (var i=0; i<cells.length; i++) {
+          if (cells[i].lastExecutionFailed) {
+            return cells[i].lastExecutionError;
+          }
         }
-      }
-      return undefined;
-    }).then(err => {
-      if (err) {
-        console.log("Execution failed.");
-        if (err.traceback) {
-          for (var i=0; i<err.traceback.length; i++) {
-            console.log(err.traceback[i]);
+        return undefined;
+      }).then(err => {
+        if (err) {
+          console.error("Execution failed.");
+          if (err.traceback) {
+            for (var i=0; i<err.traceback.length; i++) {
+              console.error(err.traceback[i]);
+            }
+          } else {
+            console.error(err);
           }
         } else {
-          console.log(err);
+          console.log("Success!  All notebook cells ran successfully.");
         }
-      } else {
-        console.log("Success!  All notebook cells ran successfully.");
-      }
-    })
+      })
+    } catch (err) {
+      console.error("Execution failed.")
+      console.error(err);
+    }
 
     // Terminate session (otherwise I'll run out).
-    if (argv.terminate) {
+    if (argv.terminate_session) {
       await page.evaluate(async () => {
         id = window.colab.global.notebook.kernel.connection.session.kernelSessionId;
         s = await window.colab.global.notebook.kernel.listNotebookSessions();
@@ -124,5 +129,6 @@ const argv = require('yargs')(process.argv.slice(2))
     }
   } catch (err) {
     console.error(err);
+    process.exit(1);
   }
 })();
