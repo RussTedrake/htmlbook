@@ -22,7 +22,14 @@ const fs = require('fs');
 const colab = require('./colab.js');
 
 const argv = require('yargs')(process.argv.slice(2))
-  .usage('node test_colab_notebook.js --terminate_session --browser --debug').argv;
+  .usage('node test_colab_notebook.js path_to_notebook.ipynb')
+  .boolean('terminate_session')
+  .boolean('browser')
+  .boolean('debug')
+  .default('terminate_session', true)
+  .default('browser', false)
+  .default('debug', false)
+  .argv;
 
 (async function main() {
   try {
@@ -42,7 +49,6 @@ const argv = require('yargs')(process.argv.slice(2))
     const relative_path = argv._[0];
 
     const page = await browser.newPage();
-    page.setDefaultTimeout(180000);
     const url = "https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/" + relative_path;
     await page.goto(url);
     await page.waitForSelector('.codecell-input-output');
@@ -73,6 +79,7 @@ const argv = require('yargs')(process.argv.slice(2))
     })
 
     console.log('running all cells');
+    page.setDefaultTimeout(180000);
     try {
       await page.waitForFunction(
         () => window.colab.global.notebook.busyCellIds.size > 0);

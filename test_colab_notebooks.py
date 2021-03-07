@@ -1,5 +1,9 @@
 
-# Usage python3 test_colab_notebooks.py
+# Usage python3 test_colab_notebooks.py [notebooks]
+# e.g. 
+# python3 htmlbook/test_colab_notebooks.py *.ipynb
+# python3 htmlbook/test_colab_notebooks.py examples/*.ipynb
+# find exercises -iname "*.ipynb" -print0 | xargs -0 python3 htmlbook/test_colab_notebooks.py 
 
 import concurrent.futures
 import os
@@ -13,7 +17,6 @@ root = os.path.dirname(htmlbook)
 repository = os.path.basename(root) 
 
 def test_notebook(notebook):
-    print(f'Running {notebook}')
     return subprocess.run(
       [
         'node',
@@ -24,15 +27,19 @@ def test_notebook(notebook):
       stdout=subprocess.PIPE, stderr=subprocess.PIPE,
       universal_newlines=True)
     
+notebooks = sys.argv[1:]
+if not notebooks:
+  for path in pathlib.Path(root).rglob('*.ipynb'):
+    p = str(path.relative_to(root))
+    if any(s in p for s in ['.history','bazel','figures','.ipynb_checkpoints']):
+      continue
+    notebooks.append(p)
 
 jobs = {}
 
-with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-  for path in pathlib.Path(root).rglob('*.ipynb'):
-    p = str(path.relative_to(root))
-    if any(s in p for s in ['.history','bazel','.ipynb_checkpoints']):
-      continue
 
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+  for p in notebooks:
     jobs[executor.submit(test_notebook, p)] = p 
     
   for f in concurrent.futures.as_completed(jobs):
@@ -45,6 +52,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
     assert data.returncode == 0, data
 
 
-
+# TODO: pause for an hour or so after each batch, to avoid hitting timeouts?
+# TODO: run nightly and send me an email on failure?
 
 
