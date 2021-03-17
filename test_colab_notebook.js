@@ -79,7 +79,6 @@ const argv = require('yargs')(process.argv.slice(2))
     })
 
     console.log('running all cells');
-    page.setDefaultTimeout(180000);
     try {
       await page.waitForFunction(
         () => window.colab.global.notebook.busyCellIds.size > 0);
@@ -87,7 +86,9 @@ const argv = require('yargs')(process.argv.slice(2))
       // value of busyCellIds.size is zero).
       console.log('waiting for run to complete');
       await page.waitForFunction(
-        () => window.colab.global.notebook.busyCellIds.size == 0);
+        () => window.colab.global.notebook.busyCellIds.size == 0, 
+        { timeout: 600000 });  // 10 min timeout. 
+        // TODO: Reduce this to 5 min pending 
 
       console.log('checking outputs');
       await page.evaluate(() => {
