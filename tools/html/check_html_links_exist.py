@@ -4,8 +4,7 @@ import os
 
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
-from urllib.parse import urljoin
+from urllib.parse import unquote
 
 parser = argparse.ArgumentParser(description='Checks my html file links.')
 # Add a workspace argument to support non-hermetic testing through `bazel test`.
@@ -39,6 +38,7 @@ def getLinksFromHTML(html):
 
 
 def html_has_id(html, id):
+    id = unquote(id)
     tag = BeautifulSoup(html, features="html.parser").find(id=id)
     return tag is not None
 
