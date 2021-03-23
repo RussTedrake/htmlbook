@@ -30,8 +30,8 @@ def write_file_as_string(filename, s):
         change_detected = True
         import difflib
         print(''.join(
-            difflib.ndiff(r.splitlines(keepends=True),
-                          s.splitlines(keepends=True))),
+            difflib.unified_diff(r.splitlines(keepends=True),
+                                 s.splitlines(keepends=True))),
               end="")
         if not args.read_only:
             f = open(filename, "w")
