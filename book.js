@@ -83,13 +83,13 @@ function customTags() {
     c.split("+").forEach(function(b) {
       index = bib.indexOf(b);
       if (index == -1) {
-        index = bib.length+1;
+        index = bib.length;
         bib.push(b);
       }
       if (str.length > 0) {
         str += ", ";
       }
-      str += '<a href="#' + b + '">' + index + '</a>';
+      str += '<a href="#' + b + '">' + (index+1) + '</a>';
     });
     elibTags[i].innerHTML = '[' + str + ']';
   }
