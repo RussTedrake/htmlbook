@@ -19,6 +19,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(StealthPlugin())
 
 const fs = require('fs');
+const path = require('path');
 const colab = require('./colab.js');
 
 const argv = require('yargs')(process.argv.slice(2))
@@ -46,10 +47,12 @@ const argv = require('yargs')(process.argv.slice(2))
     console.log('logging in to google');
     await colab.login_to_google(browser);
 
+    // __dirname returns the directory containing this .js file.
+    const repo = path.basename(path.dirname(__dirname));
     const relative_path = argv._[0];
 
     const page = await browser.newPage();
-    const url = "https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/" + relative_path;
+    const url = "https://colab.research.google.com/github/RussTedrake/" + repo + "/blob/master/" + relative_path;
     await page.goto(url);
     await page.waitForSelector('.codecell-input-output');
 
