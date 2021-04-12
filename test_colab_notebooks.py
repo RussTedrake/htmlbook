@@ -7,7 +7,6 @@
 
 import concurrent.futures
 import os
-import pathlib
 import subprocess
 import sys
 from time import sleep
@@ -38,14 +37,17 @@ def check_output(notebook, data):
 
 notebooks = sys.argv[1:]
 if not notebooks:
-  for path in pathlib.Path(root).rglob('*.ipynb'):
-    p = str(path.relative_to(root))
-    if any(s in p for s in [
-      '.history','bazel','figures','solutions','.ipynb_checkpoints', 'segmentation'
-      ]):
+  # Run all notebooks that are a source file for an active bazel rule.
+  # (This is more robust than trying all .ipynb files)
+  query = subprocess.run(['bazel','query',"kind('source file', deps(//...))"],
+    stdout=subprocess.PIPE, universal_newlines=True)
+  for path in query.stdout.splitlines():
+    if path.startswith('@') or not path.endswith('.ipynb'):
       continue
-    notebooks.append(p)
-
+    path = path.replace('//:','').replace('//','').replace(':','/')   
+    if path.startswith('solutions') or path.startswith('figures'):
+      continue
+    notebooks.append(path)
 
 if False:
   jobs = {}
