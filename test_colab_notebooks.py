@@ -41,7 +41,7 @@ if not notebooks:
   for path in pathlib.Path(root).rglob('*.ipynb'):
     p = str(path.relative_to(root))
     if any(s in p for s in [
-      '.history','bazel','figures','solutions','.ipynb_checkpoints'
+      '.history','bazel','figures','solutions','.ipynb_checkpoints', 'segmentation'
       ]):
       continue
     notebooks.append(p)
