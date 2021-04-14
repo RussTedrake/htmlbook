@@ -30,9 +30,9 @@ if not notebooks:
     notebooks.append(p)
 
 for p in notebooks:
-  subprocess.run([
-    'sed', '-i', 
-    f"s/manipulation_sha='[0-9a-z]*'/manipulation_sha='{sha}'/g",
+  s = subprocess.run([
+    'sed', '-i', '',
+    f"s/{repository}_sha='[0-9a-z]*'/{repository}_sha='{sha}'/g",
     p
   ])
 
