@@ -31,7 +31,7 @@ if not notebooks:
 
 for p in notebooks:
   s = subprocess.run([
-    'sed', '-i', '',
+    'sed', "--inplace=''", 
     f"s/{repository}_sha='[0-9a-z]*'/{repository}_sha='{sha}'/g",
     p
   ])
