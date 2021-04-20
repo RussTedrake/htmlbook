@@ -91,6 +91,10 @@ function customTags() {
       }
       str += '<a href="#' + b + '">' + (index+1) + '</a>';
     });
+    // for citing part of a work: https://blog.apastyle.org/apastyle/2013/11/how-to-cite-part-of-a-work.html
+    if (elibTags[i].hasAttribute('part')) {
+      str += ", " + elibTags[i].getAttribute('part');
+    }
     elibTags[i].innerHTML = '[' + str + ']';
   }
 }
