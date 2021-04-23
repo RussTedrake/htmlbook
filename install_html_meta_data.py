@@ -143,8 +143,9 @@ def write_references(elib, s, filename):
     global change_detected
     index = 0
     refs = []
-    while s.find("<elib>", index) > 0:
-        start = s.find("<elib>", index) + len("<elib>")
+    while s.find("<elib", index) > 0:
+        start = s.find("<elib", index)
+        start = s.find(">", start) + 1
         end = s.find("</elib>", start)
         refs += s[start:end].split("+")
         index = end + len("</elib>")
