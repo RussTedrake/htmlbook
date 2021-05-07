@@ -1,8 +1,7 @@
 import argparse
-from lxml.html import parse, etree
+from lxml.html import parse
 import json
 import mysql.connector
-import os
 
 chapters = json.load(open("chapters.json"))
 chapter_ids = chapters['chapter_ids']
@@ -175,6 +174,12 @@ def write_references(elib, s, filename):
     return replace_string_between(s, '<div id="references">', '</div>', html)
 
 
+def uni(str):
+    # All of this, to make sure that e.g. Poincar&eacute; Maps makes it through.
+    return str.encode('utf-8').decode('utf-8').encode(
+        'ascii', 'xmlcharrefreplace').decode('ascii')
+
+
 # Build TOC
 toc = "\n<h1>Table of Contents</h1>\n"
 toc += "<ul>\n"
@@ -185,23 +190,26 @@ appendix_start = 0
 for id in chapter_ids:
     filename = id + ".html"
 
+    # parser = etree.HTMLParser(encoding='utf-8')
+    # doc = parse(filename, parser=parser).getroot()
     doc = parse(filename).getroot()
     chapter = next(doc.iter('chapter'))
 
     # Write the part if this chapter starts a new one.
     if id in parts:
         toc += ('<p style="margin-bottom: 0; text-decoration: underline;'
-                + 'font-variant: small-caps;"><b>' + parts[id] + '</b></p>\n')
+                + 'font-variant: small-caps;"><b>' + uni(parts[id])
+                + '</b></p>\n')
         if parts[id] == 'Appendix':
             appendix_start = chapter_num
 
     if appendix_start > 0:
         appendix_label = chr(ord('A') + chapter_num - appendix_start)
         toc += ('  <li><a href="' + filename + '">Appendix ' + appendix_label
-                + ': ' + chapter.find('h1').text + '</a></li>\n')
+                + ': ' + uni(chapter.find('h1').text) + '</a></li>\n')
     else:
         toc += ('  <li><a href="' + filename + '">Chapter ' + str(chapter_num)
-                + ': ' + chapter.find('h1').text + '</a></li>\n')
+                + ': ' + uni(chapter.find('h1').text) + '</a></li>\n')
 
     chapter_num += 1
     section_num = 1
@@ -212,12 +220,13 @@ for id in chapter_ids:
             if section.get('id') is not None:
                 hash = section.get('id')
             toc += ('    <li><a href=' + filename + '#' + hash + ">"
-                    + section.find('h1').text + '</a></li>\n')
+                    + uni(section.find('h1').text) + '</a></li>\n')
             section_num += 1
             if section.find('subsection') is not None:
                 toc += '    <ul>\n'
                 for subsection in section.findall('subsection'):
-                    toc += '      <li>' + subsection.find('h1').text + '</li>\n'
+                    toc += ('      <li>' + uni(subsection.find('h1').text)
+                            + '</li>\n')
                 toc += '    </ul>\n'
         toc += '  </ul>\n'
 
