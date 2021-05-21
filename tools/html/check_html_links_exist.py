@@ -1,6 +1,7 @@
 import argparse
-import glob
+#import glob
 import os
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -49,7 +50,7 @@ for filename in args.files:
 
     broken_links = []
 
-    for link in getLinksFromHTML(s):
+    for link in []: #getLinksFromHTML(s):
         link = link.strip()
         # print(link)  # useful for debugging.
         if '#' in link:
@@ -114,3 +115,9 @@ for filename in args.files:
                       + " which doesn't exist")
                 exit(-2)
 
+    print("checking for ref")
+    for ref in re.finditer('\\\\ref{(.*?)}', s):
+        tag = ref[1] # match from inside of braces
+        if "\label{" + tag + "}" not in s:
+            print(f"Cannot find label matching latex reference {ref[0]}")
+            exit(-2)
