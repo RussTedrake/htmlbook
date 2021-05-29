@@ -79,7 +79,13 @@ def bibtex_entry_to_html(entry):
 
     # --- author ---
     if 'author' in entry:
-        out.append('<span class="author">%s</span>,' % field('author'))
+        # TODO: Implement more complete bibtex name parsing/output:
+        # https://nwalsh.com/tex/texhelp/bibtx-23.html
+        authors = [
+            ' '.join(a.split(',')[::-1]).strip()
+            for a in field('author').split(' and ')
+        ]
+        out.append('<span class="author">%s</span>,' % ' and '.join(authors))
         out.append('\n')
 
     if 'chapter' in entry:

@@ -81,6 +81,7 @@ function customTags() {
     var str = "";
     var index;
     c.split("+").forEach(function(b) {
+      b = b.trim();
       index = bib.indexOf(b);
       if (index == -1) {
         index = bib.length;
