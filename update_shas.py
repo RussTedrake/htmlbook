@@ -9,12 +9,12 @@ import sys
 # root should be textbook repo root
 htmlbook = os.path.dirname(os.path.realpath(__file__))
 root = os.path.dirname(htmlbook)
-repository = os.path.basename(root) 
+repository = os.path.basename(root)
 
 os.chdir(root)
 
 out = subprocess.run(
-  ['git', 'rev-parse', 'HEAD'], 
+  ['git', 'rev-parse', 'HEAD'],
   stdout=subprocess.PIPE,
   universal_newlines=True)
 sha = out.stdout.strip()
@@ -31,7 +31,7 @@ if not notebooks:
 
 for p in notebooks:
   s = subprocess.run([
-    'sed', "--inplace=''", 
+    'sed', "-i",
     f"s/{repository}_sha='[0-9a-z]*'/{repository}_sha='{sha}'/g",
     p
   ])
