@@ -56,12 +56,6 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # https://github.com/actions/virtual-environments/issues/2322
   # TODO(jamiesnape): The issue is closed so this probably can be removed.
   rm -f /usr/local/bin/2to3
-
-  # Upgrades of the gcc@8 and gcc@9 formulae fail due to conflicting symlinks.
-  # https://github.com/actions/virtual-environments/issues/2391
-  # https://github.com/Homebrew/homebrew-core/issues/68866
-  # TODO(jamiesnape): The issues are closed so this probably can be removed.
-  brew unlink gcc@8 gcc@9
 fi
 
 ./scripts/setup/mac/install_prereqs.sh
