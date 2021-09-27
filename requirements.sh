@@ -8,6 +8,7 @@
 # To build all three from mac, I can use
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:bionic
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
+# (Note: for focal, install pip-tools, then run the piptools compile directly)
 # (Note: if torch is included, it tries pip install and crashes)
 set -euo pipefail
 
