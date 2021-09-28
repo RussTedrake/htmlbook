@@ -12,4 +12,4 @@ fi
 
 trap 'rm -rf ${HOME}/.cache/pip/*' EXIT
 pip3 install --disable-pip-version-check  --retries 4 \
-  -r "${BASH_SOURCE%/*}/../../ubuntu-requirements.txt"
+  -r "${BASH_SOURCE%/*}/../../bionic-requirements.txt"
