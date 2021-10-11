@@ -38,6 +38,7 @@ var mathjax_setup = `
   \\newcommand{\\bPsi}{{\\bf \\Psi}}
   \\newcommand{\\avg}[1]{E\\left[ #1 \\right]}
   \\newcommand{\\subjto}{\\textrm{subject to}}
+  \\newcommand{\\find}{\\operatorname{\\textrm{find}}}
   \\newcommand{\\minimize}{\\operatorname{\\textrm{minimize}}}
   \\newcommand{\\maximize}{\\operatorname{\\textrm{maximize}}}
   \\DeclareMathOperator*{\\find}{find}
