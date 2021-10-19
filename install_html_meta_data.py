@@ -267,6 +267,7 @@ for id in chapter_ids:
     # Rewrite the header
     this_header = header.replace("$CHAPTER-ID$", id)
     this_header = this_header.replace("$CHAPTER-NAME$", name)
+    this_header = this_header.replace("$CHAPTER-NUM$", str(chapter_num))
     s = replace_string_before(s, "<chapter", this_header)
 
     # Rewrite the footer
