@@ -5,11 +5,12 @@
 # pip-compile can be obtained via `pip3 install pip-tools`
 # On ubuntu, I need it for both python3 and python3.7 (for colab)
 
-# To build all three from mac, I can use
+# I can use these to build bionic/focal:
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:bionic
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
-# (Note: for focal, install pip-tools, then run the piptools compile directly)
-# (Note: if torch is included, it tries pip install and crashes)
+# (Note: for focal, `pip3 install pip-tools`)
+# (Note: if torch is included, it tries pip install and crashes on mac.  it 
+# works when docker is run from bionic.  go figure)
 set -euo pipefail
 
 if [[ "${OSTYPE}" == "darwin"* ]]; then
