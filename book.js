@@ -62,6 +62,7 @@ function setPlatform(platform) {
 
   hide(document.getElementsByClassName("mac"));
   hide(document.getElementsByClassName("bionic"));
+  hide(document.getElementsByClassName("focal"));
 
   show(document.getElementsByClassName(platform));
 }
