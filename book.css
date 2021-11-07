@@ -104,16 +104,6 @@ figcaption {
   font-style: italic;
 }
 
-a.deepnote {
-  background: rgb(153,51,51);
-  color:#fff;
-  box-sizing:border-box;
-  padding:4px 12px;
-  text-decoration:none;
-  border-radius:3px;
-  border:1px solid rgba(0, 0, 0, .15);
-}
-
 /* h1 elements */
 [data-type="titlepage"] h1 {
   font-variant: small-caps;
