@@ -85,16 +85,16 @@ def bibtex_entry_to_html(entry):
             ' '.join(a.split(',')[::-1]).strip()
             for a in field('author').split(' and ')
         ]
-        out.append('<span class="author">%s</span>,' % ' and '.join(authors))
+        out.append('<span class="author">%s</span>, ' % ' and '.join(authors))
         out.append('\n')
 
     if 'chapter' in entry:
         # --- chapter ---
-        out.append('<span class="title">"%s"</span>,' % field('chapter'))
+        out.append('<span class="title">"%s"</span>, ' % field('chapter'))
         out.append('in: %s, %s' % (field('title'), field('publisher')))
     else:
         # --- title ---
-        out.append('<span class="title">"%s"</span>,' % field('title'))
+        out.append('<span class="title">"%s"</span>, ' % field('title'))
 
     if field('bibtype') == 'book':
         out.append(field('publisher'))
@@ -107,7 +107,7 @@ def bibtex_entry_to_html(entry):
     elif 'booktitle' in entry:
         out.append('<span class="publisher">')
         out.append(field('booktitle'))
-        out.append('</span>')
+        out.append('</span> ')
     elif 'eprint' in entry:
         out.append('<span class="publisher">%s</span>' % field('eprint'))
     elif field('bibtype') == 'phdthesis':
