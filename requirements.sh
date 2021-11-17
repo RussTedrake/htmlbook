@@ -8,7 +8,7 @@
 # I can use these to build bionic/focal:
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:bionic
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
-# (Note: for focal, `pip3 install pip-tools`)
+# (Note: for focal, `pip3 install pip-tools; apt install lsb-release`)
 # (Note: if torch is included, it tries pip install and crashes on mac.  it 
 # works when docker is run from bionic.  go figure)
 set -euo pipefail
