@@ -70,4 +70,9 @@ pushd /opt
 sudo tar -xf /tmp/drake-latest-mac.tar.gz
 popd
 
+# TODO(russt): Remove this on resolution of 
+# https://github.com/mpld3/mpld3/issues/502
+# This version needs to match htmlbook/mac-requirements.in
+pip3.9 install --upgrade matplotlib==3.4.3 
+
 /opt/drake/share/drake/setup/install_prereqs --without-update
