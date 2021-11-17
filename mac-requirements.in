@@ -1,6 +1,6 @@
 beautifulsoup4>=4.9.3
 lxml>=4.6.2
-matplotlib==3.4.1  # drake#14920 (should be whatever version brew pulls)
+matplotlib==3.5.0  # drake #14250 (it should be whatever version brew pulls)
 mysql-connector-python>=8.0.23
 nbconvert>=6.0.7
 pycodestyle>=2.6.0
