@@ -58,8 +58,7 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   rm -f /usr/local/bin/2to3
 fi
 
-# TODO: update this to ./setup and remove the symlinks.
-./scripts/setup/mac/install_prereqs.sh
+./setup/mac/install_prereqs.sh
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
 pushd /tmp
