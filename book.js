@@ -177,7 +177,7 @@ function loadChapter(project)  {
       tmp += '</code></pre>';
       if (!pysrcTags[j].hasAttribute("no_colab")) {
         tmp +=
-        '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/scripts/colab_scratchpad.ipynb">' + 'Colab scratchpad</a></sidenote>';
+        '<sidenote><a style="font-size:8pt; margin-left:50%" target="scratchpad" href="https://colab.research.google.com/github/RussTedrake/underactuated/blob/master/setup/colab_scratchpad.ipynb">' + 'Colab scratchpad</a></sidenote>';
       }
       pysrcTags[j].innerHTML = tmp + '</p>';
   }
