@@ -19,6 +19,12 @@ def main(notebook_filename):
     exporter = PythonExporter()
     output, resources = exporter.from_filename(notebook_filename,
                                                resources=resources)
+    # Raise deprecations to errors
+    output = """
+from pydrake.common.deprecation import DrakeDeprecationWarning
+import warnings
+warnings.simplefilter("error", DrakeDeprecationWarning)
+    """ + output
     writer = StdoutWriter()
     write_results = writer.write(output, resources)
 
