@@ -10,7 +10,7 @@
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
 # In focal, we also need
 # pip3 install pip-tools; apt update && apt install -y lsb-release
-# (Note: if torch is included, it tries pip install and crashes on mac.  it 
+# (Note: if torch is included, it tries pip install and crashes on mac.  it
 # works when docker is run from bionic.  go figure)
 set -euo pipefail
 
@@ -22,25 +22,31 @@ else
     # Bring in colab requirements:
     # First update colab_pip_freeze.txt via
     # a) running `node colab_pip_freeze.js` in the htmlbook directory, or
-    # b) manually running "!pip3 freeze" in colab and copying the result. 
-    # 
+    # b) manually running "!pip3 freeze" in colab and copying the result.
+    #
     # Then make some local modifications:
-    # 1) Fix scipy version, because manipulation/exercises/rl:policy_gradient
-    #    hit a scipy/numpy mismatch bug.
-    # 2) googlecolab version is a lie
-    # 3) Remove -cu101 from torch versions for ubuntu
-    # 4) matplotlib version from colab doesn't work with bazel
+    # - Fix scipy version, because manipulation/exercises/rl:policy_gradient
+    #   hit a scipy/numpy mismatch bug.
+    # - googlecolab version is a lie
+    # - Remove bespoke torch download versions
+    # - cloudpickle1.3.0 can't parse files saved by cloudpickle1.6.0
+    # - matplotlib version from colab doesn't work with bazel
     #    https://github.com/RobotLocomotion/drake/issues/14250
-    # 5) traitlets==5.05 requires python3.7
-    # 6) colab's install is inconsistent (and makes warnings for my pip)
-    #    albumentations 0.1.12 has requirement imgaug<0.2.7,>=0.2.5, but you'll #    have imgaug 0.2.9 which is incompatible.
+    # - traitlets==5.05 requires python3.7
+    # - kiwisolver==1.3.2 requires python3.7
+    # - scikit-learn>=1.0.0 requires python3.7
+    # - colab's install is inconsistent (and makes warnings for my pip)
+    #   albumentations 0.1.12 has requirement imgaug<0.2.7,>=0.2.5, but you'll #   have imgaug 0.2.9 which is incompatible.
 
     cat htmlbook/colab-pip-freeze.txt | sed \
         -e 's/^scipy.*/scipy==1.5.3/' \
         -e 's/^google-colab.*/git+git:\/\/github.com\/googlecolab\/colabtools\/\#egg=google-colab/' \
-        -e 's/+cu101//' \
+        -re 's/^.*(torch[a-z]*-[\.0-9]+).*/\1/' \
+        -e 's/^cloudpickle==/cloudpickle>=/' \
         -e '/^matplotlib/d' \
         -e '/^traitlets/d' \
+        -e '/^kiwisolver.*/d' \
+        -e '/^scikit-learn/d' \
         > htmlbook/colab-constraints-ubuntu.txt
 
     python3 -m piptools compile bionic-requirements.in
@@ -48,7 +54,8 @@ else
     cat htmlbook/colab-pip-freeze.txt | sed \
         -e 's/^scipy.*/scipy==1.5.3/' \
         -e 's/^google-colab.*/git+git:\/\/github.com\/googlecolab\/colabtools\/\#egg=google-colab/' \
-        -e 's/+cu101//' \
+        -e '/+cu111.*/d' \
+        -e 's/^cloudpickle==/cloudpickle>=/' \
         -e '/^imgaug/d' \
         > htmlbook/colab-constraints-colab.txt
 
