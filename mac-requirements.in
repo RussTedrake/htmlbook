@@ -1,9 +1,8 @@
 beautifulsoup4>=4.9.3
 lxml>=4.6.2
-# matplotlib needs to either be the version installed by default on pip, or 
+# matplotlib needs to either be the version installed by default in pip, or 
 # needs to be set in the github actions workflow.  See drake #14250.
-# 3.5.0 is waiting on resolution of https://github.com/mpld3/mpld3/issues/502.
-matplotlib==3.4.3  
+matplotlib==3.5.0
 mysql-connector-python>=8.0.23
 nbconvert>=6.0.7
 pycodestyle>=2.6.0
