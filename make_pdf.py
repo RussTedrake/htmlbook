@@ -5,8 +5,8 @@
 # xpdf -remote foo "openFile(manipulation.pdf)" &  
 # python3 htmlbook/make_pdf.py && xpdf -remote foo reload
 # 
-# Requires PrinceXML
-# sudo apt install prince
+# Requires PrinceXML: https://www.princexml.com/latest/
+# on 18.04 it was: sudo apt install prince
 
 # Also requires puppeteer for offline rendering of mathjax, etc.
 # 
