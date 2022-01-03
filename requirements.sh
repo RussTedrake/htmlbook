@@ -9,8 +9,9 @@
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:bionic
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
 # We also need
+# export LC_ALL=C.UTF-8 LANG=C.UTF-8
 # apt update && apt install -y lsb-release python3-pip
-# LC_ALL=C.UTF-8 pip3 install pip-tools
+# pip3 install pip-tools
 # (Note: if torch is included, it tries pip install and crashes on mac.  it
 # works when docker is run from bionic.  go figure)
 set -euo pipefail
