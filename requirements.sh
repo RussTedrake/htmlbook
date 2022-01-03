@@ -12,14 +12,16 @@
 # export LC_ALL=C.UTF-8 LANG=C.UTF-8
 # apt update && apt install -y lsb-release python3-pip
 # pip3 install pip-tools
+# apt install python3.7; python3.7 -m pip install pip-tools
 # (Note: if torch is included, it tries pip install and crashes on mac.  it
 # works when docker is run from bionic.  go figure)
 set -euo pipefail
 
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-    pip-compile mac-requirements.in setup.cfg --output-file=mac-requirements.txt
+    pip-compile mac-requirements.in
 elif [[ "$(lsb_release -cs)" == 'focal' ]]; then
-    python3 -m piptools compile -v focal-requirements.in setup.cfg --output-file=focal-requirements.txt
+    # TODO: Add setup.cfg (as below) once we support pip install drake on focal
+    python3 -m piptools compile -v focal-requirements.in
 else
     # Bring in colab requirements:
     # First update colab_pip_freeze.txt via
