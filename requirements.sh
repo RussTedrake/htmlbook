@@ -8,16 +8,17 @@
 # I can use these to build bionic/focal:
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:bionic
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
-# In focal, we also need
-# pip3 install pip-tools; apt update && apt install -y lsb-release
+# We also need
+# apt update && apt install -y lsb-release python3-pip
+# LC_ALL=C.UTF-8 pip3 install pip-tools
 # (Note: if torch is included, it tries pip install and crashes on mac.  it
 # works when docker is run from bionic.  go figure)
 set -euo pipefail
 
 if [[ "${OSTYPE}" == "darwin"* ]]; then
-    pip-compile mac-requirements.in
+    pip-compile mac-requirements.in setup.cfg --output-file=mac-requirements.txt
 elif [[ "$(lsb_release -cs)" == 'focal' ]]; then
-    python3 -m piptools compile -v focal-requirements.in
+    python3 -m piptools compile -v focal-requirements.in setup.cfg --output-file=focal-requirements.txt
 else
     # Bring in colab requirements:
     # First update colab_pip_freeze.txt via
@@ -49,7 +50,7 @@ else
         -e '/^scikit-learn/d' \
         > htmlbook/colab-constraints-ubuntu.txt
 
-    python3 -m piptools compile bionic-requirements.in
+    python3 -m piptools compile bionic-requirements.in setup.cfg --output-file=bionic-requirements.txt
 
     cat htmlbook/colab-pip-freeze.txt | sed \
         -e 's/^scipy.*/scipy==1.5.3/' \
@@ -59,7 +60,7 @@ else
         -e '/^imgaug/d' \
         > htmlbook/colab-constraints-colab.txt
 
-    python3.7 -m piptools compile colab-requirements.in
+    python3.7 -m piptools compile colab-requirements.in setup.cfg --output-file=colab-requirements.txt
 
     echo ""
     echo "IMPORTANT: Don't forget to test these requirements using"
