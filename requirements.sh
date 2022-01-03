@@ -9,17 +9,12 @@
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:bionic
 # docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
 # We also need
-# export LC_ALL=C.UTF-8 LANG=C.UTF-8
-# apt update && apt install -y lsb-release python3-pip
-# pip3 install pip-tools
-# apt install python3.7; python3.7 -m pip install pip-tools
+# export LC_ALL=C.UTF-8 LANG=C.UTF-8; apt update && apt install -y lsb-release python3-pip python3.7 python3-venv; pip3 install --upgrade pip-tools build; python3.7 -m pip install pip-tools
 # (Note: running from mac docker crashes if torch is included; it
 # works when docker is run from bionic. go figure)
 #
 # For making a distribution
 # (https://packaging.python.org/en/latest/tutorials/packaging-projects/)
-# apt install python3-venv
-# python3 -m pip install --upgrade build
 # python3 -m build
 # Then from *outside* of docker, run
 # python3 -m twine upload dist/*
