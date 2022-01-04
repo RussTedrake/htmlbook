@@ -1,2 +1,2 @@
-numpy==1.21.1  # Should match the homebrew version
+numpy==1.22.0  # Should match the homebrew version
 
