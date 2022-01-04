@@ -1,3 +1,4 @@
+beautifulsoup4>=4.6.3
 mysql-connector-python
 pycodestyle>=2.6.0
 pydocstyle>=5.1.1
