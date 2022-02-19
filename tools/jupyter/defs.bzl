@@ -9,12 +9,16 @@ load("//htmlbook/tools/python:defs.bzl", "rt_py_binary", "rt_py_test")
 
 def _nbconvert(attrs, testonly = False):
     out = "{}.ipynb.py".format(attrs["name"])
+    grader_throws = ""
+    if "grader_throws" in attrs:
+      grader_throws = "1"
+      attrs.pop("grader_throws")
     native.genrule(
         name = "{}_nbconvert".format(attrs["name"]),
         testonly = testonly,
         srcs = attrs["srcs"],
         outs = [out],
-        cmd = "$(location //htmlbook/tools/jupyter:nbconvert) $< > $@",
+        cmd = "$(location //htmlbook/tools/jupyter:nbconvert) $< " + grader_throws + " > $@",
         tools = ["//htmlbook/tools/jupyter:nbconvert"],
         visibility = ["//visibility:private"],
     )
@@ -54,5 +58,5 @@ def rt_ipynb_test(**attrs):
     if "timeout" not in attrs or attrs["timeout"] == None:
         attrs["timeout"] = "short"
     if "ipynboutput" not in attrs or attrs["ipynboutput"]:
-        rt_ipynb_output_test(**attrs)
+        rt_ipynb_output_test(**attrs) 
     rt_py_test(**_nbconvert(attrs, testonly = attrs.get("testonly", True)))
