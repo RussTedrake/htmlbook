@@ -29,5 +29,6 @@ def rt_dependencies():
 def rt_toolchains():
     native.register_toolchains(
         "//htmlbook/tools/python:linux_toolchain",
-        "//htmlbook/tools/python:macos_toolchain",
+        "//htmlbook/tools/python:macos_i386_toolchain",
+        "//htmlbook/tools/python:macos_arm64_toolchain",
     )

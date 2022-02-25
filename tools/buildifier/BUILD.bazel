@@ -11,7 +11,8 @@ native_binary(
     name = "buildifier",
     src = select({
         "//htmlbook/tools/configs/platform:linux": "@buildifier_linux//file",
-        "//htmlbook/tools/configs/platform:macos": "@buildifier_macos//file",
+        "//htmlbook/tools/configs/platform:macos_i386": "@buildifier_macos//file",
+        "//htmlbook/tools/configs/platform:macos_arm64": "@buildifier_macos//file",
     }),
     out = "buildifier",
     visibility = ["//:__subpackages__"],

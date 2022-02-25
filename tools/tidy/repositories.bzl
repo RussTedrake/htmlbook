@@ -17,7 +17,14 @@ def tidy_dependencies():
 
     maybe(
         local_file,
-        name = "tidy_macos",
+        name = "tidy_macos_i386",
         path = "/usr/local/bin/tidy",
+        symlinked_file_path = "tidy",
+    )
+
+    maybe(
+        local_file,
+        name = "tidy_macos_arm64",
+        path = "/opt/homebrew/bin/tidy",
         symlinked_file_path = "tidy",
     )
