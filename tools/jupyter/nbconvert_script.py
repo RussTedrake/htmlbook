@@ -20,16 +20,20 @@ def main(notebook_filename, grader_throws=False):
     exporter = PythonExporter()
     output, resources = exporter.from_filename(notebook_filename,
                                                resources=resources)
+    # TODO(russt): make this more robust (e.g. use bazel workspace name?)
+    repo = Path(__file__).parent.parent.parent.parent.name
     # Raise deprecations to errors
     output = (
         f'from pydrake.common.deprecation import DrakeDeprecationWarning\n'
         f'import warnings\n'
         f'warnings.simplefilter("error", DrakeDeprecationWarning)\n\n'
+        f'import sys\n'
+        f'if "{repo}" in sys.modules:\n'
+        f'    from {repo}.utils import set_running_as_test\n'
+        f'    set_running_as_test(True)\n\n'
     ) + output
 
     if grader_throws:
-        # TODO(russt): make this more robust (e.g. use bazel workspace name?)
-        repo = Path(__file__).parent.parent.parent.parent.name
         output = (
             f'from {repo}.exercises.grader import set_grader_throws\n'
             f'set_grader_throws(True)\n\n'
