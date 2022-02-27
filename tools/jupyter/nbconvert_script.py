@@ -22,15 +22,16 @@ def main(notebook_filename, grader_throws=False):
                                                resources=resources)
     # TODO(russt): make this more robust (e.g. use bazel workspace name?)
     repo = Path(__file__).parent.parent.parent.parent.name
-    # Raise deprecations to errors
+    # Raise deprecations to errors and set 'running_as_test'
     output = (
         f'from pydrake.common.deprecation import DrakeDeprecationWarning\n'
         f'import warnings\n'
         f'warnings.simplefilter("error", DrakeDeprecationWarning)\n\n'
-        f'import sys\n'
-        f'if "{repo}" in sys.modules:\n'
+        f'try:\n'
         f'    from {repo}.utils import set_running_as_test\n'
         f'    set_running_as_test(True)\n\n'
+        f'except ModuleNotFoundError:\n'
+        f'    pass\n'
     ) + output
 
     if grader_throws:
