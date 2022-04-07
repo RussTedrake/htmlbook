@@ -39,7 +39,7 @@ def update(notebook, project_id, path=''):
     url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path=Dockerfile"
     Dockerfile = f"FROM russtedrake/underactuated:{dockerhub_sha}"
     if testing:
-        print(f"pushing to {url}")
+        print(f"would be pushing to {url}")
     else:
         r = requests.put(url, headers=headers, data=Dockerfile)
         if r.status_code != 200:
@@ -50,7 +50,7 @@ def update(notebook, project_id, path=''):
     with open((Path(path)/notebook).with_suffix('.ipynb')) as f:
         contents = f.read()
     if testing:
-        print(f"pushing to {url}")
+        print(f"would be pushing to {url}")
     else:
         r = requests.put(url, headers=headers, data=contents.encode('utf-8'))
         if r.status_code != 200:
