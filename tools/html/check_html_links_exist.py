@@ -76,18 +76,17 @@ for filename in args.files:
         elif url.find("colab.research.google.com") != -1:
             try:
                 requestObj = requests.head(link)
+                if requestObj.status_code == 404:
+                    broken_links.append(link)
             except requests.ConnectionError:
                 broken_links.append(link)
 
-            if requestObj.status_code == 404:
-                broken_links.append(link)
         elif url.find("deepnote.com") != -1:
             try:
                 requestObj = requests.head(link)
+                if requestObj.status_code == 404:
+                    broken_links.append(link)
             except requests.ConnectionError:
-                broken_links.append(link)
-
-            if requestObj.status_code == 404:
                 broken_links.append(link)
         else:
             if id:
@@ -99,12 +98,11 @@ for filename in args.files:
             else:
                 try:
                     requestObj = requests.head(link)
+                    if requestObj.status_code == 404:
+                        broken_links.append(link)
                 except requests.ConnectionError as err:
                     broken_links.append(link)
                     print(err)
-
-                if requestObj.status_code == 404:
-                    broken_links.append(link)
 
     if broken_links:
         print(f"Found the following broken links:")
