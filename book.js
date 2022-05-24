@@ -212,7 +212,7 @@ function loadChapter(project)  {
   }
 
   customTags();
-  platform = 'bionic';
+  platform = 'focal';
   if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
   setPlatform(platform);
 
