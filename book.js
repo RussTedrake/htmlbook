@@ -255,9 +255,13 @@ function notebook_header(chapter) {
   return "";
 }
 
-function notebook_link(notebook, d=deepnote) {
+function notebook_link(notebook, d=deepnote, link_text="") {
   if (notebook in d) {
-    return `<p><a href="https://deepnote.com/project/${d[notebook]}/%2F${notebook}.ipynb" style="background:none; border:none;" target="${notebook}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
+    if (link_text) {
+      return `<a href="https://deepnote.com/project/${d[notebook]}/%2F${notebook}.ipynb" target="${notebook}">${link_text}</a>`;
+    } else {
+      return `<p><a href="https://deepnote.com/project/${d[notebook]}/%2F${notebook}.ipynb" style="background:none; border:none;" target="${notebook}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
+    }
   }
   return `<p><center>ERROR: <i>Notebook link not found.  Please email russt@mit.edu if you see this.</i></center></p>`;
 }
