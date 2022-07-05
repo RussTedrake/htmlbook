@@ -11,7 +11,7 @@ import sys
 testing = False
 
 if len(sys.argv) < 2:
-    print('Usage: ptyhon3 htmlbook/publish_to_deepnote.py dockerhub_sha')
+    print('Usage: python3 htmlbook/publish_to_deepnote.py dockerhub_sha')
     exit(-1)
 
 dockerhub_sha = sys.argv[1]
