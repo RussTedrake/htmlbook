@@ -52,7 +52,7 @@ for filename in args.files:
 
     for link in getLinksFromHTML(s):
         link = link.strip()
-        # print(link)  # useful for debugging.
+        # print(link, flush=True)  # useful for debugging.
         if '#' in link:
             url, id = link.split(sep='#', maxsplit=1)
         else:
