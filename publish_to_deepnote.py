@@ -37,7 +37,7 @@ def update(notebook, project_id, path=''):
     print(f'Updating {Path(path)/notebook}...')
     # Update the Dockerfile
     url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path=Dockerfile"
-    Dockerfile = f"FROM russtedrake/underactuated:{dockerhub_sha}"
+    Dockerfile = f"FROM russtedrake/{repository}:{dockerhub_sha}"
     if testing:
         print(f"would be pushing to {url}")
     else:
