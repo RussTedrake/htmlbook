@@ -24,7 +24,6 @@ repository = os.path.basename(root)
 notebooks = json.load(open("Deepnote.json"))
 
 for path in Path(root).rglob('*/Deepnote.json'):
-    print(path)
     # Ignore some directories.
     if 'bazel' in str(path):
         continue
