@@ -36,7 +36,6 @@ headers = {'Authorization': f'Bearer {api_key}'}
 
 def update(notebook, project_id, path=''):
     print(f'Updating {Path(path)/notebook}...')
-    return
     # Update the Dockerfile
     url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path=Dockerfile"
     Dockerfile = f"FROM russtedrake/{repository}:{dockerhub_sha}"
