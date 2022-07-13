@@ -24,6 +24,7 @@ repository = os.path.basename(root)
 notebooks = json.load(open("Deepnote.json"))
 
 for path in Path(root).rglob('*/Deepnote.json'):
+    print(path)
     # Ignore some directories.
     if 'bazel' in str(path):
         continue
@@ -35,6 +36,7 @@ headers = {'Authorization': f'Bearer {api_key}'}
 
 def update(notebook, project_id, path=''):
     print(f'Updating {Path(path)/notebook}...')
+    return
     # Update the Dockerfile
     url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path=Dockerfile"
     Dockerfile = f"FROM russtedrake/{repository}:{dockerhub_sha}"
@@ -66,3 +68,6 @@ for notebook, project_id in notebooks.items():
 with open(Path(root)/'chapters.js', 'w') as f:
     f.write("deepnote = ");
     json.dump(notebooks, f)
+    f.write("\n")
+    with open(Path(root)/'Deepnote_workspace.txt') as workspace_file:
+        f.write(f'deepnote_workspace_id = "{workspace_file.read()}"')
