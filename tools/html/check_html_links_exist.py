@@ -50,9 +50,9 @@ for filename in args.files:
 
     broken_links = []
 
-    for link in []: #getLinksFromHTML(s):
+    for link in getLinksFromHTML(s):
         link = link.strip()
-        # print(link)  # useful for debugging.
+        # print(link, flush=True)  # useful for debugging.
         if '#' in link:
             url, id = link.split(sep='#', maxsplit=1)
         else:
@@ -76,10 +76,17 @@ for filename in args.files:
         elif url.find("colab.research.google.com") != -1:
             try:
                 requestObj = requests.head(link)
+                if requestObj.status_code == 404:
+                    broken_links.append(link)
             except requests.ConnectionError:
                 broken_links.append(link)
 
-            if requestObj.status_code == 404:
+        elif url.find("deepnote.com") != -1:
+            try:
+                requestObj = requests.head(link)
+                if requestObj.status_code == 404:
+                    broken_links.append(link)
+            except requests.ConnectionError:
                 broken_links.append(link)
         else:
             if id:
@@ -91,16 +98,17 @@ for filename in args.files:
             else:
                 try:
                     requestObj = requests.head(link)
+                    if requestObj.status_code == 404:
+                        broken_links.append(link)
                 except requests.ConnectionError as err:
                     broken_links.append(link)
                     print(err)
 
-                if requestObj.status_code == 404:
-                    broken_links.append(link)
-
     if broken_links:
-        print(f"{filename} has the following broken links:")
-        print("\n".join(broken_links))
+        print(f"Found the following broken links:")
+        for link in broken_links:
+            line = s.count('\n', 0, s.find(link))
+            print(f"{link} in {filename}:{line+1}\n")
         exit(-2)
 
     for tag in ['jupyter', 'pysrcinclude', 'pysrc']:

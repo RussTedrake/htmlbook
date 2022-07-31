@@ -22,7 +22,8 @@ alias(
     name = "tidy",
     actual = select({
         "//htmlbook/tools/configs/platform:linux": "@tidy_linux//file",
-        "//htmlbook/tools/configs/platform:macos": "@tidy_macos//file",
+        "//htmlbook/tools/configs/platform:macos_i386": "@tidy_macos_i386//file",
+        "//htmlbook/tools/configs/platform:macos_arm64": "@tidy_macos_arm64//file",
     }),
     visibility = ["//:__subpackages__"],
 )

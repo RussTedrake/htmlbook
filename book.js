@@ -212,7 +212,7 @@ function loadChapter(project)  {
   }
 
   customTags();
-  platform = 'bionic';
+  platform = 'focal';
   if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
   setPlatform(platform);
 
@@ -244,4 +244,24 @@ function system_html(sys, url = null) {
     name_html = `<a href="${url}">${sys.name}</a>`;
   }
   return `<table align=center cellpadding=0 cellspacing=0><tr align=center><td style=\"vertical-align:middle\"><table cellspacing=0 cellpadding=0>${input_port_html}</table></td><td align=center style=\"border:solid;padding-left:20px;padding-right:20px;vertical-align:middle\" bgcolor=#F0F0F0>${name_html}</td><td style=\"vertical-align:middle\"><table cellspacing=0 cellpadding=0>${output_port_html}</table></td></tr></table>`;
+}
+
+function notebook_header(chapter) {
+  if (chapter in deepnote) {
+    return `<a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${deepnote[chapter]}/%2F${chapter}.ipynb" style="float:right; margin-top:20px; margin-bottom:-100px;background:white;border:0;" target="${chapter}">
+    <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a>
+    <div style="clear:right;"></div>`;
+  }
+  return "";
+}
+
+function notebook_link(notebook, d=deepnote, link_text="") {
+  if (notebook in d) {
+    if (link_text) {
+      return `<a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${d[notebook]}/%2F${notebook}.ipynb" target="${notebook}">${link_text}</a>`;
+    } else {
+      return `<p><a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${d[notebook]}/%2F${notebook}.ipynb" style="background:none; border:none;" target="${notebook}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
+    }
+  }
+  return `<p><center>ERROR: <i>Notebook link not found.  Please email russt@mit.edu if you see this.</i></center></p>`;
 }
