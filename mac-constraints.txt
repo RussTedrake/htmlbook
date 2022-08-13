@@ -1,3 +1,2 @@
-numpy==1.23.0  # Should match the homebrew version
-scipy==1.8.1    # Should match the homebrew version
-
+numpy==1.23.1   # Should match the homebrew version
+scipy==1.9.0    # Should match the homebrew version

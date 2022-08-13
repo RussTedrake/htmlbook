@@ -40,13 +40,13 @@ toolchain(
 
 py_runtime(
     name = "macos_i386_py3_runtime",
-    interpreter_path = "/usr/local/bin/python3.9",
+    interpreter_path = "/usr/local/bin/python3.10",
     python_version = "PY3",
 )
 
 py_runtime(
     name = "macos_arm64_py3_runtime",
-    interpreter_path = "/opt/homebrew/bin/python3.9",
+    interpreter_path = "/opt/homebrew/bin/python3.10",
     python_version = "PY3",
 )
 
