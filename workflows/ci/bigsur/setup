@@ -52,7 +52,7 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   rm -rf "${HOME}/.conda"
 
   # Symlink installed by the Python installer package causes upgrades of the
-  # python@3.9 formula to fail.
+  # python@3.10 formula to fail.
   # https://github.com/actions/virtual-environments/issues/2322
   # TODO(jamiesnape): The issue is closed so this probably can be removed.
   rm -f /usr/local/bin/2to3
@@ -72,4 +72,4 @@ popd
 /opt/drake/share/drake/setup/install_prereqs --without-update
 
 # This version should match mac-requirements.txt
-pip3.9 install --upgrade matplotlib==3.5.0
+pip3.10 install --upgrade matplotlib==3.5.0
