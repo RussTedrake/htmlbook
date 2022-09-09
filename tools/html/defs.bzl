@@ -14,6 +14,7 @@ def rt_check_links_test(**attrs):
         main = "check_html_links_exist.py",
         args = ["$(location " + attrs["srcs"][0] + ")"],
         data = attrs["srcs"],
+        flaky = True,
         tags = ["no-sandbox"],  # to allow network connections
         # args = [
         #     "--cwd",
