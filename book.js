@@ -263,5 +263,5 @@ function notebook_link(notebook, d=deepnote, link_text="") {
       return `<p><a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${d[notebook]}/%2F${notebook}.ipynb" style="background:none; border:none;" target="${notebook}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
     }
   }
-  return `<p><center>ERROR: <i>Notebook link not found.  Please email russt@mit.edu if you see this.</i></center></p>`;
+  return `<p><center>ERROR: <i>Notebook link not found. Please do a "force reload" of this page. If that doesn't fix it, please email russt@mit.edu and let me know.</i></center></p>`;
 }
