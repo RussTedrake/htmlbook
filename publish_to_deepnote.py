@@ -38,12 +38,14 @@ headers = {'Authorization': f'Bearer {api_key}'}
 updated_dockerfiles = []
 
 def update(notebook, project_id, path=''):
+    notebook = Path(notebook).stem
     notebook_path = Path(path)/notebook
     # If notebook is a directory, publish all notebooks in that directory
     if notebook_path.is_dir():
         for p in notebook_path.rglob('*.ipynb'):
             update(p.relative_to(notebook_path), project_id, notebook_path)
         return
+
 
     print(f'Updating {notebook_path}...')
     # Update the Dockerfile
