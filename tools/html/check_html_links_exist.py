@@ -1,11 +1,11 @@
 import argparse
-#import glob
 import os
+from pathlib import Path
 import re
+from urllib.parse import unquote
 
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import unquote
 
 parser = argparse.ArgumentParser(description='Checks my html file links.')
 # Add a workspace argument to support non-hermetic testing through `bazel test`.
@@ -18,8 +18,9 @@ args = parser.parse_args()
 # Find workspace root by searching parent directories.
 os.chdir(args.cwd)
 while not os.path.isfile('WORKSPACE.bazel'):
+    assert os.path.dirname(
+        os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
     os.chdir(os.path.dirname(os.getcwd()))
-
 
 def get_file_as_string(filename):
     f = open(filename, "r")
@@ -28,14 +29,18 @@ def get_file_as_string(filename):
     return s
 
 
-def getLinksFromHTML(html):
+def getLinksFromString(s, extension):
 
-    def getLink(el):
-        return el["href"]
+    if extension.lower() == ".ipynb":
+        links = re.findall(r'\((\s*http.*?)\)', s)
+        return links
 
-    return list(
-        map(getLink,
-            BeautifulSoup(html, features="html.parser").select("a[href]")))
+    else:
+        def getLink(el):
+            return el["href"]
+        return list(
+            map(getLink,
+                BeautifulSoup(s, features="html.parser").select("a[href]")))
 
 
 def html_has_id(html, id):
@@ -43,30 +48,35 @@ def html_has_id(html, id):
     tag = BeautifulSoup(html, features="html.parser").find(id=id)
     return tag is not None
 
-
 # Check that all links to code files exist.
 for filename in args.files:
+    extension = Path(filename).suffix
     s = get_file_as_string(filename)
 
     broken_links = []
 
-    for link in getLinksFromHTML(s):
+    for link in getLinksFromString(s, extension):
         link = link.strip()
-        # print(link, flush=True)  # useful for debugging.
+        #print(link, flush=True)  # useful for debugging.
+        if link[:35] == "https://manipulation.csail.mit.edu/":
+            link = link[35:]
         if '#' in link:
             url, id = link.split(sep='#', maxsplit=1)
         else:
             url = link
             id = ''
+        #print(f"url={url}, id={id}", flush=True)  # useful for debugging.
+
         if len(url) == 0:
             if not html_has_id(s, id):
                 broken_links.append(link)
         elif url[:4].lower() != 'http':
             if url[:4].lower() == 'data' and os.environ.get('GITHUB_ACTIONS'):
-                # Don't require the data directory on CI.  
+                # Don't require the data directory on CI.
                 # See https://github.com/RussTedrake/htmlbook/issues/10
                 continue
             if not os.path.exists(url):
+                print(f"couldn't find local file {url} in {os.getcwd()}")
                 broken_links.append(link)
             # The index is the only case where I want to allow section tags.
             if filename == 'index.html' and id[:7] == "section":
@@ -123,7 +133,6 @@ for filename in args.files:
                       + " which doesn't exist")
                 exit(-2)
 
-    print("checking for ref")
     for ref in re.finditer('\\\\ref{(.*?)}', s):
         tag = ref[1] # match from inside of braces
         if "\label{" + tag + "}" not in s:

@@ -6,6 +6,7 @@
 
 load("@rules_python//python:defs.bzl", "py_test")
 load("//htmlbook/tools/python:defs.bzl", "rt_py_binary", "rt_py_test")
+load("//htmlbook/tools/html:defs.bzl", "rt_check_links_test")
 
 def _nbconvert(attrs, testonly = False):
     out = "{}.ipynb.py".format(attrs["name"])
@@ -59,4 +60,5 @@ def rt_ipynb_test(**attrs):
         attrs["timeout"] = "short"
     if "ipynboutput" not in attrs or attrs["ipynboutput"]:
         rt_ipynb_output_test(**attrs) 
+    rt_check_links_test(**attrs)
     rt_py_test(**_nbconvert(attrs, testonly = attrs.get("testonly", True)))
