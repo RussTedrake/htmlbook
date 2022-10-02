@@ -107,7 +107,7 @@ for filename in args.files:
                 broken_links.append(link)
         else:
             if id:
-                requestObj = requests.get(link, timeout=5)
+                requestObj = requests.get(link, timeout=10)
                 if requestObj.status_code == 403:
                     continue
                 if not requestObj.ok:
@@ -116,7 +116,7 @@ for filename in args.files:
                     broken_links.append(link)
             else:
                 try:
-                    requestObj = requests.head(link, timeout=5)
+                    requestObj = requests.head(link, timeout=10)
                     if requestObj.status_code == 403:
                         continue
                     if not requestObj.ok:
