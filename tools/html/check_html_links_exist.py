@@ -22,6 +22,9 @@ while not os.path.isfile('WORKSPACE.bazel'):
         os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
     os.chdir(os.path.dirname(os.getcwd()))
 
+repository = os.path.basename(os.getcwd())
+repository_url = f"https://{repository}.csail.mit.edu/"
+
 def get_file_as_string(filename):
     f = open(filename, "r")
     s = f.read()
@@ -57,9 +60,8 @@ for filename in args.files:
 
     for link in getLinksFromString(s, extension):
         link = link.strip()
-        #print(link, flush=True)  # useful for debugging.
-        if link[:35] == "https://manipulation.csail.mit.edu/":
-            link = link[35:]
+        if link[:len(repository_url)] == repository_url:
+            link = link[len(repository_url):]
         if '#' in link:
             url, id = link.split(sep='#', maxsplit=1)
         else:
@@ -74,6 +76,9 @@ for filename in args.files:
             if url[:4].lower() == 'data' and os.environ.get('GITHUB_ACTIONS'):
                 # Don't require the data directory on CI.
                 # See https://github.com/RussTedrake/htmlbook/issues/10
+                continue
+            if url[:6] == 'Spring' or url[:4] == 'Fall':
+                # ignore e.g. https://underactuated.csail.mit.edu/Spring2022/ .
                 continue
             if not os.path.exists(url):
                 print(f"couldn't find local file {url} in {os.getcwd()}")

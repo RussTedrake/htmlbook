@@ -18,7 +18,6 @@ def rt_check_links_test(**attrs):
         data = attrs["srcs"] + [
           "//:html",
         ],
-        flaky = True,
         local = True,
         tags = ["no-sandbox"],  # to allow network connections
         deps = all_requirements,
