@@ -108,6 +108,8 @@ for filename in args.files:
         else:
             if id:
                 requestObj = requests.get(link, timeout=5)
+                if requestObj.status_code == 403:
+                    continue
                 if not requestObj.ok:
                     broken_links.append(link)
                 if not html_has_id(requestObj.text, id):
@@ -115,6 +117,8 @@ for filename in args.files:
             else:
                 try:
                     requestObj = requests.head(link, timeout=5)
+                    if requestObj.status_code == 403:
+                        continue
                     if not requestObj.ok:
                         print(requestObj)
                         broken_links.append(link)
