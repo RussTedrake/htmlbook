@@ -80,7 +80,7 @@ for notebook, project_id in notebooks.items():
 
 with open(Path(root)/'chapters.js', 'w') as f:
     f.write("deepnote = ");
-    json.dump(notebooks, f)
+    json.dump(notebooks, f, sort_keys=True)
     f.write("\n")
     with open(Path(root)/'Deepnote_workspace.txt') as workspace_file:
         f.write(f'deepnote_workspace_id = "{workspace_file.read()}"')
