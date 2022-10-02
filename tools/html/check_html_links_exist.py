@@ -89,6 +89,8 @@ for filename in args.files:
             if id and not html_has_id(get_file_as_string(url), id):
                 broken_links.append(link)
         elif url.find("colab.research.google.com") != -1:
+            # Colab returns 405 for correct and incorrect urls
+            continue
             try:
                 requestObj = requests.head(link, timeout=5)
                 if not requestObj.ok:
@@ -114,6 +116,7 @@ for filename in args.files:
                 try:
                     requestObj = requests.head(link, timeout=5)
                     if not requestObj.ok:
+                        print(requestObj)
                         broken_links.append(link)
                 except requests.ConnectionError as err:
                     broken_links.append(link)
