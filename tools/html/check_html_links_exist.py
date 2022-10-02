@@ -85,30 +85,30 @@ for filename in args.files:
                 broken_links.append(link)
         elif url.find("colab.research.google.com") != -1:
             try:
-                requestObj = requests.head(link)
-                if requestObj.status_code == 404:
+                requestObj = requests.head(link, timeout=5)
+                if not requestObj.ok:
                     broken_links.append(link)
             except requests.ConnectionError:
                 broken_links.append(link)
 
         elif url.find("deepnote.com") != -1:
             try:
-                requestObj = requests.head(link)
-                if requestObj.status_code == 404:
+                requestObj = requests.head(link, timeout=5)
+                if not requestObj.ok:
                     broken_links.append(link)
             except requests.ConnectionError:
                 broken_links.append(link)
         else:
             if id:
-                requestObj = requests.get(link)
-                if requestObj.status_code == 404:
+                requestObj = requests.get(link, timeout=5)
+                if not requestObj.ok:
                     broken_links.append(link)
                 if not html_has_id(requestObj.text, id):
                     broken_links.append(link)
             else:
                 try:
-                    requestObj = requests.head(link)
-                    if requestObj.status_code == 404:
+                    requestObj = requests.head(link, timeout=5)
+                    if not requestObj.ok:
                         broken_links.append(link)
                 except requests.ConnectionError as err:
                     broken_links.append(link)
