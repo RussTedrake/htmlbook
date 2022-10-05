@@ -25,6 +25,10 @@ while not os.path.isfile('WORKSPACE.bazel'):
 repository = os.path.basename(os.getcwd())
 repository_url = f"https://{repository}.csail.mit.edu/"
 
+ignore_list = [
+    "https://sr.stanford.edu/?page_id=509",
+]
+
 def get_file_as_string(filename):
     f = open(filename, "r")
     s = f.read()
@@ -105,6 +109,8 @@ for filename in args.files:
                     broken_links.append(link)
             except requests.ConnectionError:
                 broken_links.append(link)
+        elif url in ignore_list:
+            continue
         else:
             if id:
                 requestObj = requests.get(link, timeout=20)
