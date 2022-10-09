@@ -115,12 +115,13 @@ for filename in args.files:
             if id:
                 try:
                     requestObj = requests.get(link, timeout=20)
-                except requests.ReadTimeoutError as err:
+                except requests.exceptions.Timeout as err:
                     if os.environ.get('GITHUB_ACTIONS'):
                         # otherwise there is way too much noise on CI
                         continue
                     else:
-                        raise(err)
+                        broken_links.append(link)
+                        print(err)
                 if requestObj.status_code == 403:
                     continue
                 if not requestObj.ok:
@@ -135,15 +136,13 @@ for filename in args.files:
                     if not requestObj.ok:
                         print(requestObj)
                         broken_links.append(link)
-                except requests.ReadTimeoutError as err:
+                except requests.exceptions.Timeout as err:
                     if os.environ.get('GITHUB_ACTIONS'):
                         # otherwise there is way too much noise on CI
                         continue
                     else:
-                        raise(err)
-                except requests.ConnectionError as err:
-                    broken_links.append(link)
-                    print(err)
+                        broken_links.append(link)
+                        print(err)
 
     if broken_links:
         print(f"Found the following broken links:")
