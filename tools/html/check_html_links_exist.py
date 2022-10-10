@@ -122,6 +122,12 @@ for filename in args.files:
                     else:
                         broken_links.append(link)
                         print(err)
+                except requests.ConnectionError as err:
+                    if os.environ.get('GITHUB_ACTIONS'):
+                        continue
+                    else:
+                        broken_links.append(link)
+                        print(err)
                 if requestObj.status_code == 403:
                     continue
                 if not requestObj.ok:
@@ -138,7 +144,12 @@ for filename in args.files:
                         broken_links.append(link)
                 except requests.exceptions.Timeout as err:
                     if os.environ.get('GITHUB_ACTIONS'):
-                        # otherwise there is way too much noise on CI
+                        continue
+                    else:
+                        broken_links.append(link)
+                        print(err)
+                except requests.ConnectionError as err:
+                    if os.environ.get('GITHUB_ACTIONS'):
                         continue
                     else:
                         broken_links.append(link)
