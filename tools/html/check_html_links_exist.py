@@ -107,7 +107,7 @@ for filename in args.files:
                 requestObj = requests.head(link, timeout=5)
                 if not requestObj.ok:
                     broken_links.append(link)
-            except requests.ConnectionError:
+            except requests.exceptions.ConnectionError:
                 broken_links.append(link)
         elif url in ignore_list:
             continue
@@ -115,15 +115,9 @@ for filename in args.files:
             if id:
                 try:
                     requestObj = requests.get(link, timeout=20)
-                except requests.exceptions.Timeout as err:
+                except Exception as err:
                     if os.environ.get('GITHUB_ACTIONS'):
                         # otherwise there is way too much noise on CI
-                        continue
-                    else:
-                        broken_links.append(link)
-                        print(err)
-                except requests.ConnectionError as err:
-                    if os.environ.get('GITHUB_ACTIONS'):
                         continue
                     else:
                         broken_links.append(link)
@@ -142,13 +136,7 @@ for filename in args.files:
                     if not requestObj.ok:
                         print(requestObj)
                         broken_links.append(link)
-                except requests.exceptions.Timeout as err:
-                    if os.environ.get('GITHUB_ACTIONS'):
-                        continue
-                    else:
-                        broken_links.append(link)
-                        print(err)
-                except requests.ConnectionError as err:
+                except Exception as err:
                     if os.environ.get('GITHUB_ACTIONS'):
                         continue
                     else:
