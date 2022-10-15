@@ -112,36 +112,25 @@ for filename in args.files:
         elif url in ignore_list:
             continue
         else:
-            if id:
-                try:
+            try:
+                if id:
                     requestObj = requests.get(link, timeout=20)
-                except Exception as err:
-                    if os.environ.get('GITHUB_ACTIONS'):
-                        # otherwise there is way too much noise on CI
-                        continue
-                    else:
-                        broken_links.append(link)
-                        print(err)
-                if requestObj.status_code == 403:
-                    continue
-                if not requestObj.ok:
-                    broken_links.append(link)
-                if not html_has_id(requestObj.text, id):
-                    broken_links.append(link)
-            else:
-                try:
+                else:
                     requestObj = requests.head(link, timeout=20)
-                    if requestObj.status_code == 403:
-                        continue
-                    if not requestObj.ok:
-                        print(requestObj)
-                        broken_links.append(link)
-                except Exception as err:
-                    if os.environ.get('GITHUB_ACTIONS'):
-                        continue
-                    else:
-                        broken_links.append(link)
-                        print(err)
+            except Exception as err:
+                if os.environ.get('GITHUB_ACTIONS'):
+                    # otherwise there is way too much noise on CI
+                    continue
+                else:
+                    broken_links.append(link)
+                    print(err)
+            if requestObj.status_code == 403 or requestObj.status_code == 503:
+                continue
+            if not requestObj.ok:
+                print(requestObj)
+                broken_links.append(link)
+            if id and not html_has_id(requestObj.text, id):
+                broken_links.append(link)
 
     if broken_links:
         print(f"Found the following broken links:")
