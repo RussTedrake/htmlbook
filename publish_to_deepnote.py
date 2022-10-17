@@ -11,6 +11,15 @@ import sys
 
 testing = False
 check_deepnote_files = False
+#try:
+#    subprocess.run(['node', "--require='puppeteer-extra'", '--eval="//"'],
+#                   capture_output=False,
+#                   check=True, env={'NODE_PATH': '/usr/lib/node_modules'})
+#    check_deepnote_files = True
+#except:
+#    print(
+#        "Can't run node.js with puppeteer-extra requirement.\nDeepnote project contents won't be checked."
+#    )
 
 if len(sys.argv) < 2:
     print('Usage: python3 htmlbook/publish_to_deepnote.py dockerhub_sha')
@@ -48,7 +57,7 @@ def update(notebook, project_id, path=''):
         for p in notebook_path.rglob('*.ipynb'):
             expected_files.update(
                 update(p.relative_to(notebook_path), project_id, notebook_path))
-        return
+        return expected_files
 
     print(f'Updating {notebook_path}...')
     # Update the Dockerfile
@@ -73,8 +82,20 @@ def update(notebook, project_id, path=''):
         r = requests.put(url, headers=headers, data=contents.encode('utf-8'))
         if r.status_code != 200:
             print(r.status_code, r.reason, r.text)
-    expected_files.update([notebook])
+    expected_files.update([f"{notebook}.ipynb"])
     return expected_files
+
+def check_files(expected_files, project_id):
+    if not check_deepnote_files:
+        return
+
+    url = f"https://deepnote.com/workspace/{workspace}/project/{project_id}/"
+    files = set(subprocess.run(
+        ["node", "htmlbook/deepnote_check_notebooks.js", url],
+        capture_output=True, text=True, timeout=60).stdout.splitlines())
+    if not expected_files == files:
+        print(f"Expected files: {expected_files}")
+        print(f"Files on Deepnote: {files}")
 
 with open(Path(root)/'Deepnote_workspace.txt') as workspace_file:
     workspace = workspace_file.read()
@@ -82,17 +103,11 @@ with open(Path(root)/'Deepnote_workspace.txt') as workspace_file:
 for notebook, project_id in notebooks.items():
     if isinstance(project_id, dict):
         for n, p in project_id.items():
-            expected_files += update(n, p, notebook)
+            expected_files = update(n, p, notebook)
+            check_files(expected_files, p)
     else:
         expected_files = update(notebook, project_id, '')
-    if check_deepnote_files:
-        url = f"https://deepnote.com/workspace/{workspace}/project/{project_id}/"
-        files = set(subprocess.run(
-            ["node", "htmlbook/deepnote_check_notebooks.js", url],
-            capture_output=True, text=True).stdout.splitlines())
-        if not expected_files == files:
-            print(f"Expected files: {expected_files}")
-            print(f"Files on Deepnote: {files}")
+        check_files(expected_files, project_id)
 
 with open(Path(root)/'chapters.js', 'w') as f:
     f.write("deepnote = ");

@@ -3,9 +3,8 @@
 // curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
 // sudo bash nodesource_setup.sh
 // sudo apt install -y nodejs
-// npm i puppeteer --save
-// # Note: I had to manually npm i some of the missing deps on my first try to /// # the installer to complete without errors.
-// npm install puppeteer-extra puppeteer-extra-plugin-stealth
+// npm i puppeteer puppeteer-extra
+// or sudo npm i -g puppeteer puppeteer-extra
 //
 // Then run it with e.g. 
 // node deepnote_check_notebooks.js
@@ -14,10 +13,6 @@
 'use strict';
 
 const puppeteer = require('puppeteer-extra');
-
-// Add stealth plugin to allow authenticating to google
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
-puppeteer.use(StealthPlugin())
 
 const fs = require('fs');
 
