@@ -6,9 +6,11 @@ import json
 import requests
 import os
 from pathlib import Path
+import subprocess
 import sys
 
 testing = False
+check_deepnote_files = False
 
 if len(sys.argv) < 2:
     print('Usage: python3 htmlbook/publish_to_deepnote.py dockerhub_sha')
@@ -38,14 +40,15 @@ headers = {'Authorization': f'Bearer {api_key}'}
 updated_dockerfiles = []
 
 def update(notebook, project_id, path=''):
+    expected_files = set(['Dockerfile'])
     notebook = Path(notebook).stem
     notebook_path = Path(path)/notebook
     # If notebook is a directory, publish all notebooks in that directory
     if notebook_path.is_dir():
         for p in notebook_path.rglob('*.ipynb'):
-            update(p.relative_to(notebook_path), project_id, notebook_path)
+            expected_files.update(
+                update(p.relative_to(notebook_path), project_id, notebook_path))
         return
-
 
     print(f'Updating {notebook_path}...')
     # Update the Dockerfile
@@ -60,7 +63,7 @@ def update(notebook, project_id, path=''):
                 print(r.status_code, r.reason, r.text)
         updated_dockerfiles.append(project_id)
 
-    # Update the notebook file(s)        
+    # Update the notebook file(s)
     url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path={notebook}.ipynb"
     with open(notebook_path.with_suffix('.ipynb')) as f:
         contents = f.read()
@@ -70,17 +73,29 @@ def update(notebook, project_id, path=''):
         r = requests.put(url, headers=headers, data=contents.encode('utf-8'))
         if r.status_code != 200:
             print(r.status_code, r.reason, r.text)
+    expected_files.update([notebook])
+    return expected_files
+
+with open(Path(root)/'Deepnote_workspace.txt') as workspace_file:
+    workspace = workspace_file.read()
 
 for notebook, project_id in notebooks.items():
     if isinstance(project_id, dict):
         for n, p in project_id.items():
-            update(n, p, notebook)
+            expected_files += update(n, p, notebook)
     else:
-        update(notebook, project_id, '')
+        expected_files = update(notebook, project_id, '')
+    if check_deepnote_files:
+        url = f"https://deepnote.com/workspace/{workspace}/project/{project_id}/"
+        files = set(subprocess.run(
+            ["node", "htmlbook/deepnote_check_notebooks.js", url],
+            capture_output=True, text=True).stdout.splitlines())
+        if not expected_files == files:
+            print(f"Expected files: {expected_files}")
+            print(f"Files on Deepnote: {files}")
 
 with open(Path(root)/'chapters.js', 'w') as f:
     f.write("deepnote = ");
     json.dump(notebooks, f, sort_keys=True)
     f.write("\n")
-    with open(Path(root)/'Deepnote_workspace.txt') as workspace_file:
-        f.write(f'deepnote_workspace_id = "{workspace_file.read()}"')
+    f.write(f'deepnote_workspace_id = "{workspace}"')

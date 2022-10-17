@@ -1,5 +1,5 @@
 
-// Usage: node test_colab_noteboox.js [--terminate]
+// Usage: node test_colab_notebook.js [--terminate]
 //
 // Requires puppeteer and nodejs
 // cd ~
