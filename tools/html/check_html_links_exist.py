@@ -104,7 +104,7 @@ for filename in args.files:
 
         elif url.find("deepnote.com") != -1:
             try:
-                requestObj = requests.head(link, timeout=5)
+                requestObj = requests.head(link, timeout=20)
                 if not requestObj.ok:
                     broken_links.append(link)
             except requests.exceptions.ConnectionError:
@@ -126,12 +126,13 @@ for filename in args.files:
                 if id and not html_has_id(requestObj.text, id):
                     broken_links.append(link)
             except Exception as err:
-                if os.environ.get('GITHUB_ACTIONS'):
+                if os.environ['GITHUB_ACTIONS'] == 'true':
                     # otherwise there is way too much noise on CI
                     continue
                 else:
                     broken_links.append(link)
                     print(err)
+                    print(f'$GITHUB_ACTIONS = {os.environ["GITHUB_ACTIONS"]}')
 
     if broken_links:
         print(f"Found the following broken links:")
