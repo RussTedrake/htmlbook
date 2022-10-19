@@ -5,6 +5,8 @@
 
 set -euxo pipefail
 
+echo "GITHUB_ACTIONS="$GITHUB_ACTIONS
+
 # Pass the --retry 4 argument when invoking curl(1).
 export HOMEBREW_CURL_RETRIES=4
 
