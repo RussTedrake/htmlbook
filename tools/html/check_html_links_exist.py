@@ -35,7 +35,6 @@ def get_file_as_string(filename):
     f.close()
     return s
 
-
 def getLinksFromString(s, extension):
 
     if extension.lower() == ".ipynb":
@@ -133,6 +132,7 @@ for filename in args.files:
                     broken_links.append(link)
                     print(err)
                     print(f'$GITHUB_ACTIONS = {os.environ["GITHUB_ACTIONS"]}')
+                    print(os.environ)
 
     if broken_links:
         print(f"Found the following broken links:")
