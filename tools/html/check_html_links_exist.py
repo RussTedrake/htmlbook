@@ -117,6 +117,7 @@ for filename in args.files:
                 else:
                     requestObj = requests.head(link, timeout=20)
                 if (requestObj.status_code == 403 or
+                        requestObj.status_code == 429 or
                         requestObj.status_code == 503):
                     continue
                 if not requestObj.ok:
