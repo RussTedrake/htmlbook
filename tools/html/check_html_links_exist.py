@@ -125,7 +125,7 @@ for filename in args.files:
                 if id and not html_has_id(requestObj.text, id):
                     broken_links.append(link)
             except Exception as err:
-                if os.environ['GITHUB_ACTIONS'] == 'true':
+                if os.environ.get('GITHUB_ACTIONS'):
                     # otherwise there is way too much noise on CI
                     continue
                 else:
