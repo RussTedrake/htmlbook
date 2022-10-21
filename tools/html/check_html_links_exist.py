@@ -132,8 +132,6 @@ for filename in args.files:
                 else:
                     broken_links.append(link)
                     print(err)
-                    print(f'$GITHUB_ACTIONS = {os.environ["GITHUB_ACTIONS"]}')
-                    print(os.environ)
 
     if broken_links:
         print(f"Found the following broken links:")
