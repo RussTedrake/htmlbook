@@ -10,4 +10,5 @@ xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24 -ac +extension G
   bazel test --cache_test_results=no --discard_analysis_cache=yes \
     --jobs=2 --keep_going=yes --keep_state_after_build=no --repository_cache= \
     --test_summary=detailed --test_verbose_timeout_warnings=yes \
-    --track_incremental_state=no --verbose_failures=yes \ --test_env=GITHUB_ACTIONS --verbose_test_summary=yes //...
+    --track_incremental_state=no --verbose_failures=yes \
+    --test_env=GITHUB_ACTIONS --verbose_test_summary=yes //...
