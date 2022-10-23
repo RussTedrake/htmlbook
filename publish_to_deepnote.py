@@ -10,16 +10,7 @@ import subprocess
 import sys
 
 testing = False
-check_deepnote_files = False
-#try:
-#    subprocess.run(['node', "--require='puppeteer-extra'", '--eval="//"'],
-#                   capture_output=False,
-#                   check=True, env={'NODE_PATH': '/usr/lib/node_modules'})
-#    check_deepnote_files = True
-#except:
-#    print(
-#        "Can't run node.js with puppeteer-extra requirement.\nDeepnote project contents won't be checked."
-#    )
+check_deepnote_files = True
 
 if len(sys.argv) < 2:
     print('Usage: python3 htmlbook/publish_to_deepnote.py dockerhub_sha')
@@ -86,13 +77,21 @@ def update(notebook, project_id, path=''):
     return expected_files
 
 def check_files(expected_files, project_id):
+    global check_deepnote_files
     if not check_deepnote_files:
         return
 
     url = f"https://deepnote.com/workspace/{workspace}/project/{project_id}/"
-    files = set(subprocess.run(
-        ["node", "htmlbook/deepnote_check_notebooks.js", url],
-        capture_output=True, text=True, timeout=60).stdout.splitlines())
+    try:
+        files = set(subprocess.run(
+            ["node", "htmlbook/deepnote_check_notebooks.js", url],
+            capture_output=True, text=True, timeout=60).stdout.splitlines())
+    except:
+        print("Failed to run node.js notebook check. Disabling these checks.")
+        print("See deepnote_check_notebooks.js for installation instructions.")
+        check_deepnote_files = False
+        return
+
     if not expected_files == files:
         print(f"Expected files: {expected_files}")
         print(f"Files on Deepnote: {files}")
