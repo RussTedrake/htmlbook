@@ -27,6 +27,7 @@ repository_url = f"https://{repository}.csail.mit.edu/"
 
 ignore_list = [
     "https://sr.stanford.edu/?page_id=509",
+    "http://www.robotics.tu-berlin.de/menue/research/soft_hands/",
 ]
 
 def get_file_as_string(filename):
