@@ -34,6 +34,9 @@ export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
 # brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
 brew update || (sleep 30; brew update)
 
+# Use python3.10, even if 3.11 is available
+export PATH="/usr/local/opt/python@3.10/bin:$PATH"
+
 # Check that GitHub Actions is running the workflow that calls this script.
 # https://docs.github.com/en/actions/reference/environment-variables
 if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
@@ -41,8 +44,6 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # https://github.com/actions/virtual-environments/issues/1365
   # https://github.com/Homebrew/homebrew-core/blob/7250542ee8545a4545daad294c0c5fb92a13d224/Formula/bazelisk.rb#L18
   brew uninstall -f -q bazelisk
-
-  brew link --force python@3.10
 
   # conda has caused trouble in the past.
   sudo rm -rf /usr/local/bin/conda /usr/local/miniconda
