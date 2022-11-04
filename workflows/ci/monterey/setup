@@ -34,9 +34,6 @@ export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
 # brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
 brew update || (sleep 30; brew update)
 
-# Use python3.10, even if 3.11 is available
-export PATH="/usr/local/opt/python@3.10/bin:$PATH"
-
 # Check that GitHub Actions is running the workflow that calls this script.
 # https://docs.github.com/en/actions/reference/environment-variables
 if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
@@ -68,6 +65,11 @@ sudo tar -xf /tmp/drake-latest-mac.tar.gz
 popd
 
 /opt/drake/share/drake/setup/install_prereqs --without-update
+
+# Try to force rules_python to find python@3.10
+python3 --version
+brew unlink python@3.10 && brew link --overwrite python@3.10
+python3 --version
 
 # This version should match mac-requirements.txt
 pip3.10 install --upgrade matplotlib==3.5.0
