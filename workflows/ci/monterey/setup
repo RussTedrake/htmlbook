@@ -42,12 +42,7 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # https://github.com/Homebrew/homebrew-core/blob/7250542ee8545a4545daad294c0c5fb92a13d224/Formula/bazelisk.rb#L18
   brew uninstall -f -q bazelisk
 
-  # The python@3.8 formula and its dependents cause pip_install from
-  # @rules_python//python:pip.bzl to fail.
-  # TODO(jamiesnape): Work out why because this behavior does not match the
-  # @rules_python documentation.
-  brew uninstall -f -q $(brew uses --installed --recursive python@3.8) python@3.8
-  rm -rf /usr/local/lib/python3.8
+  brew link --force python@3.10
 
   # conda has caused trouble in the past.
   sudo rm -rf /usr/local/bin/conda /usr/local/miniconda
