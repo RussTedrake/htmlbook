@@ -96,6 +96,14 @@ figcaption {
   display: none;
 }
 
+.invisible_on_hover {
+  position:absolute;
+  background: white;
+}
+.invisible_on_hover:hover {
+  opacity:0;
+}
+
 .bibtexnumber {
   vertical-align: top;
 }
