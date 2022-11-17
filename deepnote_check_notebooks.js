@@ -12,13 +12,14 @@
 
 'use strict';
 
+const { executablePath } = require('puppeteer');
 const puppeteer = require('puppeteer-extra');
 
 const fs = require('fs');
 
 (async function main() {
   try {
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({executablePath: executablePath()});
     // or, for debugging:
     //const browser = await puppeteer.launch({headless:false, devtools:true});
 
