@@ -301,6 +301,35 @@ for id in chapter_ids:
 
     chapter_num += 1
 
+for id in chapters['draft_chapter_ids']:
+    filename = id + ".html"
+    s = get_file_as_string(filename)
+
+    # Extract the chapter title
+    name_start = s.find("<chapter")
+    name_start = s.find("<h1>", name_start) + len("<h1>")
+    name_end = s.find("</h1>", name_start)
+    name = s[name_start:name_end]
+
+    # Rewrite the header
+    this_header = header.replace("$CHAPTER-ID$", id)
+    this_header = this_header.replace("$CHAPTER-NAME$", name)
+    this_header = this_header.replace("$CHAPTER-NUM$", "DRAFT")
+    s = replace_string_before(s, "<chapter", this_header)
+
+    # Rewrite the footer
+    s = replace_string_after(s, "</chapter>", footer)
+
+    # Update the chapter number
+    s = replace_string_between(s, "<chapter", ">",
+                               ' style="counter-reset: chapter 100"')
+
+    # Write references
+    s = write_references(elib, s, filename)
+
+    write_file_as_string(filename, s)
+
+
 if args.read_only and change_detected:
     print("This script would have made changes. You may need to run "
           "'python3 htmlbook/install_html_meta_data.py' from the root "
