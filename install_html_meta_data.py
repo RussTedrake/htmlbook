@@ -329,7 +329,6 @@ for id in chapters['draft_chapter_ids']:
 
     write_file_as_string(filename, s)
 
-
 if args.read_only and change_detected:
     print("This script would have made changes. You may need to run "
           "'python3 htmlbook/install_html_meta_data.py' from the root "
