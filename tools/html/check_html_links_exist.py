@@ -111,7 +111,8 @@ for filename in args.files:
                 broken_links.append(link)
         elif url in ignore_list:
             continue
-        else:
+        elif not os.environ.get('GITHUB_ACTIONS'):
+            # otherwise there is way too much noise on CI
             try:
                 if id:
                     requestObj = requests.get(link, timeout=20)
@@ -127,12 +128,8 @@ for filename in args.files:
                 if id and not html_has_id(requestObj.text, id):
                     broken_links.append(link)
             except Exception as err:
-                if os.environ.get('GITHUB_ACTIONS'):
-                    # otherwise there is way too much noise on CI
-                    continue
-                else:
-                    broken_links.append(link)
-                    print(err)
+                broken_links.append(link)
+                print(err)
 
     if broken_links:
         print(f"Found the following broken links:")
