@@ -82,7 +82,7 @@ for filename in args.files:
                 # See https://github.com/RussTedrake/htmlbook/issues/10
                 continue
             if url[:6] == 'Spring' or url[:4] == 'Fall':
-                # ignore e.g. https://underactuated.csail.mit.edu/Spring2022/ .
+                # ignore e.g. https://underactuated.csail.mit.edu/Spring2023/ .
                 continue
             if not os.path.exists(url):
                 print(f"couldn't find local file {url} in {os.getcwd()}")
