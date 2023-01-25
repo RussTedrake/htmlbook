@@ -48,7 +48,6 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
 
   # adapted from https://github.com/RobotLocomotion/drake-external-examples/blob/main/.github/workflows/ci.yml as a stopgap until we support python3.11
   brew unlink python
-  brew unlink python@3.8
   brew unlink python@3.10
   brew unlink python@3.11
   rm -f /usr/local/bin/2to3
@@ -66,9 +65,6 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # will include these packages, updating now to fail CI earlier.
   brew upgrade python@3.10
   brew upgrade python@3.11
-
-  brew tap-new ci/local-scipy
-  brew extract --version=1.9.2 scipy ci/local-scipy
 fi
 
 ./setup/mac/install_prereqs.sh
