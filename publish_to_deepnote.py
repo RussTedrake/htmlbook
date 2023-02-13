@@ -9,7 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-testing = False
+testing = True
 check_deepnote_files = True
 
 if len(sys.argv) < 2:
@@ -64,13 +64,14 @@ def update(notebook, project_id, path=''):
         updated_dockerfiles.append(project_id)
 
     # Update the notebook file(s)
-    url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path={notebook}.ipynb"
+    url = f"https://api.deepnote.com/v1/projects/{project_id}/notebooks/import-from-ipynb"
     with open(notebook_path.with_suffix('.ipynb')) as f:
-        contents = f.read()
+        contents = json.load(f)
+    payload = { 'name': notebook, 'ipynb': contents }
     if testing:
         print(f"would be pushing to {url}")
     else:
-        r = requests.put(url, headers=headers, data=contents.encode('utf-8'))
+        r = requests.post(url, headers=headers, json=payload)
         if r.status_code != 200:
             print(r.status_code, r.reason, r.text)
     expected_files.update([f"{notebook}.ipynb"])
