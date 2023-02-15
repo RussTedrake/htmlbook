@@ -64,7 +64,6 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   brew update
   # NOTE: the setup/* scripts eventually trigger `brew upgrade` which
   # will include these packages, updating now to fail CI earlier.
-  brew upgrade python@3.10
   brew upgrade python@3.11
 fi
 
@@ -82,4 +81,4 @@ popd
 /opt/drake/share/drake/setup/install_prereqs --without-update
 
 # This version should match mac-requirements.txt
-pip3.10 install --upgrade matplotlib==3.5.0
+pip3.11 install --upgrade matplotlib==3.5.0
