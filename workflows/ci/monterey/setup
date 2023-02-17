@@ -65,6 +65,8 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # NOTE: the setup/* scripts eventually trigger `brew upgrade` which
   # will include these packages, updating now to fail CI earlier.
   brew upgrade python@3.11
+  # On 2023-02-16 the pip3.11 symlink was mysteriously missing.
+  brew unlink python@3.11 && brew link --overwrite python@3.11
 fi
 
 ./setup/mac/install_prereqs.sh
