@@ -31,10 +31,27 @@ const fs = require('fs');
     const url = process.argv[2];
     //const url = "https://deepnote.com/workspace/Manipulation-ac8201a1-470a-4c77-afd0-2cc45bc229ff/project/56-Simulation-Tuning-3ac7c471-008c-4512-a37c-8338b9790d6e/";
     await page.goto(url);
-    await page.waitForSelector('[data-cy^=file-sidebar-item]', 0);
+    await page.waitForSelector('[data-cy^=notebooks_upload-droparea] [data-cy^=file-sidebar-item]');
+
+    var notebooks = await page.evaluate(() => {
+      books = document.querySelectorAll('[data-cy^=notebooks_upload-droparea] [data-cy^=file-sidebar-item]');
+      notebooks = [];
+      for (i=0; i<books.length; i++) {
+        notebooks.push(books[i].innerText);
+      }
+      return notebooks;
+    })
+
+    for (var i=0; i<notebooks.length; i++) {
+      if (notebooks[i]) {
+        console.log(notebooks[i]);
+      }
+    }
+
+    console.log("---");  // delimiter
 
     var filenames = await page.evaluate(() => {
-      files = document.querySelectorAll('[data-cy^=file-sidebar-item]');
+      files = document.querySelectorAll('[data-cy^=file-explorer_upload-droparea] [data-cy^=file-sidebar-item]');
       filenames = [];
       for (i=0; i<files.length; i++) {
         filenames.push(files[i].getAttribute('title'));
@@ -43,7 +60,9 @@ const fs = require('fs');
     })
 
     for (var i=0; i<filenames.length; i++) {
-      console.log(filenames[i]);
+      if (filenames[i]) {
+        console.log(filenames[i]);
+      }
     }
 
     await browser.close();
