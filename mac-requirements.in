@@ -2,7 +2,7 @@ beautifulsoup4>=4.9.3
 lxml>=4.6.2
 # matplotlib needs to either be the version installed by default in pip, or 
 # needs to be set in the github actions workflow.  See drake #14250.
-matplotlib==3.5.0
+matplotlib==3.7.0
 mysql-connector-python>=8.0.23
 nbconvert>=7.0.0
 pillow>=9.0.1 # needed by matplotlib, need new version for macos arm64
