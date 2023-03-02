@@ -73,4 +73,4 @@ popd
 /opt/drake/share/drake/setup/install_prereqs --without-update
 
 # This version should match mac-requirements.txt
-pip3.11 install --upgrade matplotlib==3.5.0
+pip3.11 install --upgrade matplotlib==3.7.0
