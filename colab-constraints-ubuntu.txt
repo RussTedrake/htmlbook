@@ -142,7 +142,7 @@ importlib-resources==5.4.0
 imutils==0.5.4
 inflect==2.1.0
 iniconfig==1.1.1
-intel-openmp==2021.4.0
+intel-openmp==2022.4.0
 intervaltree==2.1.0
 ipykernel==4.10.1
 ipython==5.5.0

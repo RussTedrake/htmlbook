@@ -122,6 +122,14 @@ function forwardOldChapterLink() {
   }
 }
 
+function loadIndex()  {
+  forwardOldChapterLink();
+  customTags();
+  var mathjax = document.getElementById("mathjax");
+  mathjax.innerHTML = mathjax_setup + mathjax.innerHTML;
+  MathJax.typeset();
+}
+
 function loadChapter(project)  {
   var url = window.location.pathname;
   var filename = url.substring(url.lastIndexOf('/')+1);

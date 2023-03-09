@@ -233,6 +233,14 @@ for id in chapter_ids:
                 for subsection in section.findall('subsection'):
                     toc += ('      <li>' + uni(subsection.find('h1').text)
                             + '</li>\n')
+                    if subsection.find('subsubsection') is not None:
+                        toc += '      <ul>\n'
+                        for subsubsection in subsection.findall(
+                                'subsubsection'):
+                            toc += ('        <li>'
+                                    + uni(subsubsection.find('h1').text)
+                                    + '</li>\n')
+                        toc += '      </ul>\n'
                 toc += '    </ul>\n'
         toc += '  </ul>\n'
 
