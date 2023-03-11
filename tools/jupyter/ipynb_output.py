@@ -10,12 +10,15 @@ import sys
 
 def main(filename):
     ipynb = json.load(open(filename))
-    for cell in ipynb['cells']:
-        if "outputs" in cell and cell['outputs']:
-            print("The notebook " + filename
-                  + " has output/metadata in the file.  You must clear it "
-                  + "before committing (or set the ipynboutput attribute to "
-                  + "False in your BUILD file).")
+    for cell in ipynb["cells"]:
+        if "outputs" in cell and cell["outputs"]:
+            print(
+                "The notebook "
+                + filename
+                + " has output/metadata in the file.  You must clear it "
+                + "before committing (or set the ipynboutput attribute to "
+                + "False in your BUILD file)."
+            )
             exit(2)
 
 

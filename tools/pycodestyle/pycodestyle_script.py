@@ -6,6 +6,6 @@ import sys
 
 from pycodestyle import _main
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.argv[0] = re.sub(r"_script\.py$", "", sys.argv[0])
     sys.exit(_main())

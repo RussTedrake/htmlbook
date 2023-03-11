@@ -1,4 +1,3 @@
-
 # Usage python3 htmlbook/update_shas.py [notebooks]
 
 import os
@@ -14,25 +13,29 @@ repository = os.path.basename(root)
 os.chdir(root)
 
 out = subprocess.run(
-  ['git', 'rev-parse', 'HEAD'],
-  stdout=subprocess.PIPE,
-  universal_newlines=True)
+    ["git", "rev-parse", "HEAD"],
+    stdout=subprocess.PIPE,
+    universal_newlines=True,
+)
 sha = out.stdout.strip()
 
 notebooks = sys.argv[1:]
 if not notebooks:
-  for path in pathlib.Path(root).rglob('*.ipynb'):
-    p = str(path.relative_to(root))
-    if any(s in p for s in [
-      '.history','bazel','figures','.ipynb_checkpoints'
-      ]):
-      continue
-    notebooks.append(p)
+    for path in pathlib.Path(root).rglob("*.ipynb"):
+        p = str(path.relative_to(root))
+        if any(
+            s in p
+            for s in [".history", "bazel", "figures", ".ipynb_checkpoints"]
+        ):
+            continue
+        notebooks.append(p)
 
 for p in notebooks:
-  s = subprocess.run([
-    'sed', "-i",
-    f"s/{repository}_sha='[0-9a-z]*'/{repository}_sha='{sha}'/g",
-    p
-  ])
-
+    s = subprocess.run(
+        [
+            "sed",
+            "-i",
+            f"s/{repository}_sha='[0-9a-z]*'/{repository}_sha='{sha}'/g",
+            p,
+        ]
+    )
