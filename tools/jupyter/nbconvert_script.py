@@ -42,7 +42,7 @@ def main(notebook_filename, grader_throws=False):
         ) + output
 
     writer = StdoutWriter()
-    write_results = writer.write(output, resources)
+    writer.write(output, resources)
 
 
 if __name__ == "__main__":
