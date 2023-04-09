@@ -32,6 +32,8 @@ export HOMEBREW_NO_INSTALL_CLEANUP=1
 export HOMEBREW_UPDATE_REPORT_ONLY_INSTALLED=1
 
 # brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
+rm -f /usr/local/bin/go
+rm -f /usr/local/bin/gofmt
 brew update || (sleep 30; brew update)
 
 # Check that GitHub Actions is running the workflow that calls this script.
