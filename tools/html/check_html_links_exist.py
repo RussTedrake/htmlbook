@@ -20,9 +20,7 @@ args = parser.parse_args()
 # Find workspace root by searching parent directories.
 os.chdir(args.cwd)
 while not os.path.isfile("WORKSPACE.bazel"):
-    assert (
-        os.path.dirname(os.getcwd()) != os.getcwd()
-    ), "could not find WORKSPACE.bazel"
+    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
     os.chdir(os.path.dirname(os.getcwd()))
 
 repository = os.path.basename(os.getcwd())
@@ -130,6 +128,7 @@ for filename in args.files:
                     requestObj = requests.head(link, timeout=20)
                 if (
                     requestObj.status_code == 403
+                    or requestObj.status_code == 406
                     or requestObj.status_code == 418
                     or requestObj.status_code == 429
                     or requestObj.status_code == 503
