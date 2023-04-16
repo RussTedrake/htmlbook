@@ -1,0 +1,16 @@
+diff --git a/tools/python/defs.bzl b/tools/python/defs.bzl
+index bd27cac..156d9e0 100644
+--- a/tools/python/defs.bzl
++++ b/tools/python/defs.bzl
+@@ -12,9 +12,9 @@ load("//htmlbook/tools/yapf:def.bzl", "py_yapf_test")
+ 
+ def _common_attrs(attrs):
+     if "deps" in attrs and attrs["deps"] != None:
+-        attrs["deps"] = attrs["deps"] + ["@drake//bindings/pydrake"] + all_requirements
++        attrs["deps"] = attrs["deps"] + all_requirements
+     else:
+-        attrs["deps"] = ["@drake//bindings/pydrake"] + all_requirements
++        attrs["deps"] = all_requirements
+     attrs["srcs_version"] = "PY3"
+     if "tags" in attrs and attrs["tags"] != None:
+         if ("block-network" not in attrs["tags"] and
