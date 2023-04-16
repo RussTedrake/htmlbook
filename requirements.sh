@@ -6,7 +6,7 @@
 # On ubuntu, I need it for both python3 and python3.7 (for colab)
 
 # I can use these to build focal:
-# docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:focal
+# docker run -i -t -v $(pwd):/root/mount -w /root/mount robotlocomotion/drake:jammy
 # export LC_ALL=C.UTF-8 LANG=C.UTF-8; apt update && apt install -y lsb-release python3-pip python3.8 python3-venv; pip3 install --upgrade pip-tools build; python3.8 -m pip install pip-tools
 # (Note: running from mac docker crashes if torch is included; it
 # works when docker is run from bionic. go figure)
