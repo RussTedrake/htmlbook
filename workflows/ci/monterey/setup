@@ -76,3 +76,7 @@ popd
 
 # This version should match mac-requirements.txt
 pip3.11 install --upgrade matplotlib==3.7.0
+
+# Pre-fetch data so that no one test needs to fetch it
+PYTHONPATH=/opt/drake/lib/python3.11/site-packages python3 -c \
+    'from pydrake.all import PackageMap; PackageMap().GetPath("drake_models")'
