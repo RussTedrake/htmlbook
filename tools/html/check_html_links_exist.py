@@ -58,6 +58,9 @@ def getLinksFromString(s, extension):
 
 
 def html_has_id(html, id):
+    if html.find("github.com") != 1:
+        ## We aren't going to find e.g. #L55 in the html source.
+        return True
     id = unquote(id)
     tag = BeautifulSoup(html, features="html.parser").find(id=id)
     return tag is not None
@@ -79,7 +82,7 @@ for filename in args.files:
         else:
             url = link
             id = ""
-        # print(f"url={url}, id={id}", flush=True)  # useful for debugging.
+        #print(f"url={url}, id={id}", flush=True)  # useful for debugging.
 
         if len(url) == 0:
             if not html_has_id(s, id):
@@ -138,6 +141,7 @@ for filename in args.files:
                     print(requestObj)
                     broken_links.append(link)
                 if id and not html_has_id(requestObj.text, id):
+                    print(requestObj)
                     broken_links.append(link)
             except Exception as err:
                 broken_links.append(link)
