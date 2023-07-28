@@ -43,7 +43,7 @@ updated_dockerfiles = []
 
 def update(notebook, project_id, path=""):
     expected_files = set(["Dockerfile"])
-    expected_notebooks = set()
+    expected_notebooks = {'Init'}
     notebook = Path(notebook).stem
     notebook_path = Path(path) / notebook
     # If notebook is a directory, publish all notebooks in that directory
@@ -66,6 +66,7 @@ def update(notebook, project_id, path=""):
         else:
             r = requests.put(url, headers=headers, data=Dockerfile)
             if r.status_code != 200:
+                print("failed to update Dockerfile")
                 print(r.status_code, r.reason, r.text)
         updated_dockerfiles.append(project_id)
 
@@ -82,6 +83,7 @@ def update(notebook, project_id, path=""):
             if r.status_code == 200:
                 break
         if r.status_code != 200:
+            print("failed to update notebook")
             r = requests.put(url, headers=headers, json=payload)
             print(r.status_code, r.reason, r.text)
     expected_notebooks.update([f"{notebook}"])
