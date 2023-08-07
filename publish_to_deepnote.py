@@ -64,7 +64,10 @@ def update(notebook, project_id, path=""):
         if testing:
             print(f"would be pushing to {url}")
         else:
-            r = requests.put(url, headers=headers, data=Dockerfile)
+            for i in range(3):  # number of retries
+                r = requests.put(url, headers=headers, data=Dockerfile)
+                if r.status_code == 200:
+                    break
             if r.status_code != 200:
                 print("failed to update Dockerfile")
                 print(r.status_code, r.reason, r.text)
