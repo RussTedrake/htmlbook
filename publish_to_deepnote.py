@@ -43,7 +43,7 @@ updated_dockerfiles = []
 
 def update(notebook, project_id, path=""):
     expected_files = set(["Dockerfile"])
-    expected_notebooks = {'Init'}
+    expected_notebooks = {"Init"}
     notebook = Path(notebook).stem
     notebook_path = Path(path) / notebook
     # If notebook is a directory, publish all notebooks in that directory

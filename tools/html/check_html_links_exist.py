@@ -20,7 +20,9 @@ args = parser.parse_args()
 # Find workspace root by searching parent directories.
 os.chdir(args.cwd)
 while not os.path.isfile("WORKSPACE.bazel"):
-    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
+    assert (
+        os.path.dirname(os.getcwd()) != os.getcwd()
+    ), "could not find WORKSPACE.bazel"
     os.chdir(os.path.dirname(os.getcwd()))
 
 repository = os.path.basename(os.getcwd())
@@ -82,7 +84,7 @@ for filename in args.files:
         else:
             url = link
             id = ""
-        #print(f"url={url}, id={id}", flush=True)  # useful for debugging.
+        # print(f"url={url}, id={id}", flush=True)  # useful for debugging.
 
         if len(url) == 0:
             if not html_has_id(s, id):
