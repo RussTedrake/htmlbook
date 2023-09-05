@@ -44,8 +44,8 @@ updated_dockerfiles = []
 def update(notebook, project_id, path=""):
     expected_files = set(["Dockerfile"])
     expected_notebooks = {"Init"}
-    notebook = Path(notebook).stem
     notebook_path = Path(path) / notebook
+    notebook = Path(notebook).stem
     # If notebook is a directory, publish all notebooks in that directory
     if notebook_path.is_dir():
         for p in notebook_path.rglob("*.ipynb"):
@@ -75,6 +75,7 @@ def update(notebook, project_id, path=""):
 
     # Update the notebook file(s)
     url = f"https://api.deepnote.com/v1/projects/{project_id}/notebooks/import-from-ipynb"
+    print(notebook_path.with_suffix(".ipynb"))
     with open(notebook_path.with_suffix(".ipynb")) as f:
         contents = json.load(f)
     payload = {"name": notebook, "ipynb": contents}
