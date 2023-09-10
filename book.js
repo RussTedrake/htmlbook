@@ -263,15 +263,18 @@ function notebook_header(chapter) {
   return "";
 }
 
-function notebook_link(project, d=deepnote, link_text="", notebook="") {
+drake_deepnote = {"tutorials": "2b4fc509-aef2-417d-a40d-6071dfed9199"}
+drake_workspace_id = "Drake-0b3b2c53-a7ad-441b-80f8-bf8350752305"
+
+function notebook_link(project, d=deepnote, link_text="", notebook="", workspace_id=deepnote_workspace_id) {
   if (notebook == "") {
     notebook = project;
   }
   if (project in d) {
     if (link_text) {
-      return `<a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${d[project]}/%2F${notebook}.ipynb" target="${project}">${link_text}</a>`;
+      return `<a href="https://deepnote.com/workspace/${workspace_id}/project/${d[project]}/%2F${notebook}.ipynb" target="${project}">${link_text}</a>`;
     } else {
-      return `<p><a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${d[project]}/%2F${notebook}.ipynb" style="background:none; border:none;" target="${project}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
+      return `<p><a href="https://deepnote.com/workspace/${workspace_id}/project/${d[project]}/%2F${notebook}.ipynb" style="background:none; border:none;" target="${project}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
     }
   }
   return `<p><center>ERROR: <i>Notebook link not found. Please do a "force reload" of this page. If that doesn't fix it, please email russt@mit.edu and let me know.</i></center></p>`;
