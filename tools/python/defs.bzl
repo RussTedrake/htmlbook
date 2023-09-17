@@ -108,19 +108,8 @@ def rt_py_yapf_test(**attrs):
     py_yapf_test(**_yapf_test_attrs(attrs))
 
 def rt_py_test(**attrs):
-#    if attrs.pop("pycodestyle", True):
-#        rt_py_pycodestyle_test(
-#            name = attrs["name"] + "_pycodestyle",
-#            srcs = attrs["srcs"],
-#        )
-#    if attrs.pop("pydocstyle", True):
-#        rt_py_pydocstyle_test(
-#            name = attrs["name"] + "_pydocstyle",
-#            srcs = attrs["srcs"],
-#        )
-#    if attrs.pop("yapf", True):
-#        rt_py_yapf_test(
-#            name = attrs["name"] + "_yapf",
-#            srcs = attrs["srcs"],
-#        )
+    attrs["deps"] = select({
+        "//htmlbook/tools/python:installed_deps_true": [],
+        "//conditions:default": attrs.get("deps", [])
+    })
     py_test(**_test_attrs(attrs))

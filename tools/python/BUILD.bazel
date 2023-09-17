@@ -5,7 +5,17 @@
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@rules_python//python:defs.bzl", "py_runtime", "py_runtime_pair")
+
+string_flag(name = "use_installed_deps", build_setting_default = "")
+
+config_setting(
+    name = "installed_deps_true",
+    flag_values = {
+        ":use_installed_deps": "true",
+    },
+)
 
 bzl_library(
     name = "defs",
