@@ -6,7 +6,5 @@ matplotlib==3.7.0
 mysql-connector-python>=8.0.23
 nbconvert>=7.0.0
 pillow>=9.0.1 # needed by matplotlib, need new version for macos arm64
-pycodestyle>=2.6.0
-pydocstyle>=5.1.1
 requests>=2.25.1
 yapf>=0.30.0
