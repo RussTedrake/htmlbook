@@ -19,6 +19,7 @@ var mathjax_setup = `
   \\newcommand{\\bA}{{\\bf A}}
   \\newcommand{\\bB}{{\\bf B}}
   \\newcommand{\\bC}{{\\bf C}}
+  \\newcommand{\\bD}{{\\bf D}}
   \\newcommand{\\bH}{{\\bf H}}
   \\newcommand{\\bI}{{\\bf I}}
   \\newcommand{\\bJ}{{\\bf J}}
