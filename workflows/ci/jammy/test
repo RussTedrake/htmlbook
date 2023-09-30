@@ -9,6 +9,6 @@ set -euxo pipefail
 xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24 -ac +extension GLX +extension RANDR +render -noreset' \
   bazel test --cache_test_results=no --discard_analysis_cache=yes \
     --jobs=2 --keep_going=yes --keep_state_after_build=no --repository_cache= \
-    --test_summary=detailed --test_verbose_timeout_warnings=yes \
-    --track_incremental_state=no --verbose_failures=yes \
-    --test_env=GITHUB_ACTIONS --test_env=DRAKE_RESOURCE_ROOT --verbose_test_summary=yes //...
+    --test_output=errors --test_verbose_timeout_warnings=yes \
+    --track_incremental_state=no --verbose_failures=no \
+    --test_env=GITHUB_ACTIONS --test_env=DRAKE_RESOURCE_ROOT --verbose_test_summary=no //...
