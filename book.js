@@ -280,3 +280,16 @@ function notebook_link(project, d=deepnote, link_text="", notebook="", workspace
   }
   return `<p><center>ERROR: <i>Notebook link not found. Please do a "force reload" of this page. If that doesn't fix it, please email russt@mit.edu and let me know.</i></center></p>`;
 }
+
+function copy_code_to_clipboard(buttonElement) {
+  const codeElement = buttonElement.parentElement.nextElementSibling.querySelector('code');
+  const text = codeElement.textContent;
+
+  const textArea = document.createElement('textarea');
+  textArea.textContent = text;
+  document.body.appendChild(textArea);
+  textArea.select();
+
+  document.execCommand('copy');
+  document.body.removeChild(textArea);
+}
