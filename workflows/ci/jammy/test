@@ -12,3 +12,4 @@ xvfb-run --auto-servernum --server-args='-screen 0 1280x1024x24 -ac +extension G
     --test_output=errors --test_verbose_timeout_warnings=yes \
     --track_incremental_state=no --verbose_failures=no \
     --test_env=GITHUB_ACTIONS --test_env=DRAKE_RESOURCE_ROOT --verbose_test_summary=no //...
+

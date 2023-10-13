@@ -27,3 +27,7 @@ apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-r
 # Pre-fetch data so that no one test needs to fetch it
 PYTHONPATH=/opt/drake/lib/python3.10/site-packages python3 -c \
     'from pydrake.all import PackageMap; PackageMap().GetPath("drake_models")'
+
+# Pre-fetch the pip dependencies, then force pip to clean up.
+bazel fetch //...
+pip cache purge
