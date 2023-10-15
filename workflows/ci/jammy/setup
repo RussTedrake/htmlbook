@@ -30,4 +30,3 @@ PYTHONPATH=/opt/drake/lib/python3.10/site-packages python3 -c \
 
 # Pre-fetch the pip dependencies, then force pip to clean up.
 bazel fetch //...
-pip cache purge
