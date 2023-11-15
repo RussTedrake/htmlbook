@@ -12,9 +12,13 @@ load("//htmlbook/tools/yapf:def.bzl", "py_yapf_test")
 
 def _common_attrs(attrs):
     if "deps" in attrs and attrs["deps"] != None:
-        attrs["deps"] = attrs["deps"] + ["@drake//bindings/pydrake"] + all_requirements
+        attrs["deps"] = attrs["deps"] + all_requirements
     else:
-        attrs["deps"] = ["@drake//bindings/pydrake"] + all_requirements
+        attrs["deps"] = all_requirements
+    if "data" in attrs and attrs["data"] != None:
+        attrs["data"] = attrs["data"] + ["@drake_models"]
+    else:
+        attrs["data"] = ["@drake_models"]        
     attrs["srcs_version"] = "PY3"
     if "tags" in attrs and attrs["tags"] != None:
         if ("block-network" not in attrs["tags"] and
