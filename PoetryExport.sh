@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# For more details see Developers.md.
-
 poetry lock
 poetry export --without-hashes --with dev > requirements.txt
+# Work around poetry issue: https://github.com/python-poetry/poetry-plugin-export/issues/176
 sed 's/matplotlib==3.7.3 ; python_version >= "3.8"/matplotlib==3.5.1 ; sys_platform == "linux"\nmatplotlib==3.7.3 ; sys_platform == "darwin"/' requirements.txt > requirements.txt.tmp && mv requirements.txt.tmp requirements.txt
-# Force torch to be cpu-only for bazel.
+# Force torch to be cpu-only for bazel. https://drakedevelopers.slack.com/archives/C2PMBJVAN/p1697855405335329
 awk '
 /torch==[0-9]+\.[0-9]+\.[0-9]+ ; python_version >= "3.10"/ {
     version=$1; sub(/^torch==/, "", version); sub(/ ;.*/, "", version);
