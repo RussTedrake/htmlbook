@@ -1,3 +1,0 @@
-# see https://github.com/RobotLocomotion/drake/issues/14250
-matplotlib==3.1.2
-nbconvert==5.6.1
