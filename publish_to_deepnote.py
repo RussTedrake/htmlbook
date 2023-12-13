@@ -49,9 +49,7 @@ def update(notebook, project_id, path=""):
     # If notebook is a directory, publish all notebooks in that directory
     if notebook_path.is_dir():
         for p in notebook_path.rglob("*.ipynb"):
-            f, n = update(
-                p.relative_to(notebook_path), project_id, notebook_path
-            )
+            f, n = update(p.relative_to(notebook_path), project_id, notebook_path)
             expected_files.update(f)
             expected_notebooks.update(n)
         return expected_files, expected_notebooks
@@ -74,7 +72,9 @@ def update(notebook, project_id, path=""):
         updated_dockerfiles.append(project_id)
 
     # Update the notebook file(s)
-    url = f"https://api.deepnote.com/v1/projects/{project_id}/notebooks/import-from-ipynb"
+    url = (
+        f"https://api.deepnote.com/v1/projects/{project_id}/notebooks/import-from-ipynb"
+    )
     with open(notebook_path.with_suffix(".ipynb")) as f:
         contents = json.load(f)
     payload = {"name": notebook, "ipynb": contents}
@@ -89,6 +89,8 @@ def update(notebook, project_id, path=""):
             print("failed to update notebook")
             r = requests.put(url, headers=headers, json=payload)
             print(r.status_code, r.reason, r.text)
+        # TODO(russt): r.text contains the magic sha for the link:
+        # e.g. for intro/intro.ipynb, it contains {"id":"7553c700044345fe8ce505eecfcf087f"}
     expected_notebooks.update([f"{notebook}"])
     return expected_files, expected_notebooks
 

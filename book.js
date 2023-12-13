@@ -257,7 +257,7 @@ function system_html(sys, url = null) {
 
 function notebook_header(chapter) {
   if (chapter in deepnote) {
-    return `<a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${deepnote[chapter]}/%2F${chapter}.ipynb" style="float:right; margin-top:20px; margin-bottom:-100px;background:white;border:0;" target="${chapter}">
+    return `<a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${deepnote[chapter]}/notebook/%2F${chapter}" style="float:right; margin-top:20px; margin-bottom:-100px;background:white;border:0;" target="${chapter}">
     <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a>
     <div style="clear:right;"></div>`;
   }
@@ -273,9 +273,9 @@ function notebook_link(project, d=deepnote, link_text="", notebook="", workspace
   }
   if (project in d) {
     if (link_text) {
-      return `<a href="https://deepnote.com/workspace/${workspace_id}/project/${d[project]}/%2F${notebook}.ipynb" target="${project}">${link_text}</a>`;
+      return `<a href="https://deepnote.com/workspace/${workspace_id}/project/${d[project]}/notebook/%2F${notebook}" target="${project}">${link_text}</a>`;
     } else {
-      return `<p><a href="https://deepnote.com/workspace/${workspace_id}/project/${d[project]}/%2F${notebook}.ipynb" style="background:none; border:none;" target="${project}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
+      return `<p><a href="https://deepnote.com/workspace/${workspace_id}/project/${d[project]}/notebook/%2F${notebook}" style="background:none; border:none;" target="${project}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
     }
   }
   return `<p><center>ERROR: <i>Notebook link not found. Please do a "force reload" of this page. If that doesn't fix it, please email russt@mit.edu and let me know.</i></center></p>`;
