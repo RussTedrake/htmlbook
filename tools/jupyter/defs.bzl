@@ -17,9 +17,14 @@ def _nbconvert(attrs, testonly = False):
     native.genrule(
         name = "{}_nbconvert".format(attrs["name"]),
         testonly = testonly,
-        srcs = attrs["srcs"],
+        srcs = attrs["srcs"] + ["//:workspace"],
         outs = [out],
-        cmd = "$(location //htmlbook/tools/jupyter:nbconvert) $< " + grader_throws + " > $@",
+        cmd = " ".join([
+          "$(location //htmlbook/tools/jupyter:nbconvert)",
+          "$(locations " + " ".join(attrs["srcs"]) + ")",
+          grader_throws,
+          " > $@"
+        ]),
         tools = ["//htmlbook/tools/jupyter:nbconvert"],
         visibility = ["//visibility:private"],
     )

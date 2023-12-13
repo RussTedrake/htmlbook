@@ -13,16 +13,38 @@ from nbconvert.exporters import PythonExporter  # noqa: E402
 from nbconvert.writers import StdoutWriter  # noqa: E402
 
 
+def find_workspace_root(root=None):
+    if root is None:
+        root = os.getcwd()
+    if os.path.exists(os.path.join(root, "WORKSPACE")):
+        return root
+    if os.path.exists(os.path.join(root, "WORKSPACE.bazel")):
+        return root
+    new_root = os.path.dirname(root)
+    assert new_root != root, "Could not find workspace root"
+    return find_workspace_root(new_root)
+
+
+def find_workspace_name():
+    workspace_file = find_workspace_root() + "/WORKSPACE.bazel"
+    with open(workspace_file, "r") as file:
+        for line in file:
+            if line.startswith("workspace(name ="):
+                # Extracting the workspace name
+                name_part = line.split("=")[1].strip()
+                # Removing any potential leading or trailing characters like quotes or parentheses
+                workspace_name = name_part.strip(" '\"()")
+                return workspace_name
+    assert "Could not find workspace name in WORKSPACE.bazel file"
+
+
 def main(notebook_filename, grader_throws=False):
     resources = {}
     basename = os.path.basename(notebook_filename)
     resources["unique_key"] = basename[: basename.rfind(".")]
     exporter = PythonExporter()
-    output, resources = exporter.from_filename(
-        notebook_filename, resources=resources
-    )
-    # TODO(russt): make this more robust (e.g. use bazel workspace name?)
-    repo = Path(__file__).parent.parent.parent.parent.name
+    output, resources = exporter.from_filename(notebook_filename, resources=resources)
+    repo = find_workspace_name()
     # Raise deprecations to errors and set 'running_as_test'
     output = (
         f"from pydrake.common.deprecation import DrakeDeprecationWarning\n"
