@@ -24,14 +24,7 @@ htmlbook = os.path.dirname(os.path.realpath(__file__))
 root = os.path.dirname(htmlbook)
 repository = os.path.basename(root)
 
-notebooks = json.load(open("Deepnote.json"))
-
-for path in Path(root).rglob("*/Deepnote.json"):
-    # Ignore some directories.
-    if "bazel" in str(path):
-        continue
-    d = path.parent.relative_to(Path(root))
-    notebooks[str(d)] = json.load(open(path))
+deepnote = json.load(open("Deepnote.json"))
 
 api_key = os.environ["DEEPNOTE_API_KEY_" + repository.upper()]
 headers = {"Authorization": f"Bearer {api_key}"}
@@ -43,9 +36,10 @@ updated_dockerfiles = []
 
 def update(notebook, project_id, path=""):
     expected_files = set(["Dockerfile"])
-    expected_notebooks = {"Init"}
+    expected_notebooks = dict()
     notebook_path = Path(path) / notebook
     notebook = Path(notebook).stem
+
     # If notebook is a directory, publish all notebooks in that directory
     if notebook_path.is_dir():
         for p in notebook_path.rglob("*.ipynb"):
@@ -89,9 +83,7 @@ def update(notebook, project_id, path=""):
             print("failed to update notebook")
             r = requests.put(url, headers=headers, json=payload)
             print(r.status_code, r.reason, r.text)
-        # TODO(russt): r.text contains the magic sha for the link:
-        # e.g. for intro/intro.ipynb, it contains {"id":"7553c700044345fe8ce505eecfcf087f"}
-    expected_notebooks.update([f"{notebook}"])
+        expected_notebooks[notebook] = json.loads(r.text)["id"]
     return expected_files, expected_notebooks
 
 
@@ -118,31 +110,38 @@ def check_files(expected_files, expected_notebooks, project_id):
 
     separator = output.index("---")
     notebooks = set(output[:separator])
+    expected_notebooks = set(expected_notebooks)
     files = set(output[separator + 1 :])
+    expected_files = set(expected_files)
 
     if not expected_notebooks == notebooks:
-        print(f"Expected notebooks: {expected_notebooks}")
-        print(f"Notebooks on Deepnote: {notebooks}")
+        if expected_notebooks - notebooks:
+            print(f"Missing notebooks: {expected_notebooks - notebooks}")
+        if notebooks - expected_notebooks:
+            print(f"Extra notebooks: {notebooks - expected_notebooks}")
 
     if not expected_files == files:
-        print(f"Expected files: {expected_files}")
-        print(f"Files on Deepnote: {files}")
+        if expected_files - files:
+            print(f"Missing files: {expected_files - files}")
+        if files - expected_files:
+            print(f"Extra files: {files - expected_files}")
 
 
 with open(Path(root) / "Deepnote_workspace.txt") as workspace_file:
     workspace = workspace_file.read()
 
-for notebook, project_id in notebooks.items():
-    if isinstance(project_id, dict):
-        for n, p in project_id.items():
-            expected_files, expected_notebooks = update(n, p, notebook)
-            check_files(expected_files, expected_notebooks, p)
-    else:
-        expected_files, expected_notebooks = update(notebook, project_id, "")
-        check_files(expected_files, expected_notebooks, project_id)
+notebooks = dict()
+
+for chapter, project_id in deepnote.items():
+    expected_files, chapter_notebooks = update(chapter, project_id, "")
+    check_files(expected_files, chapter_notebooks.keys(), project_id)
+    notebooks[chapter] = chapter_notebooks
 
 with open(Path(root) / "chapters.js", "w") as f:
-    f.write("deepnote = ")
+    f.write("chapter_project_ids = ")
+    json.dump(deepnote, f, sort_keys=True)
+    f.write("\n")
+    f.write("notebook_ids = ")
     json.dump(notebooks, f, sort_keys=True)
     f.write("\n")
     f.write(f'deepnote_workspace_id = "{workspace}"')
