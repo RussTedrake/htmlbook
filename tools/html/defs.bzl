@@ -8,6 +8,8 @@ load("@pip//:requirements.bzl", "all_requirements")
 load("@rules_python//python:defs.bzl", "py_test")
 
 def rt_check_links_test(**attrs):
+    if "data" not in attrs:
+        attrs["data"] = []
     py_test(
         name = attrs["srcs"][0] + "_linktest",
         srcs = [
@@ -15,10 +17,10 @@ def rt_check_links_test(**attrs):
         ],
         main = "check_html_links_exist.py",
         args = ["$(location " + attrs["srcs"][0] + ")"],
-        data = attrs["srcs"] + [
+        data = attrs["srcs"] + attrs["data"] + [
           "//book:html",
+          "//:workspace",
         ],
-        local = True,
         tags = ["no-sandbox"],  # to allow network connections
         deps = all_requirements,
         visibility = ["//visibility:private"],
