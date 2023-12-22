@@ -4,15 +4,18 @@
 # Copyright 2020-2023 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
-load("//htmlbook/tools/python:defs.bzl", "rt_py_test")
+load("//book/htmlbook/tools/python:defs.bzl", "rt_py_test")
 
 rt_py_test(
     name = "install_html_meta_data",
-    srcs = ["install_html_meta_data.py"],
+    srcs = [
+      "install_html_meta_data.py",
+    ],
     args = ["--read_only"],
     data = [
-        "//:chapters",
-        "//:html",
+        "//book:chapters",
+        "//book:html",
+        "//:workspace",
     ],
     tags = ["requires-network"],  # for mysql.csail
 )

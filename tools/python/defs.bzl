@@ -6,9 +6,9 @@
 
 load("@pip//:requirements.bzl", "all_requirements")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//htmlbook/tools/pycodestyle:def.bzl", "py_pycodestyle_test")
-load("//htmlbook/tools/pydocstyle:def.bzl", "py_pydocstyle_test")
-load("//htmlbook/tools/yapf:def.bzl", "py_yapf_test")
+load("//book/htmlbook/tools/pycodestyle:def.bzl", "py_pycodestyle_test")
+load("//book/htmlbook/tools/pydocstyle:def.bzl", "py_pydocstyle_test")
+load("//book/htmlbook/tools/yapf:def.bzl", "py_yapf_test")
 
 def _common_attrs(attrs):
     if "deps" in attrs and attrs["deps"] != None:
@@ -113,7 +113,7 @@ def rt_py_yapf_test(**attrs):
 
 def rt_py_test(**attrs):
     attrs["deps"] = select({
-        "//htmlbook/tools/python:installed_deps_true": [],
+        "//book/htmlbook/tools/python:installed_deps_true": [],
         "//conditions:default": attrs.get("deps", [])
     })
     py_test(**_test_attrs(attrs))

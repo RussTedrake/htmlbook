@@ -114,12 +114,12 @@ _PY_PYCODESTYLE_TEST_ATTRS = {
     "statistics": attr.bool(doc = "Count errors and warnings"),
     "verbose": attr.bool(doc = "Print status messages"),
     "_pycodestyle": attr.label(
-        default = "//htmlbook/tools/pycodestyle",
+        default = "//book/htmlbook/tools/pycodestyle",
         doc = "The name of the pycodestyle console script",
         cfg = "host",
     ),
     "_template": attr.label(
-        default = "//htmlbook/tools/pycodestyle:pycodestyle_runner.bash.in",
+        default = "//book/htmlbook/tools/pycodestyle:pycodestyle_runner.bash.in",
         doc = "The name of the pycodestyle test runner template",
         allow_single_file = True,
     ),

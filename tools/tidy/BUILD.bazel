@@ -15,15 +15,15 @@ bzl_library(
 bzl_library(
     name = "repositories",
     srcs = ["repositories.bzl"],
-    deps = ["//htmlbook/tools/repo:local"],
+    deps = ["//book/htmlbook/tools/repo:local"],
 )
 
 alias(
     name = "tidy",
     actual = select({
-        "//htmlbook/tools/configs/platform:linux": "@tidy_linux//file",
-        "//htmlbook/tools/configs/platform:macos_i386": "@tidy_macos_i386//file",
-        "//htmlbook/tools/configs/platform:macos_arm64": "@tidy_macos_arm64//file",
+        "//book/htmlbook/tools/configs/platform:linux": "@tidy_linux//file",
+        "//book/htmlbook/tools/configs/platform:macos_i386": "@tidy_macos_i386//file",
+        "//book/htmlbook/tools/configs/platform:macos_arm64": "@tidy_macos_arm64//file",
     }),
     visibility = ["//:__subpackages__"],
 )

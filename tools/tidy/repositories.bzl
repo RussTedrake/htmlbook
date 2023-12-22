@@ -5,7 +5,7 @@
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//htmlbook/tools/repo:local.bzl", "local_file")
+load("//book/htmlbook/tools/repo:local.bzl", "local_file")
 
 def tidy_dependencies():
     maybe(

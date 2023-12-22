@@ -82,12 +82,12 @@ _PY_YAPF_TEST_ATTRS = {
     ),
     "verbose": attr.bool(doc = "Print out file names while processing"),
     "_template": attr.label(
-        default = "//htmlbook/tools/yapf:yapf_runner.bash.in",
+        default = "//book/htmlbook/tools/yapf:yapf_runner.bash.in",
         doc = "The name of the yapf test runner template",
         allow_single_file = True,
     ),
     "_yapf": attr.label(
-        default = "//htmlbook/tools/yapf",
+        default = "//book/htmlbook/tools/yapf",
         doc = "The name of the yapf console script",
         cfg = "host",
     ),

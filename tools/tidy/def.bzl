@@ -52,12 +52,12 @@ _HTML_TIDY_TEST_ATTRS = {
         doc = "Set configuration options from the specified file",
     ),
     "_template": attr.label(
-        default = "//htmlbook/tools/tidy:tidy_runner.bash.in",
+        default = "//book/htmlbook/tools/tidy:tidy_runner.bash.in",
         doc = "The name of the tidy test runner template",
         allow_single_file = True,
     ),
     "_tidy": attr.label(
-        default = "//htmlbook/tools/tidy",
+        default = "//book/htmlbook/tools/tidy",
         doc = "The name of the tidy executable",
         executable = True,
         cfg = "host",

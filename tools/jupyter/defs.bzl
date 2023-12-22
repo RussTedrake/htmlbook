@@ -5,8 +5,8 @@
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
 load("@rules_python//python:defs.bzl", "py_test")
-load("//htmlbook/tools/python:defs.bzl", "rt_py_binary", "rt_py_test")
-load("//htmlbook/tools/html:defs.bzl", "rt_check_links_test")
+load("//book/htmlbook/tools/python:defs.bzl", "rt_py_binary", "rt_py_test")
+load("//book/htmlbook/tools/html:defs.bzl", "rt_check_links_test")
 
 def _nbconvert(attrs, testonly = False):
     out = "{}.ipynb.py".format(attrs["name"])
@@ -20,12 +20,12 @@ def _nbconvert(attrs, testonly = False):
         srcs = attrs["srcs"] + ["//:workspace"],
         outs = [out],
         cmd = " ".join([
-          "$(location //htmlbook/tools/jupyter:nbconvert)",
+          "$(location //book/htmlbook/tools/jupyter:nbconvert)",
           "$(locations " + " ".join(attrs["srcs"]) + ")",
           grader_throws,
           " > $@"
         ]),
-        tools = ["//htmlbook/tools/jupyter:nbconvert"],
+        tools = ["//book/htmlbook/tools/jupyter:nbconvert"],
         visibility = ["//visibility:private"],
     )
     attrs["main"] = out
@@ -46,7 +46,7 @@ def _common_attrs(attrs):
 def rt_ipynb_output_test(**attrs):
     py_test(
         name = attrs["name"] + "_output",
-        srcs = ["//htmlbook/tools/jupyter:ipynb_output"],
+        srcs = ["//book/htmlbook/tools/jupyter:ipynb_output"],
         main = "ipynb_output.py",
         args = ["$(location " + attrs["srcs"][0] + ")"],
         data = attrs["srcs"],

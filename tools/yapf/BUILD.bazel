@@ -11,7 +11,7 @@ load("@rules_python//python:defs.bzl", "py_binary")
 bzl_library(
     name = "def",
     srcs = ["def.bzl"],
-    visibility = ["//htmlbook/tools/python:__pkg__"],
+    visibility = ["//book/htmlbook/tools/python:__pkg__"],
     deps = [
         "@bazel_skylib//lib:paths",
         "@bazel_skylib//lib:shell",

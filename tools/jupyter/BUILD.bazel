@@ -11,7 +11,7 @@ load("@rules_python//python:defs.bzl", "py_binary")
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
-    deps = ["//htmlbook/tools/python:defs"],
+    deps = ["//book/htmlbook/tools/python:defs"],
 )
 
 py_binary(

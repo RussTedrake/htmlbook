@@ -20,10 +20,10 @@ config_setting(
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
-    visibility = ["//htmlbook/tools/jupyter:__pkg__"],
+    visibility = ["//book/htmlbook/tools/jupyter:__pkg__"],
     deps = [
         ":rules_python_defs",
-        "//htmlbook/tools/pycodestyle:def",
+        "//book/htmlbook/tools/pycodestyle:def",
     ],
 )
 
@@ -93,7 +93,7 @@ toolchain(
 bzl_library(
     name = "repositories",
     srcs = ["repositories.bzl"],
-    visibility = ["//htmlbook/tools/jupyter:__pkg__"],
+    visibility = ["//book/htmlbook/tools/jupyter:__pkg__"],
     deps = [
         ":rules_python_pip",
         ":rules_python_repositories",

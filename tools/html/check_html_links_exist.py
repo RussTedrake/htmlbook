@@ -20,9 +20,7 @@ args = parser.parse_args()
 # Find workspace root by searching parent directories.
 os.chdir(args.cwd)
 while not os.path.isfile("WORKSPACE.bazel"):
-    assert (
-        os.path.dirname(os.getcwd()) != os.getcwd()
-    ), "could not find WORKSPACE.bazel"
+    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
     os.chdir(os.path.dirname(os.getcwd()))
 
 repository = os.path.basename(os.getcwd())
@@ -97,6 +95,8 @@ for filename in args.files:
             if url[:6] == "Spring" or url[:4] == "Fall":
                 # ignore e.g. https://underactuated.csail.mit.edu/Spring2023/ .
                 continue
+            # All local content should be in the book
+            url = "book/" + url
             if not os.path.exists(url):
                 print(f"couldn't find local file {url} in {os.getcwd()}")
                 broken_links.append(link)
@@ -162,7 +162,7 @@ for filename in args.files:
             start = s.find("<" + tag + ">", index) + len(tag) + 2
             end = s.find("</" + tag + ">", start)
             index = end + len(tag) + 3
-            file = s[start:end]
+            file = "book/" + s[start:end]
             if not os.path.exists(file):
                 print(
                     filename

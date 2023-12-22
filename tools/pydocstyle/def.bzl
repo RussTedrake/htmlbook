@@ -113,12 +113,12 @@ _PY_PYDOCSTYLE_TEST_ATTRS = {
     "source": attr.bool(doc = "Show the source for each error"),
     "verbose": attr.bool(doc = "Print status information"),
     "_pydocstyle": attr.label(
-        default = "//htmlbook/tools/pydocstyle",
+        default = "//book/htmlbook/tools/pydocstyle",
         doc = "The name of the pydocstyle console script",
         cfg = "host",
     ),
     "_template": attr.label(
-        default = "//htmlbook/tools/pydocstyle:pydocstyle_runner.bash.in",
+        default = "//book/htmlbook/tools/pydocstyle:pydocstyle_runner.bash.in",
         doc = "The name of the pydocstyle test runner template",
         allow_single_file = True,
     ),

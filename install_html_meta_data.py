@@ -1,8 +1,15 @@
 import argparse
 import json
+import os
 
 import mysql.connector
 from lxml.html import parse
+
+while not os.path.isfile("WORKSPACE.bazel"):
+    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
+    os.chdir(os.path.dirname(os.getcwd()))
+repository = os.path.basename(os.getcwd())
+os.chdir("book")
 
 chapters = json.load(open("chapters.json"))
 chapter_ids = chapters["chapter_ids"]
@@ -79,8 +86,7 @@ def bibtex_entry_to_html(entry):
     def field(f):
         if f not in entry:
             raise RuntimeError(
-                f"bibtex tag {entry['bibtag']} is missing"
-                f" required field {f}"
+                f"bibtex tag {entry['bibtag']} is missing" f" required field {f}"
             )
         return entry[f]
 
@@ -91,8 +97,7 @@ def bibtex_entry_to_html(entry):
         # TODO: Implement more complete bibtex name parsing/output:
         # https://nwalsh.com/tex/texhelp/bibtx-23.html
         authors = [
-            " ".join(a.split(",")[::-1]).strip()
-            for a in field("author").split(" and ")
+            " ".join(a.split(",")[::-1]).strip() for a in field("author").split(" and ")
         ]
         out.append('<span class="author">%s</span>, ' % " and ".join(authors))
         out.append("\n")
@@ -175,18 +180,13 @@ def write_references(elib, s, filename):
         elib.execute(f"SELECT * FROM bibtex WHERE bibtag = '{r}'")
         x = elib.fetchone()
         if not x:
-            print(
-                f"ELIB: Could not find reference {r} referenced from {filename}"
-            )
+            print(f"ELIB: Could not find reference {r} referenced from {filename}")
             change_detected = True
             continue
 
         html += bibtex_entry_to_html(x)
 
-    html = (
-        f"<section><h1>References</h1>\n<ol>\n{html}"
-        "\n</ol>\n</section><p/>\n"
-    )
+    html = f"<section><h1>References</h1>\n<ol>\n{html}" "\n</ol>\n</section><p/>\n"
 
     return replace_string_between(s, '<div id="references">', "</div>", html)
 
@@ -270,16 +270,10 @@ for id in chapter_ids:
             if section.find("subsection") is not None:
                 toc += "    <ul>\n"
                 for subsection in section.findall("subsection"):
-                    toc += (
-                        "      <li>"
-                        + uni(subsection.find("h1").text)
-                        + "</li>\n"
-                    )
+                    toc += "      <li>" + uni(subsection.find("h1").text) + "</li>\n"
                     if subsection.find("subsubsection") is not None:
                         toc += "      <ul>\n"
-                        for subsubsection in subsection.findall(
-                            "subsubsection"
-                        ):
+                        for subsubsection in subsection.findall("subsubsection"):
                             toc += (
                                 "        <li>"
                                 + uni(subsubsection.find("h1").text)
@@ -292,9 +286,7 @@ for id in chapter_ids:
 toc += "</ul>\n"
 
 s = get_file_as_string("index.html")
-s = replace_string_between(
-    s, '<section id="table_of_contents">', "</section>", toc
-)
+s = replace_string_between(s, '<section id="table_of_contents">', "</section>", toc)
 write_file_as_string("index.html", s)
 
 elib_connector = mysql.connector.connect(

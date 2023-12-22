@@ -10,9 +10,9 @@ load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 native_binary(
     name = "buildifier",
     src = select({
-        "//htmlbook/tools/configs/platform:linux": "@buildifier_linux//file",
-        "//htmlbook/tools/configs/platform:macos_i386": "@buildifier_macos//file",
-        "//htmlbook/tools/configs/platform:macos_arm64": "@buildifier_macos//file",
+        "//book/htmlbook/tools/configs/platform:linux": "@buildifier_linux//file",
+        "//book/htmlbook/tools/configs/platform:macos_i386": "@buildifier_macos//file",
+        "//book/htmlbook/tools/configs/platform:macos_arm64": "@buildifier_macos//file",
     }),
     out = "buildifier",
     visibility = ["//:__subpackages__"],

@@ -11,12 +11,12 @@ def rt_check_links_test(**attrs):
     py_test(
         name = attrs["srcs"][0] + "_linktest",
         srcs = [
-          "//htmlbook/tools/html:check_html_links_exist",
+          "//book/htmlbook/tools/html:check_html_links_exist",
         ],
         main = "check_html_links_exist.py",
         args = ["$(location " + attrs["srcs"][0] + ")"],
         data = attrs["srcs"] + [
-          "//:html",
+          "//book:html",
         ],
         local = True,
         tags = ["no-sandbox"],  # to allow network connections
