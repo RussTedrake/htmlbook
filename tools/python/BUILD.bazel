@@ -23,7 +23,6 @@ bzl_library(
     visibility = ["//book/htmlbook/tools/jupyter:__pkg__"],
     deps = [
         ":rules_python_defs",
-        "//book/htmlbook/tools/pycodestyle:def",
     ],
 )
 
