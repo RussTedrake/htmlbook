@@ -23,10 +23,7 @@ notebooks = sys.argv[1:]
 if not notebooks:
     for path in pathlib.Path(root).rglob("*.ipynb"):
         p = str(path.relative_to(root))
-        if any(
-            s in p
-            for s in [".history", "bazel", "figures", ".ipynb_checkpoints"]
-        ):
+        if any(s in p for s in [".history", "bazel", "figures", ".ipynb_checkpoints"]):
             continue
         notebooks.append(p)
 

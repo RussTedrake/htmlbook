@@ -85,14 +85,10 @@ for c in chapter_ids:
     # Tweak html for rendering
 
     # Remove hypothesis
-    s = s.replace(
-        '<script src="https://hypothes.is/embed.js" async></script>', ""
-    )
+    s = s.replace('<script src="https://hypothes.is/embed.js" async></script>', "")
 
     # links to data should point to online version
-    s = s.replace(
-        'href="data/', f'href="http://{basename}.csail.mit.edu/data/'
-    )
+    s = s.replace('href="data/', f'href="http://{basename}.csail.mit.edu/data/')
 
     write_file_as_string(filename, s)
     #  os.system(f"node {os.path.join(root, 'htmlbook/render_html.js')} http://{basename}.csail.mit.edu/{c}.html {filename}")
