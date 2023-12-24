@@ -22,9 +22,8 @@ dockerhub_sha = sys.argv[1]
 # root should be textbook repo root
 htmlbook = os.path.dirname(os.path.realpath(__file__))
 root = os.path.dirname(htmlbook)
-repository = os.path.basename(root)
-# move root to book subdirectory
-root = os.path.join(root, "book")
+repository = os.path.basename(os.path.dirname(root))
+os.chdir(root)
 
 deepnote = json.load(open("Deepnote.json"))
 
