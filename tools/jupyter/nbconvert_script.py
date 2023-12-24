@@ -50,8 +50,8 @@ def main(notebook_filename, grader_throws=False):
         f"import warnings\n"
         f'warnings.simplefilter("error", DrakeDeprecationWarning)\n\n'
         f"try:\n"
-        f"    from {repo}.utils import set_running_as_test\n"
-        f"    set_running_as_test(True)\n\n"
+        f"    from {repo}.utils import _set_running_as_test\n"
+        f"    _set_running_as_test(True)\n\n"
         f"except ModuleNotFoundError:\n"
         f"    pass\n"
     ) + output
