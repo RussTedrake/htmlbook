@@ -27,8 +27,9 @@ repository = os.path.basename(os.getcwd())
 repository_url = f"https://{repository}.csail.mit.edu/"
 
 ignore_list = [
-    "https://sr.stanford.edu/?page_id=509",
-    "http://www.robotics.tu-berlin.de/menue/research/soft_hands/",
+    "sr.stanford.edu",
+    "www.robotics.tu-berlin.de",
+    "colab.research.google.com",
 ]
 
 
@@ -105,24 +106,7 @@ for filename in args.files:
                 continue
             if id and not html_has_id(get_file_as_string(url), id):
                 broken_links.append(link)
-        elif url.find("colab.research.google.com") != -1:
-            # Colab returns 405 for correct and incorrect urls
-            continue
-            try:
-                requestObj = requests.head(link, timeout=5)
-                if not requestObj.ok:
-                    broken_links.append(link)
-            except requests.ConnectionError:
-                broken_links.append(link)
-
-        elif url.find("deepnote.com") != -1:
-            try:
-                requestObj = requests.head(link, timeout=20)
-                if not requestObj.ok:
-                    broken_links.append(link)
-            except requests.exceptions.ConnectionError:
-                broken_links.append(link)
-        elif url in ignore_list:
+        elif any(s in url for s in ignore_list):
             continue
         elif not os.environ.get("GITHUB_ACTIONS"):
             # otherwise there is way too much noise on CI
