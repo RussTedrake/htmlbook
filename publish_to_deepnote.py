@@ -17,13 +17,34 @@ if len(sys.argv) < 2:
     print("Usage: python3 htmlbook/publish_to_deepnote.py dockerhub_sha")
     exit(-1)
 
-dockerhub_sha = sys.argv[1]
 
 # root should be textbook repo root
 htmlbook = os.path.dirname(os.path.realpath(__file__))
 root = os.path.dirname(htmlbook)
 repository = os.path.basename(os.path.dirname(root))
 os.chdir(root)
+
+dockerhub_sha = sys.argv[1]
+Dockerfile = f"FROM russtedrake/{repository}:{dockerhub_sha}"
+
+
+def get_formatted_version():
+    # Run the 'poetry version' command
+    result = subprocess.run(['poetry', 'version'], stdout=subprocess.PIPE, text=True)
+
+    # Extract the output and strip any leading/trailing whitespace
+    output = result.stdout.strip()
+
+    # Replace the space with '==' to get the desired format
+    formatted_version = output.replace(' ', '==')
+
+    return formatted_version
+
+
+Requirements = f"""
+--extra-index-url https://drake-packages.csail.mit.edu/whl/nightly
+{get_formatted_version()}
+"""
 
 deepnote = json.load(open("Deepnote.json"))
 
@@ -36,8 +57,8 @@ updated_dockerfiles = []
 
 
 def update(notebook, project_id, path=""):
-    expected_files = set(["Dockerfile"])
-    expected_notebooks = dict()
+    expected_files = set(["Dockerfile", "requirements.txt"])
+    expected_notebooks = dict({'Init':0})
     notebook_path = Path(path) / notebook
     notebook = Path(notebook).stem
 
@@ -48,12 +69,11 @@ def update(notebook, project_id, path=""):
             expected_files.update(f)
             expected_notebooks.update(n)
         return expected_files, expected_notebooks
-
+    
     print(f"Updating {notebook_path}...")
     # Update the Dockerfile
     if project_id not in updated_dockerfiles:
         url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path=Dockerfile"
-        Dockerfile = f"FROM russtedrake/{repository}:{dockerhub_sha}"
         if testing:
             print(f"would be pushing to {url}")
         else:
@@ -64,7 +84,21 @@ def update(notebook, project_id, path=""):
             if r.status_code != 200:
                 print("failed to update Dockerfile")
                 print(r.status_code, r.reason, r.text)
+
+        url = f"https://api.deepnote.com/v1/projects/{project_id}/files?path=requirements.txt"
+        if testing:
+            print(f"would be pushing to {url}")
+        else:
+            for i in range(3):  # number of retries
+                r = requests.put(url, headers=headers, data=Requirements)
+                if r.status_code == 200:
+                    break
+            if r.status_code != 200:
+                print("failed to update requirements.txt")
+                print(r.status_code, r.reason, r.text)
+
         updated_dockerfiles.append(project_id)
+
 
     # Update the notebook file(s)
     url = (

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-poetry lock
+# For bazel
 poetry export --without-hashes --with dev > requirements.txt
 # Remove poetry. Required to work around poetry <--> poetry-plugin-export circular
 # dependency: https://github.com/python-poetry/poetry-plugin-export/issues/240
