@@ -10,23 +10,8 @@ export APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 DEBIAN_FRONTEND=noninteractive
 ./setup/ubuntu/22.04/install_prereqs.sh
 trap 'rm -rf /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin /var/lib/apt/lists/* /var/log/apt/*' EXIT
 
-# I don't need this because bazel will download the requirements:
-#LC_CTYPE=en_US.UTF-8 LANG=en_US.UTF-8 pip3 install --disable-pip-version-check --upgrade --requirement ./requirements.txt
-
-pushd /opt
-wget -nv https://drake-packages.csail.mit.edu/drake/nightly/drake-latest-jammy.tar.gz
-trap 'rm -rf /opt/drake-latest-jammy.tar.gz /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin /var/lib/apt/lists/* /var/log/apt/*' EXIT
-tar -xf drake-latest-jammy.tar.gz
-popd
-
-apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-recommends $(cat /opt/drake/share/drake/setup/packages-jammy.txt)
-
 # Setup xvfb for headless rendering.
 apt-get install -o APT::Acquire::Retries=4 -o Dpkg::Use-Pty=0 -qy --no-install-recommends xvfb
-
-# Pre-fetch data so that no one test needs to fetch it
-PYTHONPATH=/opt/drake/lib/python3.10/site-packages python3 -c \
-    'from pydrake.all import PackageMap; PackageMap().GetPath("drake_models")'
 
 # Pre-fetch the pip dependencies, then force pip to clean up.
 bazel fetch //...
