@@ -10,7 +10,7 @@ set -euo pipefail
 bazel query 'kind(test, //...)' > /tmp/my_tests.txt
 sed 's#^//:#:#g' /tmp/my_tests.txt > /tmp/all_tests.txt
 
-BATCH_SIZE=15
+BATCH_SIZE=10
 TOTAL_LINES=$(wc -l < /tmp/all_tests.txt)
 START_LINE=1
 
