@@ -3,6 +3,8 @@
 // curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
 // sudo bash nodesource_setup.sh
 // sudo apt install -y nodejs
+// or brew install nodejs on mac
+// then
 // npm i puppeteer puppeteer-extra
 // or sudo npm i -g puppeteer puppeteer-extra
 //
