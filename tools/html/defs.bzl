@@ -4,7 +4,7 @@
 # Copyright 2020 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
-load("@pip//:requirements.bzl", "all_requirements")
+load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_test")
 
 def rt_check_links_test(**attrs):
@@ -22,7 +22,10 @@ def rt_check_links_test(**attrs):
           "//:workspace",
         ],
         tags = ["no-sandbox"],  # to allow network connections
-        deps = all_requirements,
+        deps = [
+          requirement("requests"),
+          requirement("beautifulsoup4"),
+        ],
         visibility = ["//visibility:private"],
     )
 

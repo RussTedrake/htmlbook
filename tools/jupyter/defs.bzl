@@ -5,6 +5,7 @@
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
 load("@rules_python//python:defs.bzl", "py_test")
+load("@pip_deps//:requirements.bzl", "requirement")
 load("//book/htmlbook/tools/python:defs.bzl", "rt_py_binary", "rt_py_test")
 load("//book/htmlbook/tools/html:defs.bzl", "rt_check_links_test")
 
@@ -57,6 +58,8 @@ def rt_ipynb_binary(**attrs):
 def rt_ipynb_test(**attrs):
     if "size" not in attrs or attrs["size"] == None:
         attrs["size"] = "medium"
+    if "deps" not in attrs or attrs["deps"] == None:
+        attrs["deps"] = []
     if "timeout" not in attrs or attrs["timeout"] == None:
         attrs["timeout"] = "short"
     if "ipynboutput" not in attrs or attrs["ipynboutput"]:

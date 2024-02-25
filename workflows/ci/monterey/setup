@@ -58,8 +58,8 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   brew update && brew upgrade
 
   # On 2023-02-16 the pip3.11 symlink was mysteriously missing.
-  brew unlink python@3.11 && brew link python@3.11
-  pip3.11 --version
+  brew unlink python@3.12 && brew link python@3.12
+  pip3.12 --version
 fi
 
 ./setup/mac/install_prereqs.sh
@@ -76,8 +76,8 @@ popd
 /opt/drake/share/drake/setup/install_prereqs --without-update
 
 # This version should match mac-requirements.txt
-pip3.11 install --upgrade matplotlib==3.7.0
+pip3.12 install --upgrade matplotlib==3.7.3
 
 # Pre-fetch data so that no one test needs to fetch it
-PYTHONPATH=/opt/drake/lib/python3.11/site-packages python3 -c \
+PYTHONPATH=/opt/drake/lib/python3.12/site-packages python3 -c \
     'from pydrake.all import PackageMap; PackageMap().GetPath("drake_models")'
