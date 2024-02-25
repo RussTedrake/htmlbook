@@ -65,8 +65,8 @@ fi
 ./setup/mac/install_prereqs.sh
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
-# Help jupyter find PythonExporter.
-ln -s /opt/homebrew/share/jupyter/ ~/Library/Jupyter
+# We need nbconvert outside of the virtual environment to install the templates.
+pip3 install --break-system-packages nbconvert
 
 # Pre-fetch the pip dependencies, then force pip to clean up.
 bazel fetch //...
