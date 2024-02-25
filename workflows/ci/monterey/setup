@@ -65,5 +65,8 @@ fi
 ./setup/mac/install_prereqs.sh
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
+# Help jupyter find PythonExporter.
+ln -s /opt/homebrew/share/jupyter/ ~/Library/Jupyter
+
 # Pre-fetch the pip dependencies, then force pip to clean up.
 bazel fetch //...
