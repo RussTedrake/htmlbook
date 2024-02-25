@@ -158,6 +158,6 @@ for filename in args.files:
 
     for ref in re.finditer("\\\\ref{(.*?)}", s):
         tag = ref[1]  # match from inside of braces
-        if "\label{" + tag + "}" not in s:
+        if "\\label{" + tag + "}" not in s:
             print(f"Cannot find label matching latex reference {ref[0]}")
             exit(-2)
