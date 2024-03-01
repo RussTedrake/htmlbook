@@ -1,6 +1,6 @@
 // Requires puppeteer and nodejs
 // cd ~
-// curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh
+// curl -sL https://deb.nodesource.com/setup_20.x -o nodesource_setup.sh
 // sudo bash nodesource_setup.sh
 // sudo apt install -y nodejs
 // or brew install nodejs on mac
