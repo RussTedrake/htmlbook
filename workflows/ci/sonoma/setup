@@ -43,7 +43,6 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # https://github.com/actions/virtual-environments/issues/1365
   # https://github.com/Homebrew/homebrew-core/blob/7250542ee8545a4545daad294c0c5fb92a13d224/Formula/bazelisk.rb#L18
   brew uninstall -f -q bazelisk
-  brew unlink tcl-tk
   brew unlink node@18
 
   # conda has caused trouble in the past.
@@ -67,6 +66,7 @@ trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
 # We need nbconvert outside of the virtual environment to install the templates.
 pip3 install --break-system-packages nbconvert
+ln -s /opt/homebrew/share/jupyter/ ~/Library/Jupyter
 
 # Pre-fetch the pip dependencies, then force pip to clean up.
 bazel fetch //...
