@@ -43,7 +43,7 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # https://github.com/actions/virtual-environments/issues/1365
   # https://github.com/Homebrew/homebrew-core/blob/7250542ee8545a4545daad294c0c5fb92a13d224/Formula/bazelisk.rb#L18
   brew uninstall -f -q bazelisk
-  brew unlink node@18
+  #brew unlink node@18
 
   # conda has caused trouble in the past.
   sudo rm -rf /usr/local/bin/conda /usr/local/miniconda
