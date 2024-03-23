@@ -3,7 +3,7 @@ import json
 import os
 
 import mysql.connector
-from lxml.html import parse
+from lxml.html import parse, document_fromstring
 
 while not os.path.isfile("WORKSPACE.bazel"):
     assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
@@ -162,12 +162,10 @@ def write_references(elib, s, filename):
     global change_detected
     index = 0
     refs = []
-    while s.find("<elib", index) > 0:
-        start = s.find("<elib", index)
-        start = s.find(">", start) + 1
-        end = s.find("</elib>", start)
-        refs += s[start:end].split("+")
-        index = end + len("</elib>")
+    
+    doc = document_fromstring(s)
+    for ref in doc.findall(".//elib"):
+        refs += ref.text.split("+")
 
     if not refs:
         return s
