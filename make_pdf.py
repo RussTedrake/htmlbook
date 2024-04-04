@@ -65,7 +65,7 @@ def replace_string_between(s, start_str, end_str, with_str):
     return s
 
 
-# root should be textbook repo root
+# root should be textbook repo root/book
 root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 basename = os.path.basename(root)
 
