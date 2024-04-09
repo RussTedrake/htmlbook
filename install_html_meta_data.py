@@ -392,7 +392,7 @@ for id in chapters["draft_chapter_ids"]:
 if args.read_only and change_detected:
     print(
         "This script would have made changes. You may need to run "
-        "'python3 htmlbook/install_html_meta_data.py' from the root "
+        "'python3 htmlbook/install_html_meta_data.py' from the book "
         "directory."
     )
 
