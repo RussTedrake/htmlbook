@@ -69,6 +69,15 @@ example {
   margin-bottom: 10px;
   padding: 5px;
 }
+algorithm {
+  display: block;
+  border: 1px solid;
+  border-radius: 0px;
+  background-color: rgb(242,242,242); /* light gray */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 5px;
+}
 exercise {
   display: block;
   border-radius: 0px;
@@ -149,6 +158,12 @@ example > h1 {
   font-variant: normal;
   margin: 2px;
 }
+algorithm > h1 {
+  display: block;
+  font-size: 16px;
+  font-variant: normal;
+  margin: 2px;
+}
 
 exercise > h1 {
   display: block;
@@ -161,7 +176,7 @@ exercise > h1 {
 /* Counters */
 chapter > h1 {
   counter-increment:chapter;
-  counter-reset: sect1 example_counter exercise_counter definition theorem algorithm figure;
+  counter-reset: sect1 example_counter exercise_counter definition theorem algorithm_counter figure;
 }
 chapter section {
   counter-increment:sect1;
@@ -183,7 +198,7 @@ exercise {
   counter-increment:exercise_counter;
 }
 algorithm {
-  counter-increment:algorithm;
+  counter-increment:algorithm_counter;
 }
 
 chapter > h1:before {
@@ -217,7 +232,7 @@ exercise > h1:before {
   content: "Exercise " counter(chapter) "." counter(exercise_counter) " ";
 }
 algorithm > h1:before {
-  content: "Algorithm " counter(chapter) "." counter(algorithm) " (";
+  content: "Algorithm " counter(chapter) "." counter(algorithm_counter) " (";
 }
 example > h1:after {
   content: ")";
@@ -253,7 +268,7 @@ chapter.appendix exercise > h1:before {
   content: "Exercise " counter(chapter, upper-alpha) "." counter(exercise_counter) " ";
 }
 chapter.appendix algorithm > h1:before {
-  content: "Algorithm " counter(chapter, upper-alpha) "." counter(algorithm) " (";
+  content: "Algorithm " counter(chapter, upper-alpha) "." counter(algorithm_counter) " (";
 }
 chapter.appendix figcaption:before {
   content: "Figure " counter(chapter, upper-alpha) "." counter(figure) " - ";
