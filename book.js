@@ -239,7 +239,7 @@ function system_html(sys, url = null) {
   let input_port_html = "";
   if ('input_ports' in sys) {
     sys.input_ports.forEach(port => {
-      input_port_html += `<tr><td align=right style=\"padding:5px 0px 5px 0px\">${port}&rarr;</td></tr>`;
+      input_port_html += `<tr><td align=right style=\"padding:5px 0px 5px 0px\">${port} &rarr;</td></tr>`;
     });
   }
   let output_port_html = "";
