@@ -30,6 +30,7 @@ ignore_list = [
     "sr.stanford.edu",
     "www.robotics.tu-berlin.de",
     "colab.research.google.com",
+    "accessibility.mit.edu",
 ]
 
 
