@@ -24,3 +24,14 @@ rt_py_test(
     ],
     tags = ["requires-network"],  # for mysql.csail
 )
+
+rt_py_test(
+    name = "check_deepnote_requirements",
+    srcs = [
+      "check_deepnote_requirements.py",
+    ],
+    data = [
+        "//book:deepnote",
+    ],
+    tags = ["requires-network"], 
+)
