@@ -6,6 +6,7 @@
 
 load("@pip_deps//:requirements.bzl", "requirement")
 load("//book/htmlbook/tools/python:defs.bzl", "rt_py_test")
+load("@pip_deps//:requirements.bzl", "requirement")
 
 rt_py_test(
     name = "install_html_meta_data",
@@ -32,6 +33,9 @@ rt_py_test(
     ],
     data = [
         "//book:deepnote",
+    ],
+    deps = [
+      requirement("requests"),
     ],
     tags = ["requires-network"], 
 )
