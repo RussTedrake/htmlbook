@@ -26,7 +26,8 @@ os.chdir(root)
 
 dockerhub_sha = sys.argv[1]
 Dockerfile = f"FROM russtedrake/{repository}:{dockerhub_sha}"
-
+with open(htmlbook + "/Init.ipynb") as f:
+    Init = json.load(f)
 
 def get_formatted_version():
     # Run the 'poetry version' command
@@ -95,6 +96,21 @@ def update(notebook, project_id, path=""):
                     break
             if r.status_code != 200:
                 print("failed to update requirements.txt")
+                print(r.status_code, r.reason, r.text)
+
+        url = (
+            f"https://api.deepnote.com/v1/projects/{project_id}/notebooks/import-from-ipynb"
+        )
+        payload = {"name": "Init", "ipynb": Init}
+        if testing:
+            print(f"would be pushing to {url}")
+        else:
+            for i in range(3):  # number of retries
+                r = requests.put(url, headers=headers, json=payload)
+                if r.status_code == 200:
+                    break
+            if r.status_code != 200:
+                print("failed to update Init notebook")
                 print(r.status_code, r.reason, r.text)
 
         updated_dockerfiles.append(project_id)
