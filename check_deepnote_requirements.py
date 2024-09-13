@@ -49,7 +49,7 @@ def check_manip_sha(chapter, project_id):
         print(r.status_code, r.reason, r.text)
 
     # Regular expression to find the version number after manipulation==
-    match = re.search(r"manipulation==([\d.]+)", r.text)
+    match = re.search(r"manipulation==(.+)$", r.text)
     if match:
         version = match.group(1)
         if version != version_from_poetry:
