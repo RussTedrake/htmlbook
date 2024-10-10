@@ -31,6 +31,7 @@ export HOMEBREW_NO_INSTALL_CLEANUP=1
 # brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
 rm -f /usr/local/bin/go
 rm -f /usr/local/bin/gofmt
+
 brew update || (sleep 30; brew update)
 
 # Check that GitHub Actions is running the workflow that calls this script.
@@ -49,20 +50,45 @@ if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
   # Remove the symlinks that cause issues.
   find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete
   sudo rm -rf /Library/Frameworks/Python.framework/
+  find /usr/local/bin -lname '*/Library/Frameworks/Python3.framework/*' -delete
+  sudo rm -rf /Library/Frameworks/Python3.framework/
+
+  brew untap homebrew/cask || true
+  brew untap homebrew/core || true
 
   # Run upgrades now to fail-fast (setup scripts do this anyway).
   brew update && brew upgrade
 
-  # On 2023-02-16 the pip3.11 symlink was mysteriously missing.
-  brew unlink python@3.12 && brew link python@3.12
-  pip3.12 --version
+  BREW_PYTHON_DIR="/opt/homebrew/opt/python@3.12"
+  # Attempting to create missing symlinks..."
+  ln -sf $BREW_PYTHON_DIR/bin/python3.12 $BREW_PYTHON_DIR/bin/python3
+  ln -sf $BREW_PYTHON_DIR/bin/pip3.12 $BREW_PYTHON_DIR/bin/pip3
+  export PATH="/opt/homebrew/opt/python@3.12/bin:$PATH"
+
+  # brew doctor || true
+
+  ls -l /opt/homebrew/opt/python@3.12/bin
+  /opt/homebrew/opt/python@3.12/bin/python3 --version
+  echo $PATH
+  which python3
+  python3 --version
+  pip3 --version
+
+  if [[ $(python3 --version) != "Python 3.12"* ]]; then
+      echo "ERROR: Failed to use Homebrew Python 3.12"
+      exit 1
+  fi
 fi
 
 ./setup/mac/install_prereqs.sh
+if [[ $(python3 --version) != "Python 3.12"* ]]; then
+    echo "ERROR: Failed to use Homebrew Python 3.12"
+    exit 1
+fi
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
 # We need nbconvert outside of the virtual environment to install the templates.
-pip3 install --break-system-packages nbconvert
+pip3.12 install --break-system-packages nbconvert
 ln -s /opt/homebrew/share/jupyter/ ~/Library/Jupyter
 
 # Pre-fetch the pip dependencies, then force pip to clean up.
