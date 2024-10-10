@@ -5,6 +5,13 @@
 
 set -euxo pipefail
 
+# Check that GitHub Actions is running the workflow that calls this script.
+# https://docs.github.com/en/actions/reference/environment-variables
+if [[ "${GITHUB_ACTIONS:-}" !=  "true" ]]; then
+  echo "This script is only intended to be run on Github actions"
+  exit 1
+fi
+
 echo "GITHUB_ACTIONS="$GITHUB_ACTIONS
 
 # Pass the --retry 4 argument when invoking curl(1).
@@ -31,39 +38,49 @@ export HOMEBREW_NO_INSTALL_CLEANUP=1
 # brew update uses git(1), so HOMEBREW_CURL_RETRIES does not take effect.
 rm -f /usr/local/bin/go
 rm -f /usr/local/bin/gofmt
+
 brew update || (sleep 30; brew update)
 
-# Check that GitHub Actions is running the workflow that calls this script.
-# https://docs.github.com/en/actions/reference/environment-variables
-if [[ "${GITHUB_ACTIONS:-}" ==  "true" ]]; then
-  # The bazelisk formula conflicts with the bazel formula.
-  # https://github.com/actions/virtual-environments/issues/1365
-  # https://github.com/Homebrew/homebrew-core/blob/7250542ee8545a4545daad294c0c5fb92a13d224/Formula/bazelisk.rb#L18
-  brew uninstall -f -q bazelisk
-  #brew unlink node@18
+# The bazelisk formula conflicts with the bazel formula.
+# https://github.com/actions/virtual-environments/issues/1365
+# https://github.com/Homebrew/homebrew-core/blob/7250542ee8545a4545daad294c0c5fb92a13d224/Formula/bazelisk.rb#L18
+brew uninstall -f -q bazelisk
+#brew unlink node@18
 
-  # conda has caused trouble in the past.
-  sudo rm -rf /usr/local/bin/conda /usr/local/miniconda
-  rm -rf "${HOME}/.conda"
+# conda has caused trouble in the past.
+sudo rm -rf /usr/local/bin/conda /usr/local/miniconda
+rm -rf "${HOME}/.conda"
 
-  # Remove the symlinks that cause issues.
-  find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete
-  sudo rm -rf /Library/Frameworks/Python.framework/
+# Remove the symlinks that cause issues.
+find /usr/local/bin -lname '*/Library/Frameworks/Python.framework/*' -delete
+sudo rm -rf /Library/Frameworks/Python.framework/
+find /usr/local/bin -lname '*/Library/Frameworks/Python3.framework/*' -delete
+sudo rm -rf /Library/Frameworks/Python3.framework/
 
-  # Run upgrades now to fail-fast (setup scripts do this anyway).
-  brew update && brew upgrade
+brew untap homebrew/cask || true
+brew untap homebrew/core || true
 
-  # On 2023-02-16 the pip3.11 symlink was mysteriously missing.
-  brew unlink python@3.12 && brew link python@3.12
-  pip3.12 --version
-fi
+# Run upgrades now to fail-fast (setup scripts do this anyway).
+brew update && brew upgrade
+
+BREW_PYTHON_DIR="/opt/homebrew/opt/python@3.12"
+# Attempting to create missing symlinks..."
+ln -sf $BREW_PYTHON_DIR/bin/python3.12 $BREW_PYTHON_DIR/bin/python3
+ln -sf $BREW_PYTHON_DIR/bin/pip3.12 $BREW_PYTHON_DIR/bin/pip3
+export PATH="/opt/homebrew/opt/python@3.12/bin:$PATH"
+
+# brew doctor || true
 
 ./setup/mac/install_prereqs.sh
+if [[ $(python3 --version) != "Python 3.12"* ]]; then
+    echo "ERROR: Failed to use Homebrew Python 3.12"
+    exit 1
+fi
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
 
 # We need nbconvert outside of the virtual environment to install the templates.
 pip3 install --break-system-packages nbconvert
 ln -s /opt/homebrew/share/jupyter/ ~/Library/Jupyter
 
-# Pre-fetch the pip dependencies, then force pip to clean up.
+# Pre-fetch the pip dependencies.
 bazel fetch //...
