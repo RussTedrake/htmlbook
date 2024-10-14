@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import re
 
 import mysql.connector
 from lxml.html import parse, document_fromstring
@@ -73,6 +74,52 @@ def replace_string_between(s, start_str, end_str, with_str):
     return s
 
 
+def bibtex_field_to_html(text):
+    # Function to process nested braces
+    def process_braces(match):
+        content = match.group(1)
+        while '{' in content:
+            content = re.sub(r'\{([^{}]*)\}', lambda m: m.group(1), content)
+        return content
+
+    # Remove outermost braces and process nested ones
+    text = re.sub(r'\{([^{}]*)\}', process_braces, text)
+    
+    # Replace \& with &amp;
+    text = text.replace(r'\&', '&amp;')
+    
+    # Replace accented characters
+    accent_map = {
+        r"\'e": "&eacute;",
+        r"\'a": "&aacute;",
+        r'\"o': "&ouml;",
+        r'\"a': "&auml;",
+        r"\'i": "&iacute;",
+        r"\'o": "&oacute;",
+        r"\'u": "&uacute;",
+        r'\"u': "&uuml;",
+        r"\`e": "&egrave;",
+        r"\`a": "&agrave;",
+        r"\^e": "&ecirc;",
+        r"\^a": "&acirc;",
+        r"\~n": "&ntilde;",
+        r"\c{c}": "&ccedil;"
+    }
+    for latex, html in accent_map.items():
+        text = text.replace(latex, html)
+    
+    # Replace other LaTeX special characters (extend as needed)
+    latex_to_html = {
+        r'\textbf{': '<strong>',
+        r'\textit{': '<em>',
+        r'}': '</strong></em>'  # Closing tag for both bold and italic
+    }
+    for latex, html in latex_to_html.items():
+        text = text.replace(latex, html)
+    
+    return text
+
+
 def bibtex_entry_to_html(entry):
     """Inspired by bibtex2html.py get_entry_output()"""
     # rip out whitespace
@@ -88,6 +135,8 @@ def bibtex_entry_to_html(entry):
             raise RuntimeError(
                 f"bibtex tag {entry['bibtag']} is missing" f" required field {f}"
             )
+        if isinstance(entry[f], str):
+            return bibtex_field_to_html(entry[f])
         return entry[f]
 
     out = ["\n<li id=%s>\n" % field("bibtag")]
