@@ -20,6 +20,15 @@ awk '
     next;
 }
 1' requirements.txt > requirements-bazel.txt
+awk '
+/torchvision==[0-9]+\.[0-9]+\.[0-9]+ ; python_version >= "3.10" and python_version < "4.0"/ {
+    version=$1; sub(/^torchvision==/, "", version); sub(/ ;.*/, "", version);
+    print "--find-links https://download.pytorch.org/whl/torch_stable.html";
+    print "torchvision==" version "+cpu ; python_version >= \"3.10\" and sys_platform == \"linux\"";
+    print "torchvision==" version " ; python_version >= \"3.10\" and sys_platform == \"darwin\"";
+    next;
+}
+1' requirements-bazel.txt > requirements-bazel.txt.tmp && mv requirements-bazel.txt.tmp requirements-bazel.txt
 # Embarassingly, pip_parse does not support markers, so we need to split the
 # requirements into separate files.
 # https://github.com/bazelbuild/rules_python/issues/1105
