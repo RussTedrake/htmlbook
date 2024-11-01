@@ -28,6 +28,7 @@ while [ $START_LINE -lt $TOTAL_LINES ]; do
         --test_verbose_timeout_warnings=yes \
         --track_incremental_state=no --verbose_failures=no \
         --test_env=GITHUB_ACTIONS --test_env=DRAKE_RESOURCE_ROOT \
+        --test_env=MANIPULATION_DATA_DIR --test_env=UNDERACTUATED_DATA_DIR \
         --verbose_test_summary=no $TESTS
 
     # Clean up
