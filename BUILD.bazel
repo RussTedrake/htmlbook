@@ -32,6 +32,7 @@ rt_py_test(
       "check_deepnote_requirements.py",
     ],
     data = [
+        "//:pyproject.toml",
         "//book:deepnote",
     ],
     deps = [
