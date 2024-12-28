@@ -166,10 +166,11 @@ def check_files(expected_files, expected_notebooks, project_id):
     expected_files = set(expected_files)
 
     if not expected_notebooks == notebooks:
+        print(f"At {url}:")
         if expected_notebooks - notebooks:
-            print(f"Missing notebooks: {expected_notebooks - notebooks}")
+            print(f"  Missing notebooks: {expected_notebooks - notebooks}")
         if notebooks - expected_notebooks:
-            print(f"Extra notebooks: {notebooks - expected_notebooks}")
+            print(f"  Extra notebooks: {notebooks - expected_notebooks}")
 
     if not expected_files == files:
         if expected_files - files:
