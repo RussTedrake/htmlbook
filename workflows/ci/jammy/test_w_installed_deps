@@ -15,7 +15,7 @@ TOTAL_LINES=$(wc -l < /tmp/all_tests.txt)
 START_LINE=1
 
 while [ $START_LINE -lt $TOTAL_LINES ]; do
-    echo "Running tests from $START_LINE to $((START_LINE + BATCH_SIZE))"
+    echo "Running tests from $START_LINE to $((START_LINE + BATCH_SIZE)) of $TOTAL_LINES"
     # Get batch of test targets
     TESTS=$(sed -n "$START_LINE,+$BATCH_SIZE p" /tmp/all_tests.txt)
     
