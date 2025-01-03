@@ -1,7 +1,7 @@
 ## Requirements management with Poetry
 
 ```
-pip3 install poetry poetry-plugin-export
+pip install poetry poetry-plugin-export
 poetry install --with=dev,docs
 ```
 (in a virtual environment) to install the requirements.
@@ -9,7 +9,7 @@ poetry install --with=dev,docs
 ## Please install the pre-commit hooks
 
 ```
-pip3 install pre-commit
+pip install pre-commit
 pre-commit install
 ```
 
@@ -83,7 +83,7 @@ broken anything.
 You will need to install `sphinx`:
 ```
 poetry install --with docs
-pip3 install sphinx myst-parser sphinx_rtd_theme
+pip install sphinx myst-parser sphinx_rtd_theme
 ```
 
 From the root directory, run

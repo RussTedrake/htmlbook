@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # For bazel
-poetry export --without-hashes --with dev > requirements.txt
+poetry export --without-hashes --with dev --all-extras > requirements.txt
 # Remove poetry. Required to work around poetry <--> poetry-plugin-export circular
 # dependency: https://github.com/python-poetry/poetry-plugin-export/issues/240
 # Note that pip_parse does provide a mechanism for handling known cycles:
