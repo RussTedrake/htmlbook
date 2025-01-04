@@ -7,7 +7,10 @@ set -euo pipefail
 
 # Run the tests in batches to reduce the memory footprint on CI. (I was running
 # out of memory on manipulation's jammy CI). 
-if [ -n "${EXCLUDE_TESTS:-}" ]; then
+if [ -n "${INCLUDE_TESTS:-}" ]; then
+  echo "Including specific tests: $INCLUDE_TESTS"
+  bazel query "kind(test, $INCLUDE_TESTS)" > /tmp/my_tests.txt
+elif [ -n "${EXCLUDE_TESTS:-}" ]; then
   echo "Excluding tests: $EXCLUDE_TESTS"
   bazel query "kind(test, //...) except $EXCLUDE_TESTS" > /tmp/my_tests.txt
 else
