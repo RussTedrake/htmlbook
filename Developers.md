@@ -2,7 +2,7 @@
 
 ```
 pip install poetry poetry-plugin-export
-poetry install --with=dev,docs
+poetry install --all-extras --with=dev,docs
 ```
 (in a virtual environment) to install the requirements.
 

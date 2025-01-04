@@ -31,7 +31,7 @@ awk '
 # https://github.com/bazelbuild/rules_python/issues/1105
 awk '/sys_platform == "darwin"/ || !/sys_platform/' requirements-bazel.txt > requirements-bazel-mac.txt
 awk '/sys_platform == "linux"/ || !/sys_platform/' requirements-bazel.txt > requirements-bazel-linux.txt
-# Soften the matplotlib requirement to >= for bazel on linux, since we get
+# Peg the matplotlib requirement for bazel on linux, since we get
 # interference with the matplotlib installed via apt python3-matplotlib.
 # https://github.com/RobotLocomotion/drake/issues/14250#issuecomment-984217002  
-sed -E 's/matplotlib==[0-9]+\.[0-9]+\.[0-9]+/matplotlib>=3.5.1/' requirements-bazel-linux.txt > requirements-bazel-linux.txt.tmp && mv requirements-bazel-linux.txt.tmp requirements-bazel-linux.txt
+sed -E 's/matplotlib==[0-9]+\.[0-9]+\.[0-9]+/matplotlib==3.5.1/' requirements-bazel-linux.txt > requirements-bazel-linux.txt.tmp && mv requirements-bazel-linux.txt.tmp requirements-bazel-linux.txt
