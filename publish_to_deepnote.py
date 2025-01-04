@@ -153,30 +153,37 @@ def check_files(expected_files, expected_notebooks, project_id):
             text=True,
             timeout=60,
         ).stdout.splitlines()
+        
+        # Add error handling for malformed output
+        try:
+            separator = output.index("---")
+        except ValueError:
+            print(f"Warning: Malformed output from deepnote_check_notebooks.js for {url}")
+            print("Output received:", output)
+            return
+            
+        notebooks = set(output[:separator])
+        expected_notebooks = set(expected_notebooks)
+        files = set(output[separator + 1 :])
+        expected_files = set(expected_files)
+        
+        if not expected_notebooks == notebooks:
+            print(f"At {url}:")
+            if expected_notebooks - notebooks:
+                print(f"  Missing notebooks: {expected_notebooks - notebooks}")
+            if notebooks - expected_notebooks:
+                print(f"  Extra notebooks: {notebooks - expected_notebooks}")
+
+        if not expected_files == files:
+            if expected_files - files:
+                print(f"Missing files: {expected_files - files}")
+            if files - expected_files:
+                print(f"Extra files: {files - expected_files}")
     except:
         print("Failed to run node.js notebook check. Disabling these checks.")
         print("See deepnote_check_notebooks.js for installation instructions.")
         check_deepnote_files = False
         return
-
-    separator = output.index("---")
-    notebooks = set(output[:separator])
-    expected_notebooks = set(expected_notebooks)
-    files = set(output[separator + 1 :])
-    expected_files = set(expected_files)
-
-    if not expected_notebooks == notebooks:
-        print(f"At {url}:")
-        if expected_notebooks - notebooks:
-            print(f"  Missing notebooks: {expected_notebooks - notebooks}")
-        if notebooks - expected_notebooks:
-            print(f"  Extra notebooks: {notebooks - expected_notebooks}")
-
-    if not expected_files == files:
-        if expected_files - files:
-            print(f"Missing files: {expected_files - files}")
-        if files - expected_files:
-            print(f"Extra files: {files - expected_files}")
 
 
 with open(Path(root) / "Deepnote_workspace.txt") as workspace_file:
