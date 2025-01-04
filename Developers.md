@@ -60,7 +60,7 @@ the root directory, run:
 rm -rf dist/*
 poetry publish --build && cd book && ./Deepnote.sh
 ```
-- Finally, PR the updated pyproject.toml (without the `requires new pip wheels` label).
+- Finally, PR the updated pyproject.toml (*without* the `requires new pip wheels` label).
 
 Note: use `poetry config pypi-token.pypi <token>` once to set up your pypi token.
 
