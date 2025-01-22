@@ -29,14 +29,26 @@ rt_py_test(
 rt_py_test(
     name = "check_deepnote_requirements",
     srcs = [
-      "check_deepnote_requirements.py",
+        "check_deepnote_requirements.py",
     ],
     data = [
         "//:pyproject.toml",
         "//book:deepnote",
     ],
     deps = [
-      requirement("requests"),
+        requirement("requests"),
     ],
     tags = ["requires-network"], 
+)
+
+rt_py_test(
+    name = "check_website",
+    srcs = ["check_website.py"],
+    data = [
+        "//:pyproject.toml",
+    ],
+    deps = [
+        requirement("requests"),
+    ],
+    tags = ["requires-network"],
 )
