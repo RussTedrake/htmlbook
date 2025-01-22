@@ -8,6 +8,20 @@ load("@pip_deps//:requirements.bzl", "requirement")
 load("//book/htmlbook/tools/python:defs.bzl", "rt_py_library", "rt_py_test")
 load("@pip_deps//:requirements.bzl", "requirement")
 
+rt_py_library(
+    name = "htmlbook",
+    srcs = [
+      "__init__.py",
+      "book_name.py"
+    ],
+    imports = [".."],
+    data = [
+        "//:pyproject.toml",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+
 rt_py_test(
     name = "install_html_meta_data",
     srcs = [
@@ -41,20 +55,12 @@ rt_py_test(
     tags = ["requires-network"], 
 )
 
-rt_py_library(
-    name = "book_name",
-    srcs = ["book_name.py"],
-    data = [
-        "//:pyproject.toml",
-    ],
-    visibility = ["//visibility:public"],
-)
 
 rt_py_test(
     name = "check_website",
     srcs = ["check_website.py"],
     deps = [
-        ":book_name",
+        ":htmlbook",
         requirement("requests"),
     ],
     tags = ["requires-network"],
