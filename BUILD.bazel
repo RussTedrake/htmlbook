@@ -54,7 +54,7 @@ rt_py_test(
     name = "check_website",
     srcs = ["check_website.py"],
     deps = [
-        "book_name",
+        ":book_name",
         requirement("requests"),
     ],
     tags = ["requires-network"],
