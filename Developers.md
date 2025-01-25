@@ -72,11 +72,10 @@ latest pip dependencies):
 ```
 rm -rf dist/*
 poetry publish --build
-./book/Deepnote_docker.sh
-cd book && ./Deepnote.sh
+./book/Deepnote_docker.sh && cd book && ./Deepnote.sh
 ```
 And make sure to follow the printed instructions to build the image once on
-deepnote. The run a few notebooks on deepnote to convince yourself you haven't
+deepnote. Then run a few notebooks on deepnote to convince yourself you haven't
 broken anything.
 
 ## Building the documentation
