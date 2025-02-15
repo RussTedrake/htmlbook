@@ -10,7 +10,7 @@ load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 def _common_attrs(attrs):
     if "data" not in attrs or attrs["data"] == None:
         attrs["data"] = []
-    attrs["data"] = attrs["data"] + ["@drake_models"]        
+    attrs["data"] = attrs["data"]
     if "deps" not in attrs or attrs["deps"] == None:
         attrs["deps"] = []
     attrs["srcs_version"] = "PY3"
@@ -25,6 +25,13 @@ def _common_attrs(attrs):
 def _binary_attrs(attrs):
     attrs["legacy_create_init"] = False
     attrs["python_version"] = "PY3"
+    if "env" not in attrs or attrs["env"] == None:
+        attrs["env"] = {}
+    # This lets me only download once for AddRemote but only when "no-sandbox" is passed.
+    if "tags" in attrs and "no-sandbox" in attrs["tags"]:
+      attrs["env"].update({
+          "TEST_TMPDIR": "/tmp/htmlbook_cache",
+      })
     return _common_attrs(attrs)
 
 def _style_test_attrs(attrs):
