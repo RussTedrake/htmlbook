@@ -40,6 +40,16 @@ Then run
 bazel test //...
 ```
 
+To run the tests with different dependency configurations, use the following flags:
+```bash
+# all deps
+bazel test //... # or --define=use_dependencies=all 
+# only required deps, for testing the core library, e.g.
+bazel test //manipulation/... --define=use_dependencies=minimal 
+# no dependencies (for using the installed version of manipulation; this requires some additional setup, and is only expected to be used by CI)
+bazel test //... --define=use_dependencies=none     
+```
+
 ## Updating dependencies
 
 Bazel currently uses requirements-bazel.txt, which we generate from poetry

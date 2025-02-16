@@ -13,6 +13,13 @@ def _common_attrs(attrs):
     attrs["data"] = attrs["data"]
     if "deps" not in attrs or attrs["deps"] == None:
         attrs["deps"] = []
+    if "optional_deps" in attrs:
+        attrs["deps"] = select({
+            "//book/htmlbook/tools/python:no_deps": [],
+            "//book/htmlbook/tools/python:minimal_deps": attrs["deps"],
+            "//conditions:default": attrs["deps"] + attrs["optional_deps"],
+        })
+        attrs.pop("optional_deps")
     attrs["srcs_version"] = "PY3"
     if "tags" in attrs and attrs["tags"] != None:
         if ("block-network" not in attrs["tags"] and
@@ -53,8 +60,4 @@ def rt_py_library(**attrs):
     py_library(**_common_attrs(attrs))
 
 def rt_py_test(**attrs):
-    attrs["deps"] = select({
-        "//book/htmlbook/tools/python:installed_deps_true": [],
-        "//conditions:default": attrs.get("deps", [])
-    })
     py_test(**_test_attrs(attrs))

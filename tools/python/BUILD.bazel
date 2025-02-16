@@ -8,13 +8,14 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@rules_python//python:defs.bzl", "py_runtime", "py_runtime_pair")
 
-string_flag(name = "use_installed_deps", build_setting_default = "")
+config_setting(
+    name = "no_deps",
+    values = {"define": "use_dependencies=none"},
+)
 
 config_setting(
-    name = "installed_deps_true",
-    flag_values = {
-        ":use_installed_deps": "true",
-    },
+    name = "minimal_deps",
+    values = {"define": "use_dependencies=minimal"},
 )
 
 bzl_library(
