@@ -114,3 +114,12 @@ bzl_library(
     name = "rules_python_repositories",
     srcs = ["@rules_python//python:repositories.bzl"],
 )
+
+genrule(
+    name = "print_config",
+    outs = ["dummy"],
+    cmd = select({
+        ":no_deps": "echo 'no_deps is active' > $@",
+        "//conditions:default": "echo 'default config is active' > $@",
+    }),
+)

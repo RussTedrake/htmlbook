@@ -7,6 +7,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
+load("//book/htmlbook/tools/python:defs.bzl", "rt_py_binary")
 
 bzl_library(
     name = "defs",
@@ -14,17 +15,14 @@ bzl_library(
     deps = ["//book/htmlbook/tools/python:defs"],
 )
 
-py_binary(
+rt_py_binary(
     name = "nbconvert",
     srcs = ["nbconvert_script.py", "startup.py"],
-    legacy_create_init = False,
     main = "nbconvert_script.py",
-    python_version = "PY3",
-    srcs_version = "PY3",
     visibility = ["//visibility:public"],
     deps = [
-      requirement("nbconvert"),
-      requirement("ipython"),
+        requirement("nbconvert"),
+        requirement("ipython"),
     ],
 )
 

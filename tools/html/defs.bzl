@@ -22,10 +22,13 @@ def rt_check_links_test(**attrs):
           "//:workspace",
         ],
         tags = ["no-sandbox"],  # to allow network connections
-        deps = [
-          requirement("requests"),
-          requirement("beautifulsoup4"),
-        ],
+        deps = select({
+            "//book/htmlbook/tools/python:no_deps": [],
+            "//conditions:default": [
+                requirement("requests"),
+                requirement("beautifulsoup4"),
+            ],
+        }),
         visibility = ["//visibility:private"],
     )
 

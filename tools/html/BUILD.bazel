@@ -7,17 +7,18 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//book/htmlbook/tools/python:defs.bzl", "rt_py_binary")
 
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
 )
 
-py_binary(
+rt_py_binary(
     name = "check_html_links_exist",
     srcs = ["check_html_links_exist.py"],
     deps = [
-      requirement("requests"),
+        requirement("requests"),
     ],
     visibility = ["//visibility:public"],
 )
