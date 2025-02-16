@@ -31,10 +31,3 @@ awk '
 # https://github.com/bazelbuild/rules_python/issues/1105
 awk '/sys_platform == "darwin"/ || !/sys_platform/' requirements-bazel.txt > requirements-bazel-mac.txt
 awk '/sys_platform == "linux"/ || !/sys_platform/' requirements-bazel.txt > requirements-bazel-linux.txt
-# Peg the matplotlib requirement for bazel on linux, since we get interference
-# with the matplotlib installed via apt python3-matplotlib.
-# https://github.com/RobotLocomotion/drake/issues/14250#issuecomment-984217002
-# This only appears to be needed for `from mpl_toolkits.mplot3d import axes3d`
-# (still used in underactuated), so we could purge those instances to drop this
-# limitation. 
-sed -E 's/matplotlib==[0-9]+\.[0-9]+\.[0-9]+/matplotlib==3.5.1/' requirements-bazel-linux.txt > requirements-bazel-linux.txt.tmp && mv requirements-bazel-linux.txt.tmp requirements-bazel-linux.txt

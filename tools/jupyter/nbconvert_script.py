@@ -44,17 +44,23 @@ def main(notebook_filename, grader_throws=False):
     exporter = PythonExporter()
     output, resources = exporter.from_filename(notebook_filename, resources=resources)
     repo = find_workspace_name()
+    # load startup.py from same directory as this script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    startup_path = os.path.join(script_dir, "startup.py")
+    with open(startup_path, "r") as file:
+        startup_code = file.read()
     # Raise deprecations to errors and set 'running_as_test'
     output = (
-        f"from pydrake.common.deprecation import DrakeDeprecationWarning\n"
-        f"import warnings\n"
-        f'warnings.simplefilter("error", DrakeDeprecationWarning)\n\n'
-        f"try:\n"
-        f"    from {repo}.utils import _set_running_as_test\n"
-        f"    _set_running_as_test(True)\n\n"
-        f"except ModuleNotFoundError:\n"
-        f"    pass\n"
-    ) + output
+        startup_code
+        + (
+            f"try:\n"
+            f"    from {repo}.utils import _set_running_as_test\n"
+            f"    _set_running_as_test(True)\n\n"
+            f"except ModuleNotFoundError:\n"
+            f"    pass\n"
+        )
+        + output
+    )
 
     if grader_throws:
         output = (

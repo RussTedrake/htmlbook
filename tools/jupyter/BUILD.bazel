@@ -16,7 +16,7 @@ bzl_library(
 
 py_binary(
     name = "nbconvert",
-    srcs = ["nbconvert_script.py"],
+    srcs = ["nbconvert_script.py", "startup.py"],
     legacy_create_init = False,
     main = "nbconvert_script.py",
     python_version = "PY3",
