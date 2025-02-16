@@ -38,7 +38,7 @@ while [ $START_LINE -lt $TOTAL_LINES ]; do
         --track_incremental_state=no --verbose_failures=no \
         --test_env=GITHUB_ACTIONS --test_env=DRAKE_RESOURCE_ROOT \
         --test_env=MANIPULATION_DATA_DIR --test_env=UNDERACTUATED_DATA_DIR \
-        ${BAZEL_TEST_FLAGS} --verbose_test_summary=no $TESTS
+        ${BAZEL_TEST_FLAGS:-} --verbose_test_summary=no $TESTS
 
     # Clean up
     bazel clean
