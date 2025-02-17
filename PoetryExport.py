@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 
 from packaging.markers import Marker
-from pip_requirements_parser import RequirementsFile
+from pip_requirements_parser import RequirementsFile, build_install_req, RequirementLine
 
 
 def export_requirements():
@@ -15,26 +15,29 @@ def export_requirements():
         stdout=open("requirements.txt", "w"),
         check=True,
     )
-    return RequirementsFile.from_file("requirements.txt").requirements
+    # Add PyTorch find-links option
+    with open("requirements.txt", "r") as f:
+        content = f.read()
+    with open("requirements.txt", "w") as f:
+        f.write("--find-links https://download.pytorch.org/whl/torch_stable.html\n")
+        f.write(content)
+    return RequirementsFile.from_file("requirements.txt")
 
 
-def remove_poetry_dependencies(requirements):
-    return [req for req in requirements if not req.name.startswith("poetry")]
+def remove_poetry_dependencies(requirements_file):
+    requirements_file.requirements = [
+        req for req in requirements_file.requirements if not req.name.startswith("poetry")
+    ]
+    return requirements_file
 
 
-def modify_torch_requirements(requirements):
-    modified_reqs = []
-    find_links_added = False
+def modify_torch_requirements(requirements_file):
     torch_packages = {"torch", "torchvision"}
-
-    for req in requirements:
-        print(f"Processing requirement: {req.name} {req.specifier}")  # Debug print
+    
+    modified_requirements = []
+    
+    for req in requirements_file.requirements:
         if req.name in torch_packages:
-            if not find_links_added:
-                modified_reqs.append(
-                    f"--find-links https://download.pytorch.org/whl/torch_stable.html"
-                )
-                find_links_added = True
             version = str(req.specifier).replace("==", "")
             # Base requirement without platform
             base_req = f"{req.name}=={version}"
@@ -50,20 +53,14 @@ def modify_torch_requirements(requirements):
                 if req.marker
                 else f'{req.name}=={version}+cpu ; sys_platform == "linux"'
             )
-            modified_reqs.append(mac_req)
-            modified_reqs.append(linux_req)
+            # Parse the new requirements into Requirement objects
+            modified_requirements.append(build_install_req(mac_req, RequirementLine(line=mac_req)))
+            modified_requirements.append(build_install_req(linux_req, RequirementLine(line=linux_req)))
         else:
-            modified_reqs.append(req.line)
-
-    # Write to temporary file and parse again to get InstallRequirement objects
-    temp_file = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
-    try:
-        with temp_file as f:
-            for req in modified_reqs:
-                f.write(req + "\n")
-        return RequirementsFile.from_file(temp_file.name).requirements
-    finally:
-        os.unlink(temp_file.name)  # Clean up the temporary file
+            modified_requirements.append(req)
+    
+    requirements_file.requirements = modified_requirements
+    return requirements_file
 
 
 def should_include_for_platform(requirement, platform):
@@ -78,28 +75,31 @@ def should_include_for_platform(requirement, platform):
     return Marker(str(requirement.marker)).evaluate(context)
 
 
-def write_platform_requirements(requirements):
+def write_platform_requirements(requirements_file):
     with open("requirements-bazel.txt", "w") as f_bazel, open(
         "requirements-bazel-mac.txt", "w"
     ) as f_mac, open("requirements-bazel-linux.txt", "w") as f_linux:
-        for req in requirements:
-            f_bazel.write(req.line + "\n")
+        for file in [f_bazel, f_mac, f_linux]:
+            for option in requirements_file.options:
+                file.write(option.requirement_line.line + "\n")
+        for req in requirements_file.requirements:
+            f_bazel.write(req.requirement_line.line + "\n")
             if should_include_for_platform(req, "darwin"):
-                f_mac.write(req.line + "\n")
+                f_mac.write(req.requirement_line.line + "\n")
             if should_include_for_platform(req, "linux"):
-                f_linux.write(req.line + "\n")
+                f_linux.write(req.requirement_line.line + "\n")
 
 
 def main():
     # Export from poetry and load.
-    reqs = export_requirements()
+    requirements_file = export_requirements()
 
     # Make some changes for bazel compatibility.
-    reqs = remove_poetry_dependencies(reqs)
-    reqs = modify_torch_requirements(reqs)
+    requirements_file = remove_poetry_dependencies(requirements_file)
+    requirements_file = modify_torch_requirements(requirements_file)
 
     # Write final platform-specific files
-    write_platform_requirements(reqs)
+    write_platform_requirements(requirements_file)
 
 
 if __name__ == "__main__":
