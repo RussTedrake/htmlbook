@@ -56,10 +56,6 @@ Bazel currently uses requirements-bazel.txt, which we generate from poetry
 
 To generate it, run
 ```
-poetry lock --no-update && ./book/htmlbook/PoetryExport.py
-```
-or remove the `--no-update` flag to update all dependencies:
-```
 poetry lock && ./book/htmlbook/PoetryExport.py
 ```
 
