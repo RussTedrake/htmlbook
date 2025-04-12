@@ -52,9 +52,9 @@ bazel test //... --define=use_dependencies=none
 
 ## Updating dependencies
 
-Bazel currently uses requirements-bazel.txt, which we generate from poetry
+First update the dependency in `pyproject.toml`.
 
-To generate it, run
+Bazel currently uses requirements-bazel.txt, which we generate from poetry. To generate it, run
 ```
 poetry lock && ./book/htmlbook/PoetryExport.py
 ```
