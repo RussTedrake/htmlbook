@@ -58,6 +58,11 @@ Bazel currently uses requirements-bazel.txt, which we generate from poetry. To g
 ```
 poetry lock && ./book/htmlbook/PoetryExport.py
 ```
+Then run 
+```
+poetry install --all-extras --with=dev,docs
+```
+to update your virtual environment.
 
 ## To update the pip wheels
 
