@@ -6,7 +6,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_python//python:defs.bzl", "py_binary")
-load("//:python_version_detect.bzl", "requirement")
+load("//book/htmlbook/tools/python:requirements.bzl", "requirement")
 load("//book/htmlbook/tools/python:defs.bzl", "rt_py_binary")
 
 bzl_library(
