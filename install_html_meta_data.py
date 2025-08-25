@@ -6,8 +6,8 @@ import re
 import mysql.connector
 from lxml.html import parse, document_fromstring
 
-while not os.path.isfile("WORKSPACE.bazel"):
-    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
+while not os.path.isfile("MODULE.bazel"):
+    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find MODULE.bazel"
     os.chdir(os.path.dirname(os.getcwd()))
 repository = os.path.basename(os.getcwd())
 os.chdir("book")
@@ -78,45 +78,45 @@ def bibtex_field_to_html(text):
     # Function to process nested braces
     def process_braces(match):
         content = match.group(1)
-        while '{' in content:
-            content = re.sub(r'\{([^{}]*)\}', lambda m: m.group(1), content)
+        while "{" in content:
+            content = re.sub(r"\{([^{}]*)\}", lambda m: m.group(1), content)
         return content
 
     # Remove outermost braces and process nested ones
-    text = re.sub(r'\{([^{}]*)\}', process_braces, text)
-    
+    text = re.sub(r"\{([^{}]*)\}", process_braces, text)
+
     # Replace \& with &amp;
-    text = text.replace(r'\&', '&amp;')
-    
+    text = text.replace(r"\&", "&amp;")
+
     # Replace accented characters
     accent_map = {
         r"\'e": "&eacute;",
         r"\'a": "&aacute;",
-        r'\"o': "&ouml;",
-        r'\"a': "&auml;",
+        r"\"o": "&ouml;",
+        r"\"a": "&auml;",
         r"\'i": "&iacute;",
         r"\'o": "&oacute;",
         r"\'u": "&uacute;",
-        r'\"u': "&uuml;",
+        r"\"u": "&uuml;",
         r"\`e": "&egrave;",
         r"\`a": "&agrave;",
         r"\^e": "&ecirc;",
         r"\^a": "&acirc;",
         r"\~n": "&ntilde;",
-        r"\c{c}": "&ccedil;"
+        r"\c{c}": "&ccedil;",
     }
     for latex, html in accent_map.items():
         text = text.replace(latex, html)
-    
+
     # Replace other LaTeX special characters (extend as needed)
     latex_to_html = {
-        r'\textbf{': '<strong>',
-        r'\textit{': '<em>',
-        r'}': '</strong></em>'  # Closing tag for both bold and italic
+        r"\textbf{": "<strong>",
+        r"\textit{": "<em>",
+        r"}": "</strong></em>",  # Closing tag for both bold and italic
     }
     for latex, html in latex_to_html.items():
         text = text.replace(latex, html)
-    
+
     return text
 
 
@@ -211,7 +211,7 @@ def write_references(elib, s, filename):
     global change_detected
     index = 0
     refs = []
-    
+
     doc = document_fromstring(s)
     for ref in doc.findall(".//elib"):
         refs += ref.text.split("+")

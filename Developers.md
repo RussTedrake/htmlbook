@@ -1,7 +1,7 @@
 ## Requirements management with Poetry
 
 ```
-pip install "poetry>=2.0,<2.1"
+pip install "poetry>=2.0" pip-requirements-parser
 poetry install --all-extras --with=dev,docs
 ```
 (in a virtual environment) to install the requirements.

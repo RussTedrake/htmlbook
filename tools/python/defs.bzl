@@ -4,7 +4,7 @@
 # Copyright 2020 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
-load("@pip_deps//:requirements.bzl", "requirement")
+load("//:python_version_detect.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 
 def _common_attrs(attrs):

@@ -6,6 +6,33 @@ import re
 import sys
 import warnings
 
+# Set environment variables to help nbconvert 7.x find templates
+temp_jupyter_dir = '/tmp/jupyter_templates'
+template_dir = os.path.join(temp_jupyter_dir, 'nbconvert', 'templates', 'python')
+os.makedirs(template_dir, exist_ok=True)
+
+# Create the minimal index.py.j2 template that nbconvert expects
+template_content = '''# coding: utf-8
+{%- for cell in nb.cells -%}
+{%- if cell.cell_type == 'code' -%}
+{% for line in cell.source.splitlines() %}
+{{ line }}
+{% endfor %}
+{% if not loop.last %}
+
+{% endif %}
+{%- endif -%}
+{%- endfor -%}
+'''
+
+template_file = os.path.join(template_dir, 'index.py.j2')
+if not os.path.exists(template_file):
+    with open(template_file, 'w') as f:
+        f.write(template_content)
+
+os.environ.setdefault('JUPYTER_DATA_DIR', temp_jupyter_dir)
+os.environ.setdefault('JUPYTER_CONFIG_DIR', '/tmp')
+
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 from nbconvert.exporters import PythonExporter  # noqa: E402
@@ -17,7 +44,7 @@ def find_workspace_root(root=None):
         root = os.getcwd()
     if os.path.exists(os.path.join(root, "WORKSPACE")):
         return root
-    if os.path.exists(os.path.join(root, "WORKSPACE.bazel")):
+    if os.path.exists(os.path.join(root, "MODULE.bazel")):
         return root
     new_root = os.path.dirname(root)
     assert new_root != root, "Could not find workspace root"
@@ -25,16 +52,17 @@ def find_workspace_root(root=None):
 
 
 def find_workspace_name():
-    workspace_file = find_workspace_root() + "/WORKSPACE.bazel"
+    workspace_file = find_workspace_root() + "/MODULE.bazel"
     with open(workspace_file, "r") as file:
         for line in file:
-            if line.startswith("workspace(name ="):
+            # Support both bzlmod (module) and legacy (workspace) syntax
+            if line.startswith("module(name =") or line.startswith("workspace(name ="):
                 # Extracting the workspace name
                 name_part = line.split("=")[1].strip()
                 # Removing any potential leading or trailing characters like quotes or parentheses
                 workspace_name = name_part.strip(" '\"()")
                 return workspace_name
-    assert "Could not find workspace name in WORKSPACE.bazel file"
+    assert "Could not find module/workspace name in MODULE.bazel file"
 
 
 def main(notebook_filename, grader_throws=False):

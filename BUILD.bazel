@@ -4,9 +4,9 @@
 # Copyright 2020-2024 Massachusetts Institute of Technology.
 # Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
 
-load("@pip_deps//:requirements.bzl", "requirement")
+load("//:python_version_detect.bzl", "requirement")
 load("//book/htmlbook/tools/python:defs.bzl", "rt_py_library", "rt_py_test")
-load("@pip_deps//:requirements.bzl", "requirement")
+load("//:python_version_detect.bzl", "requirement")
 
 rt_py_library(
     name = "htmlbook",
@@ -35,7 +35,7 @@ rt_py_test(
     ],
     deps = [
       requirement("lxml"),
-      requirement("mysql-connector-python"),
+      requirement("mysql_connector_python"),
     ],
     tags = ["requires-network"],  # for mysql.csail
 )

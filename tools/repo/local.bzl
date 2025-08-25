@@ -34,7 +34,7 @@ def _local_file_impl(repository_ctx):
         repository_ctx.path("."),
         repository_ctx.path("BUILD.bazel"),
         repository_ctx.path("BUILD"),
-        repository_ctx.path("WORKSPACE.bazel"),
+        repository_ctx.path("MODULE.bazel"),
         repository_ctx.path("WORKSPACE"),
         repository_ctx.path("file/BUILD.bazel"),
         repository_ctx.path("file/BUILD"),
@@ -57,7 +57,7 @@ def _local_file_impl(repository_ctx):
     )
 
     repository_ctx.file(
-        "WORKSPACE.bazel",
+        "MODULE.bazel",
         content = _LOCAL_FILE_WORKSPACE_BAZEL.format(
             "GENERATED FILE DO NOT EDIT",
             repository_ctx.name,

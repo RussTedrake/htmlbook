@@ -19,8 +19,8 @@ args = parser.parse_args()
 
 # Find workspace root by searching parent directories.
 os.chdir(args.cwd)
-while not os.path.isfile("WORKSPACE.bazel"):
-    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find WORKSPACE.bazel"
+while not os.path.isfile("MODULE.bazel"):
+    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find MODULE.bazel"
     os.chdir(os.path.dirname(os.getcwd()))
 
 repository = os.path.basename(os.getcwd())
