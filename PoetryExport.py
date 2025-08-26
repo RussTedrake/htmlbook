@@ -26,40 +26,10 @@ def export_requirements():
 
 def remove_poetry_dependencies(requirements_file):
     requirements_file.requirements = [
-        req for req in requirements_file.requirements if not req.name.startswith("poetry")
+        req
+        for req in requirements_file.requirements
+        if not req.name.startswith("poetry")
     ]
-    return requirements_file
-
-
-def modify_torch_requirements(requirements_file):
-    torch_packages = {"torch", "torchvision"}
-    
-    modified_requirements = []
-    
-    for req in requirements_file.requirements:
-        if req.name in torch_packages:
-            version = str(req.specifier).replace("==", "")
-            # Base requirement without platform
-            base_req = f"{req.name}=={version}"
-            # Mac version - append platform requirement
-            mac_req = (
-                f'{base_req} ; {req.marker} and sys_platform == "darwin"'
-                if req.marker
-                else f'{base_req} ; sys_platform == "darwin"'
-            )
-            # Linux version - append +cpu and platform requirement
-            linux_req = (
-                f'{req.name}=={version}+cpu ; {req.marker} and sys_platform == "linux"'
-                if req.marker
-                else f'{req.name}=={version}+cpu ; sys_platform == "linux"'
-            )
-            # Parse the new requirements into Requirement objects
-            modified_requirements.append(build_install_req(mac_req, RequirementLine(line=mac_req)))
-            modified_requirements.append(build_install_req(linux_req, RequirementLine(line=linux_req)))
-        else:
-            modified_requirements.append(req)
-    
-    requirements_file.requirements = modified_requirements
     return requirements_file
 
 
@@ -96,7 +66,6 @@ def main():
 
     # Make some changes for bazel compatibility.
     requirements_file = remove_poetry_dependencies(requirements_file)
-    requirements_file = modify_torch_requirements(requirements_file)
 
     # Write final platform-specific files
     write_platform_requirements(requirements_file)

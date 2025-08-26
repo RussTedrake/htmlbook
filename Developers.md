@@ -69,7 +69,7 @@ to update your virtual environment.
 If you make a change to the dependencies or library directory, you
 will need to update the pip wheels.
 - First PR the code changes, and mark the PR with the `requires new pip wheels` label.
-- Make sure to `git pull` your merged PRinto `master`.
+- Make sure to `git pull` your merged PR into `master`.
 - Once the PR is merged update the version number in `pyproject.toml`, then
 `git commit` that small change, then from the root directory, run:
 ```
