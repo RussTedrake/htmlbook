@@ -23,7 +23,7 @@ def requirement(package_name):
     Returns:
         String reference to the pip package
     """
-    return "@manipulation_pip//{}".format(package_name)
+    return "@htmlbook_pip//{}".format(package_name)
 
 def all_requirements(package_names):
     """
@@ -35,4 +35,4 @@ def all_requirements(package_names):
     Returns:
         List of pip package references
     """
-    return ["@manipulation_pip//{}".format(name) for name in package_names]
+    return ["@htmlbook_pip//{}".format(name) for name in package_names]
