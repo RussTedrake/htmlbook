@@ -1,0 +1,599 @@
+#!/usr/bin/env python3
+
+# Copyright 2025 Massachusetts Institute of Technology.
+# Licensed under the BSD 3-Clause License. See LICENSE.TXT for details.
+
+import subprocess
+import sys
+import os
+import re
+import argparse
+
+
+def get_rt_py_test_files():
+    """Find all rt_py_test targets and return their main py files as a Python list of executable file paths."""
+    try:
+        # Find all rt_py_test targets (py_test rules with "block-network" tag)
+        result = subprocess.run(
+            [
+                "bazel",
+                "query",
+                'attr("tags", "block-network", //...)',
+                "--output=label_kind",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        test_files = []
+        for line in result.stdout.splitlines():
+            if "py_test rule" in line:
+                # Extract target name (3rd field)
+                target = line.split()[2]
+
+                # Get the main py file for this target
+                src_result = subprocess.run(
+                    ["bazel", "query", f"labels(srcs, {target})"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+
+                # Find the first .py file
+                for src_line in src_result.stdout.splitlines():
+                    if src_line.strip().endswith(".py"):
+                        # Convert bazel label to file path
+                        bazel_label = src_line.strip()
+                        file_path = convert_bazel_label_to_path(bazel_label)
+                        if file_path and os.path.exists(file_path):
+                            test_files.append(file_path)
+                        break
+
+        return test_files
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error running bazel query: {e}", file=sys.stderr)
+        return []
+
+
+def get_main_file_from_target(target):
+    """Extract the main file from a rt_py_test target by checking the main attribute or using default behavior."""
+    try:
+        # Extract package path from target (e.g., //book/segmentation:segmentation_data -> book/segmentation)
+        if target.startswith("//"):
+            package_path = target[2:].split(":")[0]
+            target_name = target.split(":")[-1]
+        else:
+            return None
+
+        # Find the BUILD file in the package directory
+        build_file = os.path.join(package_path, "BUILD.bazel")
+        if not os.path.exists(build_file):
+            build_file = os.path.join(package_path, "BUILD")
+
+        if not os.path.exists(build_file):
+            return None
+
+        # Read the BUILD file
+        with open(build_file, "r") as f:
+            build_content = f.read()
+
+        # Try to find rt_py_test block first
+        pattern = (
+            rf'rt_py_test\(\s*name\s*=\s*["\']{re.escape(target_name)}["\'](.*?)\)'
+        )
+        match = re.search(pattern, build_content, re.DOTALL)
+
+        if not match:
+            pattern = rf'rt_ipynb_test\(\s*name\s*=\s*["\']{re.escape(target_name)}["\'](.*?)\)'
+            match = re.search(pattern, build_content, re.DOTALL)
+            if match:
+                return f"{os.path.join(package_path, target_name)}.ipynb"
+
+        if not match:
+            return None
+
+        target_block = match.group(1)
+
+        main_pattern = r'main\s*=\s*["\']([^"\']+)["\']'
+        main_match = re.search(main_pattern, target_block)
+
+        if main_match:
+            # Main attribute is specified
+            main_file = main_match.group(1)
+            # Convert to full path
+            if main_file.startswith("//"):
+                # Absolute label
+                main_file = convert_bazel_label_to_path(main_file)
+            elif ":" in main_file:
+                # Relative label within same package
+                main_file = os.path.join(package_path, main_file.split(":")[-1])
+            else:
+                # Just filename
+                main_file = os.path.join(package_path, main_file)
+            return main_file
+
+        # If no main attribute, use the default: target name with .py
+        default_main = f"{target_name}.py"
+        default_path = os.path.join(package_path, default_main)
+
+        # Check if this file exists
+        if os.path.exists(default_path):
+            return default_path
+
+        # If default doesn't exist, try to find any .py file in srcs
+        srcs_pattern = r"srcs\s*=\s*\[(.*?)\]"
+        srcs_match = re.search(srcs_pattern, target_block, re.DOTALL)
+
+        if srcs_match:
+            srcs_string = srcs_match.group(1)
+            # Parse srcs list to find .py files
+            for src in srcs_string.split(","):
+                src = src.strip()
+                if src.startswith('"') and src.endswith('"'):
+                    src = src[1:-1]
+                elif src.startswith("'") and src.endswith("'"):
+                    src = src[1:-1]
+
+                if src.endswith(".py"):
+                    # Convert to full path
+                    if src.startswith("//"):
+                        src_path = convert_bazel_label_to_path(src)
+                    elif ":" in src:
+                        src_path = os.path.join(package_path, src.split(":")[-1])
+                    else:
+                        src_path = os.path.join(package_path, src)
+
+                    if os.path.exists(src_path):
+                        return src_path
+
+        return None
+
+    except Exception as e:
+        print(
+            f"Warning: Could not extract main file for {target}: {e}", file=sys.stderr
+        )
+        return None
+
+
+def get_test_args(target):
+    """Extract args from a rt_py_test target by parsing the BUILD file."""
+    try:
+        # Extract package path from target (e.g., //book/segmentation:segmentation_data -> book/segmentation)
+        if target.startswith("//"):
+            package_path = target[2:].split(":")[0]
+        else:
+            return []
+
+        # Find the BUILD file in the package directory
+        build_file = os.path.join(package_path, "BUILD.bazel")
+        if not os.path.exists(build_file):
+            build_file = os.path.join(package_path, "BUILD")
+
+        if not os.path.exists(build_file):
+            return []
+
+        # Read the BUILD file
+        with open(build_file, "r") as f:
+            build_content = f.read()
+
+        # Extract target name without the package prefix
+        target_name = target.split(":")[-1]
+
+        # Find the rt_py_test block for this target
+        pattern = (
+            rf'rt_py_test\(\s*name\s*=\s*["\']{re.escape(target_name)}["\'](.*?)\)'
+        )
+        match = re.search(pattern, build_content, re.DOTALL)
+
+        if not match:
+            return []
+
+        target_block = match.group(1)
+
+        # Extract args from the target block
+        args_pattern = r"args\s*=\s*\[(.*?)\]"
+        args_match = re.search(args_pattern, target_block, re.DOTALL)
+
+        if not args_match:
+            return []
+
+        args_string = args_match.group(1)
+
+        # Parse the args list
+        args = []
+        # Simple parsing - split by comma and strip quotes
+        for arg in args_string.split(","):
+            arg = arg.strip()
+            if arg.startswith('"') and arg.endswith('"'):
+                args.append(arg[1:-1])
+            elif arg.startswith("'") and arg.endswith("'"):
+                args.append(arg[1:-1])
+            elif arg:  # Non-empty non-quoted argument
+                args.append(arg)
+
+        return args
+
+    except Exception as e:
+        print(f"Warning: Could not extract args for {target}: {e}", file=sys.stderr)
+        return []
+
+
+def convert_bazel_label_to_path(bazel_label):
+    """Convert a bazel label like //book/clutter:clutter_clearing.ipynb.py to a file path."""
+    if not bazel_label.startswith("//"):
+        return None
+
+    # Remove the // prefix
+    label = bazel_label[2:]
+
+    # Split on : to separate package path from target name
+    if ":" in label:
+        package_path, target_name = label.split(":", 1)
+    else:
+        # If no :, the target name is the same as the last part of the package path
+        package_path = label
+        target_name = os.path.basename(package_path)
+
+    # If the target name ends with .ipynb.py, strip the .py to leave .ipynb
+    if target_name.endswith(".ipynb.py"):
+        target_name = target_name[:-3]  # Remove the last 3 characters (.py)
+
+    # Convert package path to directory path
+    dir_path = package_path.replace("/", os.sep)
+
+    # Construct the full file path
+    file_path = os.path.join(dir_path, target_name)
+
+    return file_path
+
+
+def get_rt_py_test_targets():
+    """Find all rt_py_test targets and return their target names as a Python list."""
+    try:
+        # Find all rt_py_test targets (py_test rules with "block-network" tag)
+        result = subprocess.run(
+            [
+                "bazel",
+                "query",
+                'attr("tags", "block-network", //...)',
+                "--output=label_kind",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        test_targets = []
+        for line in result.stdout.splitlines():
+            if "py_test rule" in line:
+                # Extract target name (3rd field)
+                target = line.split()[2]
+                test_targets.append(target)
+
+        return test_targets
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error running bazel query: {e}", file=sys.stderr)
+        return []
+
+
+def run_notebook_test(notebook_file, args, dry_run=False):
+    """Run a notebook test by converting it to Python and executing it."""
+    if dry_run:
+        # Print the command that would be run
+        nbconvert_script = "book/htmlbook/tools/jupyter/nbconvert_script.py"
+        print(f"# Would convert notebook: {notebook_file}")
+        print(f"# Would run: {sys.executable} {nbconvert_script} {notebook_file}")
+        print(f"# Would execute converted Python with args: {args}")
+        return None
+
+    try:
+        # Convert notebook to Python using nbconvert_script.py
+        nbconvert_script = "book/htmlbook/tools/jupyter/nbconvert_script.py"
+
+        # Call nbconvert_script.py to convert the notebook
+        convert_result = subprocess.run(
+            [sys.executable, nbconvert_script, notebook_file],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        # Create a temporary directory for running the test
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Write the converted Python code to a temporary file
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".py", delete=False, dir=temp_dir
+            ) as temp_file:
+                temp_file.write(convert_result.stdout)
+                temp_python_file = temp_file.name
+
+            try:
+                # Build command with args
+                cmd = [sys.executable, temp_python_file] + args
+
+                # Set environment variables for headless execution (like bazel)
+                env = os.environ.copy()
+                env["MPLBACKEND"] = "Template"  # Non-interactive backend
+                env["DISPLAY"] = ""  # Clear display variable
+                env["PYTHONPATH"] = os.getcwd() + ":" + env.get("PYTHONPATH", "")
+
+                # Run the converted Python file in the temp directory
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=300,
+                    cwd=temp_dir,  # 5 minute timeout
+                    env=env,
+                )
+
+                return result
+
+            finally:
+                # Clean up temporary file
+                try:
+                    os.unlink(temp_python_file)
+                except:
+                    pass
+
+    except subprocess.CalledProcessError as e:
+        # Return a mock result for conversion failure
+        class MockResult:
+            def __init__(self, returncode, stdout, stderr):
+                self.returncode = returncode
+                self.stdout = stdout
+                self.stderr = stderr
+
+        return MockResult(1, "", f"Failed to convert notebook: {e}")
+    except Exception as e:
+        # Return a mock result for other errors
+        class MockResult:
+            def __init__(self, returncode, stdout, stderr):
+                self.returncode = returncode
+                self.stdout = stdout
+                self.stderr = stderr
+
+        return MockResult(1, "", f"Error processing notebook: {e}")
+
+
+def run_py_test_in_temp(test_file, args, dry_run=False):
+    """Run a Python test file in a temporary directory."""
+    if dry_run:
+        # Print the command that would be run
+        print(f"# Would copy {test_file} to temp directory")
+        print(
+            f"# Would run: {sys.executable} {os.path.basename(test_file)} {' '.join(args)}"
+        )
+        return None
+
+    try:
+        # Create a temporary directory for running the test
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Copy the test file to the temp directory
+            import shutil
+
+            temp_test_file = os.path.join(temp_dir, os.path.basename(test_file))
+            shutil.copy2(test_file, temp_test_file)
+
+            # Build command with args
+            cmd = [sys.executable, temp_test_file] + args
+
+            # Set environment variables for headless execution (like bazel)
+            env = os.environ.copy()
+            env["MPLBACKEND"] = "Template"  # Non-interactive backend
+            env["DISPLAY"] = ""  # Clear display variable
+            env["PYTHONPATH"] = os.getcwd() + ":" + env.get("PYTHONPATH", "")
+
+            # Run the test file in the temp directory
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                cwd=temp_dir,  # 5 minute timeout
+                env=env,
+            )
+
+            return result
+
+    except Exception as e:
+        # Return a mock result for errors
+        class MockResult:
+            def __init__(self, returncode, stdout, stderr):
+                self.returncode = returncode
+                self.stdout = stdout
+                self.stderr = stderr
+
+        return MockResult(1, "", f"Error running test: {e}")
+
+
+def run_py_tests(dry_run=False, core_library_only=False):
+    """Run all .py test files found in rt_py_test targets."""
+    try:
+        # Use the existing function that finds all rt_py_test targets
+        all_targets = get_rt_py_test_targets()
+
+        py_test_targets = []
+        notebook_test_targets = []
+
+        for target in all_targets:
+            # Filter for core library tests if requested
+            if core_library_only and not target.startswith("//manipulation"):
+                continue
+
+            # Get the main file for this target using our logic
+            file_path = get_main_file_from_target(target)
+            if file_path and os.path.exists(file_path):
+                if file_path.endswith(".py"):
+                    py_test_targets.append((target, file_path))
+                elif file_path.endswith(".ipynb"):
+                    notebook_test_targets.append((target, file_path))
+
+        if dry_run:
+            print(f"# Found {len(py_test_targets)} .py test files to run")
+            print(f"# Found {len(notebook_test_targets)} .ipynb test files to run")
+            print(f"# Using Python interpreter: {sys.executable}")
+            if core_library_only:
+                print("# Filtered to core library tests only")
+            print("=" * 50)
+        else:
+            print(
+                f"Running {len(py_test_targets)} .py tests and {len(notebook_test_targets)} .ipynb tests..."
+            )
+            print(f"Using Python interpreter: {sys.executable}")
+            if core_library_only:
+                print("Filtered to core library tests only")
+            print()
+
+        passed = 0
+        failed = 0
+        failed_tests = []
+
+        # Run .py tests
+        for target, test_file in py_test_targets:
+            if dry_run:
+                print(f"\n# Would run .py test: {test_file}")
+                print(f"# Target: {target}")
+            else:
+                # Show full target path for normal mode
+                print(f"{target}...", end=" ", flush=True)
+
+            # Get args for this target
+            args = get_test_args(target)
+            if dry_run and args:
+                print(f"# Args: {args}")
+
+            try:
+                # Run the test file in a temp directory
+                result = run_py_test_in_temp(test_file, args, dry_run)
+
+                if dry_run:
+                    continue
+
+                if result.returncode == 0:
+                    print("✅ PASSED")
+                    passed += 1
+                else:
+                    print("❌ FAILED")
+                    failed += 1
+                    failed_tests.append((target, test_file, result))
+
+                    # Print detailed output for failed test
+                    print(f"\n--- FAILED TEST OUTPUT: {target} ---")
+                    if result.stdout:
+                        print("STDOUT:")
+                        print(result.stdout)
+                    if result.stderr:
+                        print("STDERR:")
+                        print(result.stderr)
+                    print("--- END FAILED TEST OUTPUT ---\n")
+
+            except subprocess.TimeoutExpired:
+                if not dry_run:
+                    print("❌ TIMEOUT")
+                    failed += 1
+                    failed_tests.append((target, test_file, None))
+            except Exception as e:
+                if not dry_run:
+                    print(f"❌ ERROR: {e}")
+                    failed += 1
+                    failed_tests.append((target, test_file, None))
+
+        # Run .ipynb tests
+        for target, test_file in notebook_test_targets:
+            if dry_run:
+                print(f"\n# Would run notebook test: {test_file}")
+                print(f"# Target: {target}")
+            else:
+                # Show full target path for normal mode
+                print(f"{target}...", end=" ", flush=True)
+
+            # Get args for this target
+            args = get_test_args(target)
+            if dry_run and args:
+                print(f"# Args: {args}")
+
+            try:
+                # Run the notebook test
+                result = run_notebook_test(test_file, args, dry_run)
+
+                if dry_run:
+                    continue
+
+                if result.returncode == 0:
+                    print("✅ PASSED")
+                    passed += 1
+                else:
+                    print("❌ FAILED")
+                    failed += 1
+                    failed_tests.append((target, test_file, result))
+
+                    # Print detailed output for failed test
+                    print(f"\n--- FAILED TEST OUTPUT: {target} ---")
+                    if result.stdout:
+                        print("STDOUT:")
+                        print(result.stdout)
+                    if result.stderr:
+                        print("STDERR:")
+                        print(result.stderr)
+                    print("--- END FAILED TEST OUTPUT ---\n")
+
+            except subprocess.TimeoutExpired:
+                if not dry_run:
+                    print("❌ TIMEOUT")
+                    failed += 1
+                    failed_tests.append((target, test_file, None))
+            except Exception as e:
+                if not dry_run:
+                    print(f"❌ ERROR: {e}")
+                    failed += 1
+                    failed_tests.append((target, test_file, None))
+
+        # Print summary
+        if not dry_run:
+            print("\n" + "=" * 50)
+            print(f"SUMMARY: {passed} passed, {failed} failed")
+
+            if failed > 0:
+                print(f"\nFAILED TESTS ({len(failed_tests)}):")
+                for target, test_file, result in failed_tests:
+                    target_name = target.split(":")[-1]
+                    print(f"  - {target_name}")
+                    if result and result.stderr:
+                        # Show first line of error for quick reference
+                        error_lines = result.stderr.strip().split("\n")
+                        if error_lines:
+                            print(f"    Error: {error_lines[0]}")
+
+        return failed == 0  # Return True if all tests passed
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error running bazel query: {e}", file=sys.stderr)
+        return False
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run rt_py_test targets")
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Print commands that would be run without executing them",
+    )
+    parser.add_argument(
+        "--core-library-only",
+        action="store_true",
+        help="Run only tests in the core manipulation library",
+    )
+    args = parser.parse_args()
+
+    success = run_py_tests(
+        dry_run=args.dry_run, core_library_only=args.core_library_only
+    )
+    sys.exit(0 if success else 1)
