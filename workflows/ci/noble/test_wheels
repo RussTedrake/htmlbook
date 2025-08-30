@@ -320,7 +320,6 @@ def run_notebook_test(notebook_file, args, dry_run=False):
                 env = os.environ.copy()
                 env["MPLBACKEND"] = "Template"  # Non-interactive backend
                 env["DISPLAY"] = ""  # Clear display variable
-                env["PYTHONPATH"] = os.getcwd() + ":" + env.get("PYTHONPATH", "")
 
                 # Run the converted Python file in the temp directory
                 result = subprocess.run(
@@ -417,6 +416,31 @@ def run_py_test_in_temp(test_file, args, dry_run=False):
 def run_py_tests(dry_run=False, core_library_only=False):
     """Run all .py test files found in rt_py_test targets."""
     try:
+        # Verify we're using the pip installed version, not the submodule checkout
+        try:
+            import manipulation
+
+            manipulation_path = manipulation.__file__
+            print(f"manipulation.__file__: {manipulation_path}")
+            if (
+                "site-packages" not in manipulation_path
+                and "dist-packages" not in manipulation_path
+            ):
+                print(
+                    f"ERROR: Expected pip installed version, got: {manipulation_path}"
+                )
+                print(
+                    "This suggests the submodule checkout version is being used instead of the pip installed version."
+                )
+                return False
+            print("✅ Verified using pip installed manipulation package")
+        except ImportError as e:
+            print(f"ERROR: Could not import manipulation: {e}")
+            return False
+        except Exception as e:
+            print(f"ERROR: Unexpected error checking manipulation import: {e}")
+            return False
+
         # Use the existing function that finds all rt_py_test targets
         all_targets = get_rt_py_test_targets()
 
