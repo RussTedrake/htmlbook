@@ -6,7 +6,6 @@
 
 load("//book/htmlbook/tools/python:requirements.bzl", "requirement")
 load("//book/htmlbook/tools/python:defs.bzl", "rt_py_library", "rt_py_test")
-load("//book/htmlbook/tools/python:requirements.bzl", "requirement")
 
 rt_py_library(
     name = "htmlbook",
