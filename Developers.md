@@ -30,8 +30,13 @@ Install the prerequisites:
 bash setup/.../install_prereqs.sh
 ```
 
-Make sure that you have done a recursive checkout in this repository, or have run
+If you have access to the solutions repository (e.g. manipulation-solutions or underactuated-solutions), run e.g.
+```
+git clone git@github.com:RobotLocomotion/manipulation-solutions.git solutions
+cd solutions && git checkout $(cat ../solutions_sha.txt) && cd ..
+```
 
+Make sure that you have done a recursive checkout in this repository, or have run
 ```bash
 git submodule update --init --recursive
 ```
@@ -76,6 +81,7 @@ will need to update the pip wheels.
 rm -rf dist/*
 poetry publish --build && cd book && ./Deepnote.sh
 ```
+- The push to deepnote might update `chapters.js`; commit those changes now, too.
 - Finally, PR the updated pyproject.toml (*without* the `requires new pip wheels` label).
 
 Note: use `poetry config pypi-token.pypi <token>` once to set up your pypi token.
