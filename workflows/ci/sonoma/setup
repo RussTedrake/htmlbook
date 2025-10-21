@@ -63,17 +63,17 @@ brew untap homebrew/core || true
 # Run upgrades now to fail-fast (setup scripts do this anyway).
 brew update && brew upgrade
 
-BREW_PYTHON_DIR="/opt/homebrew/opt/python@3.12"
+BREW_PYTHON_DIR="/opt/homebrew/opt/python@3.13"
 # Attempting to create missing symlinks..."
-ln -sf $BREW_PYTHON_DIR/bin/python3.12 $BREW_PYTHON_DIR/bin/python3
-ln -sf $BREW_PYTHON_DIR/bin/pip3.12 $BREW_PYTHON_DIR/bin/pip3
-export PATH="/opt/homebrew/opt/python@3.12/bin:$PATH"
+ln -sf $BREW_PYTHON_DIR/bin/python3.13 $BREW_PYTHON_DIR/bin/python3
+ln -sf $BREW_PYTHON_DIR/bin/pip3.13 $BREW_PYTHON_DIR/bin/pip3
+export PATH="/opt/homebrew/opt/python@3.13/bin:$PATH"
 
 # brew doctor || true
 
 ./setup/mac/install_prereqs.sh
-if [[ $(python3 --version) != "Python 3.12"* ]]; then
-    echo "ERROR: Failed to use Homebrew Python 3.12"
+if [[ $(python3 --version) != "Python 3.13"* ]]; then
+    echo "ERROR: Failed to use Homebrew Python 3.13"
     exit 1
 fi
 trap 'brew cleanup && rm -rf "$(brew --cache)"' EXIT
