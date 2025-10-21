@@ -23,6 +23,11 @@ def find_workspace_root(root=None):
     return find_workspace_root(new_root)
 
 
+def get_project_name():
+    """Get the project name such as "underactuated" or "manipulation"."""
+    return os.path.basename(find_workspace_root())
+
+
 def get_rt_py_test_files():
     """Find all rt_py_test targets and return their main py files as a Python list of executable file paths."""
     try:
@@ -334,7 +339,9 @@ def run_notebook_test(notebook_file, args, dry_run=False):
                 env["MPLBACKEND"] = "Template"  # Non-interactive backend
                 env["DISPLAY"] = ""  # Clear display variable
                 workspace_root = find_workspace_root()
-                env["MANIPULATION_DATA_DIR"] = os.path.join(workspace_root, "book/data")
+                project_name = get_project_name()
+                project_name_upper = project_name.upper()
+                env[f"{project_name_upper}_DATA_DIR"] = os.path.join(workspace_root, "book/data")
 
                 # Run the converted Python file in the temp directory
                 result = subprocess.run(
@@ -404,7 +411,9 @@ def run_py_test_in_temp(test_file, args, dry_run=False):
             env["MPLBACKEND"] = "Template"  # Non-interactive backend
             env["DISPLAY"] = ""  # Clear display variable
             workspace_root = find_workspace_root()
-            env["MANIPULATION_DATA_DIR"] = os.path.join(workspace_root, "book/data")
+            project_name = get_project_name()
+            project_name_upper = project_name.upper()
+            env[f"{project_name_upper}_DATA_DIR"] = os.path.join(workspace_root, "book/data")
 
             # Run the test file in the temp directory
             result = subprocess.run(
@@ -434,27 +443,30 @@ def run_py_tests(dry_run=False, core_library_only=False):
     try:
         # Verify we're using the pip installed version, not the submodule checkout
         try:
-            import manipulation
+            project_name = get_project_name()
+            project_module = __import__(project_name)
 
-            manipulation_path = manipulation.__file__
-            print(f"manipulation.__file__: {manipulation_path}")
+            project_path = project_module.__file__
+            print(f"{project_name}.__file__: {project_path}")
             if (
-                "site-packages" not in manipulation_path
-                and "dist-packages" not in manipulation_path
+                "site-packages" not in project_path
+                and "dist-packages" not in project_path
             ):
                 print(
-                    f"ERROR: Expected pip installed version, got: {manipulation_path}"
+                    f"ERROR: Expected pip installed version, got: {project_path}"
                 )
                 print(
                     "This suggests the submodule checkout version is being used instead of the pip installed version."
                 )
                 return False
-            print("✅ Verified using pip installed manipulation package")
+            print(f"✅ Verified using pip installed {project_name} package")
         except ImportError as e:
-            print(f"ERROR: Could not import manipulation: {e}")
+            project_name = get_project_name()
+            print(f"ERROR: Could not import {project_name}: {e}")
             return False
         except Exception as e:
-            print(f"ERROR: Unexpected error checking manipulation import: {e}")
+            project_name = get_project_name()
+            print(f"ERROR: Unexpected error checking {project_name} import: {e}")
             return False
 
         # Use the existing function that finds all rt_py_test targets
@@ -465,8 +477,10 @@ def run_py_tests(dry_run=False, core_library_only=False):
 
         for target in all_targets:
             # Filter for core library tests if requested
-            if core_library_only and not target.startswith("//manipulation"):
-                continue
+            if core_library_only:
+                project_name = get_project_name()
+                if not target.startswith(f"//{project_name}"):
+                    continue
 
             # Get the main file for this target using our logic
             file_path = get_main_file_from_target(target)
@@ -629,7 +643,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--core-library-only",
         action="store_true",
-        help="Run only tests in the core manipulation library",
+        help="Run only tests in the core library",
     )
     args = parser.parse_args()
 
