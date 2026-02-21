@@ -29,15 +29,16 @@ Dockerfile = f"FROM russtedrake/{repository}:{dockerhub_sha}"
 with open(htmlbook + "/Init.ipynb") as f:
     Init = json.load(f)
 
+
 def get_formatted_version():
     # Run the 'poetry version' command
-    result = subprocess.run(['poetry', 'version'], stdout=subprocess.PIPE, text=True)
+    result = subprocess.run(["poetry", "version"], stdout=subprocess.PIPE, text=True)
 
     # Extract the output and strip any leading/trailing whitespace
     output = result.stdout.strip()
 
     # Replace the space with '==' to get the desired format
-    formatted_version = output.replace(' ', '==')
+    formatted_version = output.replace(" ", "==")
 
     return formatted_version
 
@@ -59,7 +60,7 @@ updated_dockerfiles = []
 
 def update(notebook, project_id, path=""):
     expected_files = set(["Dockerfile", "requirements.txt"])
-    expected_notebooks = dict({'Init':0})
+    expected_notebooks = dict({"Init": 0})
     notebook_path = Path(path) / notebook
     notebook = Path(notebook).stem
 
@@ -70,7 +71,7 @@ def update(notebook, project_id, path=""):
             expected_files.update(f)
             expected_notebooks.update(n)
         return expected_files, expected_notebooks
-    
+
     print(f"Updating {notebook_path}...")
     # Update the Dockerfile
     if project_id not in updated_dockerfiles:
@@ -98,9 +99,7 @@ def update(notebook, project_id, path=""):
                 print("failed to update requirements.txt")
                 print(r.status_code, r.reason, r.text)
 
-        url = (
-            f"https://api.deepnote.com/v1/projects/{project_id}/notebooks/import-from-ipynb"
-        )
+        url = f"https://api.deepnote.com/v1/projects/{project_id}/notebooks/import-from-ipynb"
         payload = {"name": "Init", "ipynb": Init}
         if testing:
             print(f"would be pushing to {url}")
@@ -114,7 +113,6 @@ def update(notebook, project_id, path=""):
                 print(r.status_code, r.reason, r.text)
 
         updated_dockerfiles.append(project_id)
-
 
     # Update the notebook file(s)
     url = (
@@ -153,20 +151,22 @@ def check_files(expected_files, expected_notebooks, project_id):
             text=True,
             timeout=60,
         ).stdout.splitlines()
-        
+
         # Add error handling for malformed output
         try:
             separator = output.index("---")
         except ValueError:
-            print(f"Warning: Malformed output from deepnote_check_notebooks.js for {url}")
+            print(
+                f"Warning: Malformed output from deepnote_check_notebooks.js for {url}"
+            )
             print("Output received:", output)
             return
-            
+
         notebooks = set(output[:separator])
         expected_notebooks = set(expected_notebooks)
         files = set(output[separator + 1 :])
         expected_files = set(expected_files)
-        
+
         if not expected_notebooks == notebooks:
             print(f"At {url}:")
             if expected_notebooks - notebooks:

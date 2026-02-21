@@ -2,27 +2,13 @@ import argparse
 import json
 import os
 import re
+from pathlib import Path
 
 import mysql.connector
-from lxml.html import parse, document_fromstring
-
-while not os.path.isfile("MODULE.bazel"):
-    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find MODULE.bazel"
-    os.chdir(os.path.dirname(os.getcwd()))
-repository = os.path.basename(os.getcwd())
-os.chdir("book")
-
-chapters = json.load(open("chapters.json"))
-chapter_ids = chapters["chapter_ids"]
-parts = chapters["parts"]
+from lxml.html import document_fromstring, parse
 
 change_detected = False
-
-parser = argparse.ArgumentParser(
-    description="Install ToC and Navigation into book html files."
-)
-parser.add_argument("--read_only", action="store_true")
-args = parser.parse_args()
+READ_ONLY = False
 
 
 def get_file_as_string(filename):
@@ -47,7 +33,7 @@ def write_file_as_string(filename, s):
             ),
             end="",
         )
-        if not args.read_only:
+        if not READ_ONLY:
             f = open(filename, "w")
             f.write(s)
             f.close()
@@ -209,7 +195,6 @@ def bibtex_entry_to_html(entry):
 
 def write_references(elib, s, filename):
     global change_detected
-    index = 0
     refs = []
 
     doc = document_fromstring(s)
@@ -248,201 +233,265 @@ def uni(str):
     )
 
 
-# Build TOC
-toc = "\n<h1>Table of Contents</h1>\n"
-toc += "<ul>\n"
-toc += '  <li><a href="#preface">Preface</a></li>\n'
+def _find_repo_root(start_dir: Path) -> Path:
+    current = start_dir.resolve()
+    while True:
+        if (current / "pyproject.toml").is_file():
+            return current
+        if current.parent == current:
+            raise RuntimeError("Could not find repository root")
+        current = current.parent
 
-chapter_num = 1
-appendix_start = 0
-for id in chapter_ids:
-    filename = id + ".html"
 
-    # parser = etree.HTMLParser(encoding='utf-8')
-    # doc = parse(filename, parser=parser).getroot()
-    doc = parse(filename).getroot()
-    chapter = next(doc.iter("chapter"))
+def install_html_meta_data(
+    *, check: bool = False, read_only: bool | None = None
+) -> bool:
+    global change_detected
+    global READ_ONLY
 
-    # Write the part if this chapter starts a new one.
-    if id in parts:
-        toc += (
-            '<p style="margin-bottom: 0; text-decoration: underline;'
-            + 'font-variant: small-caps;"><b>'
-            + uni(parts[id])
-            + "</b></p>\n"
-        )
-        if parts[id] == "Appendix":
-            appendix_start = chapter_num
+    if read_only is not None:
+        check = check or read_only
 
-    if appendix_start > 0:
-        appendix_label = chr(ord("A") + chapter_num - appendix_start)
-        toc += (
-            '  <li><a href="'
-            + filename
-            + '">Appendix '
-            + appendix_label
-            + ": "
-            + uni(chapter.find("h1").text)
-            + "</a></li>\n"
-        )
-    else:
-        toc += (
-            '  <li><a href="'
-            + filename
-            + '">Chapter '
-            + str(chapter_num)
-            + ": "
-            + uni(chapter.find("h1").text)
-            + "</a></li>\n"
-        )
+    root = _find_repo_root(Path(__file__).resolve().parent)
+    book_dir = root / "book"
+    original_cwd = Path.cwd()
 
-    chapter_num += 1
-    section_num = 1
-    if chapter.find("section") is not None:
-        toc += "  <ul>\n"
-        for section in chapter.findall("section"):
-            hash = "section" + str(section_num)
-            if section.get("id") is not None:
-                hash = section.get("id")
-            toc += (
-                "    <li><a href="
-                + filename
-                + "#"
-                + hash
-                + ">"
-                + uni(section.find("h1").text)
-                + "</a></li>\n"
-            )
-            section_num += 1
-            if section.find("subsection") is not None:
-                toc += "    <ul>\n"
-                for subsection in section.findall("subsection"):
-                    toc += "      <li>" + uni(subsection.find("h1").text) + "</li>\n"
-                    if subsection.find("subsubsection") is not None:
-                        toc += "      <ul>\n"
-                        for subsubsection in subsection.findall("subsubsection"):
+    change_detected = False
+    READ_ONLY = check
+
+    os.chdir(book_dir)
+    try:
+        chapters = json.load(open("chapters.json"))
+        chapter_ids = chapters["chapter_ids"]
+        parts = chapters["parts"]
+
+        # Build TOC
+        toc = "\n<h1>Table of Contents</h1>\n"
+        toc += "<ul>\n"
+        toc += '  <li><a href="#preface">Preface</a></li>\n'
+
+        chapter_num = 1
+        appendix_start = 0
+        for id in chapter_ids:
+            filename = id + ".html"
+
+            doc = parse(filename).getroot()
+            chapter = next(doc.iter("chapter"))
+
+            # Write the part if this chapter starts a new one.
+            if id in parts:
+                toc += (
+                    '<p style="margin-bottom: 0; text-decoration: underline;'
+                    + 'font-variant: small-caps;"><b>'
+                    + uni(parts[id])
+                    + "</b></p>\n"
+                )
+                if parts[id] == "Appendix":
+                    appendix_start = chapter_num
+
+            if appendix_start > 0:
+                appendix_label = chr(ord("A") + chapter_num - appendix_start)
+                toc += (
+                    '  <li><a href="'
+                    + filename
+                    + '">Appendix '
+                    + appendix_label
+                    + ": "
+                    + uni(chapter.find("h1").text)
+                    + "</a></li>\n"
+                )
+            else:
+                toc += (
+                    '  <li><a href="'
+                    + filename
+                    + '">Chapter '
+                    + str(chapter_num)
+                    + ": "
+                    + uni(chapter.find("h1").text)
+                    + "</a></li>\n"
+                )
+
+            chapter_num += 1
+            section_num = 1
+            if chapter.find("section") is not None:
+                toc += "  <ul>\n"
+                for section in chapter.findall("section"):
+                    hash = "section" + str(section_num)
+                    if section.get("id") is not None:
+                        hash = section.get("id")
+                    toc += (
+                        "    <li><a href="
+                        + filename
+                        + "#"
+                        + hash
+                        + ">"
+                        + uni(section.find("h1").text)
+                        + "</a></li>\n"
+                    )
+                    section_num += 1
+                    if section.find("subsection") is not None:
+                        toc += "    <ul>\n"
+                        for subsection in section.findall("subsection"):
                             toc += (
-                                "        <li>"
-                                + uni(subsubsection.find("h1").text)
+                                "      <li>"
+                                + uni(subsection.find("h1").text)
                                 + "</li>\n"
                             )
-                        toc += "      </ul>\n"
-                toc += "    </ul>\n"
-        toc += "  </ul>\n"
+                            if subsection.find("subsubsection") is not None:
+                                toc += "      <ul>\n"
+                                for subsubsection in subsection.findall(
+                                    "subsubsection"
+                                ):
+                                    toc += (
+                                        "        <li>"
+                                        + uni(subsubsection.find("h1").text)
+                                        + "</li>\n"
+                                    )
+                                toc += "      </ul>\n"
+                        toc += "    </ul>\n"
+                toc += "  </ul>\n"
 
-toc += "</ul>\n"
+        toc += "</ul>\n"
 
-s = get_file_as_string("index.html")
-s = replace_string_between(s, '<section id="table_of_contents">', "</section>", toc)
-write_file_as_string("index.html", s)
-
-elib_connector = mysql.connector.connect(
-    host="mysql.csail.mit.edu",
-    user="elibuser",
-    password="readonly678",
-    database="elib",
-)
-elib = elib_connector.cursor(dictionary=True)
-
-# Write common headers / footers
-header = get_file_as_string("header.html.in")
-footer = get_file_as_string("footer.html.in")
-
-chapter_num = 1
-for id in chapter_ids:
-    filename = id + ".html"
-    s = get_file_as_string(filename)
-
-    # Extract the chapter title
-    name_start = s.find("<chapter")
-    name_start = s.find("<h1>", name_start) + len("<h1>")
-    name_end = s.find("</h1>", name_start)
-    name = s[name_start:name_end]
-
-    # Rewrite the header
-    this_header = header.replace("$CHAPTER-ID$", id)
-    this_header = this_header.replace("$CHAPTER-NAME$", name)
-    this_header = this_header.replace("$CHAPTER-NUM$", str(chapter_num))
-    s = replace_string_before(s, "<chapter", this_header)
-
-    # Rewrite the footer
-    s = replace_string_after(s, "</chapter>", footer)
-
-    # Update the chapter number
-    if appendix_start > 0 and chapter_num >= appendix_start:
+        s = get_file_as_string("index.html")
         s = replace_string_between(
-            s,
-            "<chapter",
-            ">",
-            ' class="appendix" style="counter-reset: chapter '
-            + str(chapter_num - appendix_start)
-            + '"',
+            s, '<section id="table_of_contents">', "</section>", toc
         )
-    else:
-        s = replace_string_between(
-            s,
-            "<chapter",
-            ">",
-            ' style="counter-reset: chapter ' + str(chapter_num - 1) + '"',
+        write_file_as_string("index.html", s)
+
+        elib_connector = mysql.connector.connect(
+            host="mysql.csail.mit.edu",
+            user="elibuser",
+            password="readonly678",
+            database="elib",
+        )
+        elib = elib_connector.cursor(dictionary=True)
+
+        # Write common headers / footers
+        header = get_file_as_string("header.html.in")
+        footer = get_file_as_string("footer.html.in")
+
+        chapter_num = 1
+        for id in chapter_ids:
+            filename = id + ".html"
+            s = get_file_as_string(filename)
+
+            # Extract the chapter title
+            name_start = s.find("<chapter")
+            name_start = s.find("<h1>", name_start) + len("<h1>")
+            name_end = s.find("</h1>", name_start)
+            name = s[name_start:name_end]
+
+            # Rewrite the header
+            this_header = header.replace("$CHAPTER-ID$", id)
+            this_header = this_header.replace("$CHAPTER-NAME$", name)
+            this_header = this_header.replace("$CHAPTER-NUM$", str(chapter_num))
+            s = replace_string_before(s, "<chapter", this_header)
+
+            # Rewrite the footer
+            s = replace_string_after(s, "</chapter>", footer)
+
+            # Update the chapter number
+            if appendix_start > 0 and chapter_num >= appendix_start:
+                s = replace_string_between(
+                    s,
+                    "<chapter",
+                    ">",
+                    ' class="appendix" style="counter-reset: chapter '
+                    + str(chapter_num - appendix_start)
+                    + '"',
+                )
+            else:
+                s = replace_string_between(
+                    s,
+                    "<chapter",
+                    ">",
+                    ' style="counter-reset: chapter ' + str(chapter_num - 1) + '"',
+                )
+
+            # Write previous and next chapter logic
+            if chapter_num > 1:
+                s = replace_string_between(
+                    s,
+                    '<a class="previous_chapter"',
+                    "</a>",
+                    " href=" + chapter_ids[chapter_num - 2] + ".html>Previous Chapter",
+                )
+            if chapter_num < len(chapter_ids):
+                s = replace_string_between(
+                    s,
+                    '<a class="next_chapter"',
+                    "</a>",
+                    " href=" + chapter_ids[chapter_num] + ".html>Next Chapter",
+                )
+
+            # Write references
+            s = write_references(elib, s, filename)
+
+            write_file_as_string(filename, s)
+
+            chapter_num += 1
+
+        for id in chapters["draft_chapter_ids"]:
+            filename = id + ".html"
+            s = get_file_as_string(filename)
+
+            # Extract the chapter title
+            name_start = s.find("<chapter")
+            name_start = s.find("<h1>", name_start) + len("<h1>")
+            name_end = s.find("</h1>", name_start)
+            name = s[name_start:name_end]
+
+            # Rewrite the header
+            this_header = header.replace("$CHAPTER-ID$", id)
+            this_header = this_header.replace("$CHAPTER-NAME$", name)
+            this_header = this_header.replace("$CHAPTER-NUM$", "DRAFT")
+            s = replace_string_before(s, "<chapter", this_header)
+
+            # Rewrite the footer
+            s = replace_string_after(s, "</chapter>", footer)
+
+            # Update the chapter number
+            s = replace_string_between(
+                s, "<chapter", ">", ' style="counter-reset: chapter 100"'
+            )
+
+            # Write references
+            s = write_references(elib, s, filename)
+
+            write_file_as_string(filename, s)
+    finally:
+        os.chdir(original_cwd)
+
+    if check and change_detected:
+        print(
+            "This script would have made changes. You may need to run "
+            "'python3 htmlbook/install_html_meta_data.py' from the book "
+            "directory."
         )
 
-    # Write previous and next chapter logic
-    if chapter_num > 1:
-        s = replace_string_between(
-            s,
-            '<a class="previous_chapter"',
-            "</a>",
-            " href=" + chapter_ids[chapter_num - 2] + ".html>Previous Chapter",
-        )
-    if chapter_num < len(chapter_ids):
-        s = replace_string_between(
-            s,
-            '<a class="next_chapter"',
-            "</a>",
-            " href=" + chapter_ids[chapter_num] + ".html>Next Chapter",
-        )
+    return change_detected
 
-    # Write references
-    s = write_references(elib, s, filename)
 
-    write_file_as_string(filename, s)
-
-    chapter_num += 1
-
-for id in chapters["draft_chapter_ids"]:
-    filename = id + ".html"
-    s = get_file_as_string(filename)
-
-    # Extract the chapter title
-    name_start = s.find("<chapter")
-    name_start = s.find("<h1>", name_start) + len("<h1>")
-    name_end = s.find("</h1>", name_start)
-    name = s[name_start:name_end]
-
-    # Rewrite the header
-    this_header = header.replace("$CHAPTER-ID$", id)
-    this_header = this_header.replace("$CHAPTER-NAME$", name)
-    this_header = this_header.replace("$CHAPTER-NUM$", "DRAFT")
-    s = replace_string_before(s, "<chapter", this_header)
-
-    # Rewrite the footer
-    s = replace_string_after(s, "</chapter>", footer)
-
-    # Update the chapter number
-    s = replace_string_between(
-        s, "<chapter", ">", ' style="counter-reset: chapter 100"'
+def _parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Install ToC and Navigation into book html files."
     )
-
-    # Write references
-    s = write_references(elib, s, filename)
-
-    write_file_as_string(filename, s)
-
-if args.read_only and change_detected:
-    print(
-        "This script would have made changes. You may need to run "
-        "'python3 htmlbook/install_html_meta_data.py' from the book "
-        "directory."
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Do not write changes; fail if updates would be made.",
     )
+    # Backward-compatible alias.
+    parser.add_argument("--read_only", action="store_true", help=argparse.SUPPRESS)
+    return parser.parse_args(argv)
 
-exit(change_detected)
+
+def main(argv=None) -> int:
+    args = _parse_args(argv)
+    check_mode = args.check or args.read_only
+    return int(install_html_meta_data(check=check_mode))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
