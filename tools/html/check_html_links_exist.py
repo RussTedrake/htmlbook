@@ -17,11 +17,23 @@ parser.add_argument(
 parser.add_argument("files", nargs="+")
 args = parser.parse_args()
 
+
+def _is_workspace_root(d):
+    return (
+        os.path.isfile(os.path.join(d, "MODULE.bazel"))
+        or os.path.isfile(os.path.join(d, "pants.toml"))
+        or os.path.isfile(os.path.join(d, "pyproject.toml"))
+    )
+
+
 # Find workspace root by searching parent directories.
 os.chdir(args.cwd)
-while not os.path.isfile("MODULE.bazel"):
-    assert os.path.dirname(os.getcwd()) != os.getcwd(), "could not find MODULE.bazel"
-    os.chdir(os.path.dirname(os.getcwd()))
+while not _is_workspace_root(os.getcwd()):
+    parent = os.path.dirname(os.getcwd())
+    assert parent != os.getcwd(), (
+        "could not find workspace root (MODULE.bazel, pants.toml, or pyproject.toml)"
+    )
+    os.chdir(parent)
 
 repository = os.path.basename(os.getcwd())
 repository_url = f"https://{repository}.csail.mit.edu/"

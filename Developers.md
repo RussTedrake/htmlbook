@@ -2,6 +2,7 @@
 
 ```
 pip install "poetry>=2.0" pip-requirements-parser
+poetry self add poetry-plugin-export
 poetry install --all-extras --with=dev,docs
 ```
 (in a virtual environment) to install the requirements.
@@ -25,10 +26,26 @@ nbqa autoflake --remove-all-unused-imports --in-place .
 
 ## To Run the Unit Tests
 
-Install the prerequisites:
+**Recommended: Pants**
+
+Install the prerequisites (includes Pants and tidy; on macOS use the setup script):
 ```bash
-bash setup/.../install_prereqs.sh
+bash setup/mac/install_prereqs.sh   # or setup/ubuntu/... as appropriate
 ```
+
+From the repo root, generate the lockfile once (and after changing deps), then run tests:
+```bash
+pants generate-lockfiles
+pants test ::
+```
+
+To run a subset of tests:
+```bash
+pants test underactuated::
+pants test book/htmlbook:: book/figures::
+```
+
+See **PANTS.md** in the repo root for more options (tidy, link-check, drake_models, solutions).
 
 If you have access to the solutions repository (e.g. manipulation-solutions or underactuated-solutions), run e.g.
 ```
@@ -40,7 +57,8 @@ Make sure that you have done a recursive checkout in this repository, or have ru
 ```bash
 git submodule update --init --recursive
 ```
-Then run
+
+**Alternative: Bazel** (still used for notebook tests; Python/book tests are also ported to Pants)
 ```bash
 bazel test //...
 ```
@@ -63,6 +81,7 @@ Bazel currently uses requirements-bazel.txt, which we generate from poetry. To g
 ```
 poetry lock && ./book/htmlbook/PoetryExport.py
 ```
+(If `poetry export` is not found, run `poetry self add poetry-plugin-export` once.)
 Then run 
 ```
 poetry install --all-extras --with=dev,docs
