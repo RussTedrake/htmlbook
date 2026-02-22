@@ -23,4 +23,4 @@ repos:
   rev: 1.9.1
   hooks:
     - id: nbqa-isort # isort for jupyter
-      additional_dependencies: [setuptools]
+      additional_dependencies: [setuptools, isort==5.12.0]
