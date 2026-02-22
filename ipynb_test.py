@@ -11,6 +11,7 @@ from pathlib import Path
 
 import nbformat
 import pytest
+from htmlbook.book_name import get_project_name
 from nbconvert.exporters import PythonExporter
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -44,6 +45,7 @@ def _prepare_nbconvert_template() -> None:
 def _startup_prelude() -> str:
     startup = _REPO_ROOT / "book/htmlbook/tools/jupyter/startup.py"
     startup_code = startup.read_text(encoding="utf-8")
+    project_module = get_project_name().replace("-", "_")
     startup_code = startup_code.replace(
         'if "/usr/lib/python" in sys.modules["mpl_toolkits"].__file__:',
         'mpl_toolkits_file = getattr(sys.modules["mpl_toolkits"], "__file__", "") or ""\n'
@@ -54,7 +56,7 @@ def _startup_prelude() -> str:
         startup_code
         + "\n\n"
         + "try:\n"
-        + "    from underactuated.utils import _set_running_as_test\n"
+        + f"    from {project_module}.utils import _set_running_as_test\n"
         + "    _set_running_as_test(True)\n"
         + "except ModuleNotFoundError:\n"
         + "    pass\n\n"
@@ -82,7 +84,6 @@ def _notebook_source(notebook_path: Path) -> str:
     notebook = nbformat.read(notebook_path, as_version=4)
     exporter = PythonExporter()
     source, _ = exporter.from_notebook_node(notebook)
-    source = source.replace("plot_system_graphviz", "#plot_system_graphviz")
     return _startup_prelude() + source
 
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import re
+import time
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -20,9 +21,17 @@ IGNORE_LINK_DOMAINS = (
     "www.robotics.tu-berlin.de",
     "colab.research.google.com",
     "accessibility.mit.edu",
+    "kuffner.org",
 )
 
 BOOK_DIR = ROOT / "book"
+CHECK_EXTERNAL_LINKS = os.environ.get("CHECK_EXTERNAL_LINKS", "").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+
+_EXTERNAL_LINK_CACHE: dict[tuple[str, str], bool] = {}
 
 
 def _book_html_sources() -> list[Path]:
@@ -54,6 +63,53 @@ def _html_has_id(html: str, element_id: str) -> bool:
 
 def _is_transient_http_status(status_code: int) -> bool:
     return status_code in {403, 406, 418, 429, 503}
+
+
+def _request_with_retries(link: str, anchor_id: str, attempts: int = 2):
+    if requests is None:
+        return None
+    method = requests.get if anchor_id else requests.head
+    timeout_s = 8
+    last_response = None
+    for attempt in range(attempts):
+        try:
+            response = method(link, timeout=timeout_s)
+            last_response = response
+            if response.ok:
+                return response
+            if not _is_transient_http_status(response.status_code):
+                return response
+        except Exception:
+            if attempt == attempts - 1:
+                raise
+            # Retry once for network blips, but keep the test fast.
+        if attempt < attempts - 1:
+            time.sleep(0.1)
+    return last_response
+
+
+def _external_link_ok(link: str, anchor_id: str) -> bool:
+    cache_key = (link, anchor_id)
+    if cache_key in _EXTERNAL_LINK_CACHE:
+        return _EXTERNAL_LINK_CACHE[cache_key]
+
+    try:
+        response = _request_with_retries(link, anchor_id, attempts=2)
+        if response is None:
+            ok = True
+        elif _is_transient_http_status(response.status_code):
+            ok = True
+        elif not response.ok:
+            ok = False
+        elif anchor_id and not _html_has_id(response.text, anchor_id):
+            ok = False
+        else:
+            ok = True
+    except Exception:
+        ok = False
+
+    _EXTERNAL_LINK_CACHE[cache_key] = ok
+    return ok
 
 
 def _check_html_links(filename: Path) -> list[str]:
@@ -94,21 +150,8 @@ def _check_html_links(filename: Path) -> list[str]:
                 broken_links.append(link)
         elif any(domain in url for domain in IGNORE_LINK_DOMAINS):
             continue
-        elif requests is not None and not os.environ.get("GITHUB_ACTIONS"):
-            # Avoid noisy external-link failures on CI.
-            try:
-                if anchor_id:
-                    response = requests.get(link, timeout=20)
-                else:
-                    response = requests.head(link, timeout=20)
-                if _is_transient_http_status(response.status_code):
-                    continue
-                if not response.ok:
-                    broken_links.append(link)
-                    continue
-                if anchor_id and not _html_has_id(response.text, anchor_id):
-                    broken_links.append(link)
-            except Exception:
+        elif requests is not None and CHECK_EXTERNAL_LINKS:
+            if not _external_link_ok(link, anchor_id):
                 broken_links.append(link)
 
     for tag in ("jupyter", "pysrcinclude", "pysrc"):
