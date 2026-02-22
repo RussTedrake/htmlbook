@@ -22,34 +22,13 @@ IGNORE_LINK_DOMAINS = (
     "accessibility.mit.edu",
 )
 
-# HTML pages to validate.
-BOOK_HTML_FILES = (
-    "intro.html",
-    "pend.html",
-    "acrobot.html",
-    "simple_legs.html",
-    "humanoids.html",
-    "stochastic.html",
-    "dp.html",
-    "lqr.html",
-    "lyapunov.html",
-    "trajopt.html",
-    "planning.html",
-    "feedback_motion_planning.html",
-    "policy_search.html",
-    "robust.html",
-    "output_feedback.html",
-    "limit_cycles.html",
-    "contact.html",
-    "sysid.html",
-    "state_estimation.html",
-    "rl_policy_search.html",
-    "drake.html",
-    "multibody.html",
-    "optimization.html",
-    "playbook.html",
-    "misc.html",
-)
+BOOK_DIR = ROOT / "book"
+
+
+def _book_html_sources() -> list[Path]:
+    files = list(BOOK_DIR.glob("*.html"))
+    files.extend(BOOK_DIR.glob("*.html.in"))
+    return sorted(files)
 
 
 def _read_file(path: Path) -> str:
@@ -98,7 +77,11 @@ def _check_html_links(filename: Path) -> list[str]:
             if url[:4].lower() == "data" and os.environ.get("GITHUB_ACTIONS"):
                 # Don't require the data directory on CI.
                 continue
-            if url.startswith("Spring") or url.startswith("Fall"):
+            if (
+                url.startswith("Spring")
+                or url.startswith("Fall")
+                or url.startswith("python")
+            ):
                 # Ignore versioned term URLs.
                 continue
             local_path = ROOT / "book" / url
@@ -146,10 +129,12 @@ def _check_html_links(filename: Path) -> list[str]:
     return broken_links
 
 
-@pytest.mark.parametrize("html_name", BOOK_HTML_FILES)
-def test_html_links_exist(html_name: str) -> None:
-    html_path = ROOT / "book" / html_name
-    broken_links = _check_html_links(html_path)
-    if broken_links:
-        details = "\n".join(f"- {link}" for link in broken_links)
-        pytest.fail(f"HTML link check failed for {html_name}\n{details}")
+def test_html_links_exist() -> None:
+    failures: list[str] = []
+    for html_path in _book_html_sources():
+        broken_links = _check_html_links(html_path)
+        if broken_links:
+            details = "\n".join(f"- {link}" for link in broken_links)
+            failures.append(f"HTML link check failed for {html_path.name}\n{details}")
+    if failures:
+        pytest.fail("\n\n".join(failures))
