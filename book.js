@@ -255,41 +255,6 @@ function system_html(sys, url = null) {
   return `<table align=center cellpadding=0 cellspacing=0><tr align=center><td style=\"vertical-align:middle\"><table cellspacing=0 cellpadding=0>${input_port_html}</table></td><td align=center style=\"border:solid;padding-left:20px;padding-right:20px;vertical-align:middle\" bgcolor=#F0F0F0>${name_html}</td><td style=\"vertical-align:middle\"><table cellspacing=0 cellpadding=0>${output_port_html}</table></td></tr></table>`;
 }
 
-function notebook_header(chapter) {
-  if (chapter in chapter_project_ids) {
-    return `<a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${chapter_project_ids[chapter]}/" style="float:right; margin-top:20px; margin-bottom:-100px;background:white;border:0;" target="${chapter}">
-    <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a>
-    <div style="clear:right;"></div>`;
-  }
-  return "";
-}
-
-drake_tutorials_id = "2b4fc509-aef2-417d-a40d-6071dfed9199"
-drake_workspace_id = "Drake-0b3b2c53-a7ad-441b-80f8-bf8350752305"
-
-function drake_tutorials_link(name, link_text="") {
-  // TODO(russt): Retrieve IDs for sp
-  if (link_text) {
-    return `<a href="https://deepnote.com/workspace/${drake_workspace_id}/project/${drake_tutorials_id}" target="drake_tutorials">${link_text}</a>`;
-  } else {
-    return `<p><a href="https://deepnote.com/workspace/${drake_workspace_id}/project/${drake_tutorials_id}" style="background:none; border:none;" target="drake_tutorials">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
-  }
-}
-
-function notebook_link(chapter, notebook, link_text="") {
-  if (!notebook) { notebook = chapter; }
-  chapter_project_id = chapter_project_ids[chapter];
-  notebook_id = notebook_ids[chapter][notebook];
-  if (notebook_id) {
-    if (link_text) {
-      return `<a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${chapter_project_id}/notebook/${notebook}-${notebook_id}" target="${chapter}">${link_text}</a>`;
-    } else {
-      return `<p><a href="https://deepnote.com/workspace/${deepnote_workspace_id}/project/${chapter_project_id}/notebook/${notebook}-${notebook_id}" style="background:none; border:none;" target="${chapter}">  <img src="https://deepnote.com/buttons/launch-in-deepnote-white.svg"></a></p>`;
-    }
-  }
-  return `<p><center>ERROR: <i>Notebook link not found. Please do a "force reload" of this page. If that doesn't fix it, please email russt@mit.edu and let me know.</i></center></p>`;
-}
-
 function copy_code_to_clipboard(buttonElement) {
   const codeElement = buttonElement.parentElement.nextElementSibling.querySelector('code');
   const text = codeElement.textContent;

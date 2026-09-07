@@ -61,33 +61,45 @@ to update your virtual environment.
 
 ## To update the pip wheels
 
-If you make a change to the dependencies or library directory, you
-will need to update the pip wheels.
-- First PR the code changes, and mark the PR with the `requires new pip wheels` label.
-- Make sure to `git pull` your merged PR into `master`.
-- Once the PR is merged update the version number in `pyproject.toml`, then
-`git commit` that small change, then from the root directory, run:
-```
-rm -rf dist/*
-poetry publish --build && cd book && ./Deepnote.sh
-```
-- The push to deepnote might update `chapters.js`; commit those changes now, too.
-- Finally, PR the updated pyproject.toml (*without* the `requires new pip wheels` label).
+Library and dependency changes require a new package release. Keep the source
+release and its published artifacts in this order:
 
-Note: use `poetry config pypi-token.pypi <token>` once to set up your pypi token.
+1. Include a new version in `pyproject.toml` in the code PR, and apply the
+   `requires new pip wheels` label. Run local lint and source tests, including
+   changed files in this submodule, before pushing.
+2. Merge the PR after the relevant CI checks pass. A job testing the installed
+   PyPI package may need the release before it can pass; check that its failure
+   is caused by the unpublished version rather than a source regression.
+3. Check out the merged commit with a clean working tree and initialized
+   submodules. Build from that commit, so the published version has an exact
+   source revision. From the repository root, use a fresh output directory:
 
-# To update the Docker image (and pip wheels)
+   ```bash
+   .venv/bin/python -m poetry build --output /tmp/book-release-VERSION
+   ```
 
-It's good form to update the pip wheels first (so that the Docker contains the
-latest pip dependencies):
-```
-rm -rf dist/*
-poetry publish --build
-./book/Deepnote_docker.sh && cd book && ./Deepnote.sh
-```
-And make sure to follow the printed instructions to build the image once on
-deepnote. Then run a few notebooks on deepnote to convince yourself you haven't
-broken anything.
+4. Inspect the artifacts and test the wheel in a separate environment outside
+   the checkout. Publish the same artifacts:
+
+   ```bash
+   .venv/bin/python -m poetry publish --dist-dir /tmp/book-release-VERSION
+   ```
+
+5. Verify that PyPI serves the expected version and artifacts, and test a fresh
+   installation. Rerun any CI jobs that were waiting for the package release.
+6. Update public notebook links and instructions that depend on the release
+   only after the package is available. Smoke-test the notebooks in Colab,
+   including their Meshcat links.
+
+Replace `VERSION` with the release version. Configure the PyPI token once with
+`poetry config pypi-token.pypi <token>`; do not commit the token.
+
+## To update the Docker image
+
+Publish the pip wheels first so the image installs the released library. In
+repositories providing it, run `./setup/docker/publish.sh` from the repository
+root, then smoke-test the resulting image. This is a separate publication step
+from the Python package release.
 
 ## Building the documentation
 
