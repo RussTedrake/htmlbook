@@ -4,6 +4,7 @@ from unittest.mock import Mock
 from urllib.error import URLError
 
 import pytest
+from htmlbook import http_retry
 from htmlbook import install_html_meta_data as metadata
 from htmlbook.install_html_meta_data import install_html_meta_data
 
@@ -54,6 +55,8 @@ def test_invalid_or_missing_bibliography(monkeypatch, payload):
 
 
 def test_network_failure_precedes_any_writes(monkeypatch):
+    monkeypatch.setattr(http_retry.time, "sleep", Mock())
+
     def fail(*args, **kwargs):
         raise URLError("unavailable")
 
@@ -63,3 +66,20 @@ def test_network_failure_precedes_any_writes(monkeypatch):
     with pytest.raises(RuntimeError, match="Failed to fetch"):
         install_html_meta_data()
     write.assert_not_called()
+
+
+def test_bibliography_recovers_from_connection_timeout(monkeypatch):
+    monkeypatch.setattr(http_retry.time, "sleep", Mock())
+    entry = {"bibtag": "A", "bibtype": "article", "title": "Title", "year": "2025"}
+    response = io.BytesIO(json.dumps({"entries": {"A": entry}, "missing": []}).encode())
+    fetch = Mock(side_effect=[URLError(TimeoutError("timed out")), response])
+    monkeypatch.setattr(metadata, "urlopen", fetch)
+    assert metadata.fetch_bibliography("https://example.org/elib.cgi", ["A"]) == {
+        "A": entry
+    }
+    assert fetch.call_count == 2
+    for invocation in fetch.call_args_list:
+        assert invocation.kwargs == {"timeout": 30}
+        assert invocation.args[0].get_method() == "POST"
+        assert json.loads(invocation.args[0].data) == ["A"]
+    assert response.closed

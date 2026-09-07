@@ -8,6 +8,11 @@ from urllib.request import Request, urlopen
 
 from lxml.html import document_fromstring, parse
 
+if __package__:
+    from .http_retry import retry_http
+else:
+    from http_retry import retry_http
+
 change_detected = False
 READ_ONLY = False
 
@@ -34,9 +39,14 @@ def fetch_bibliography(url, tags):
         headers={"Content-Type": "application/json", "Accept": "application/json"},
         method="POST",
     )
-    try:
+
+    def fetch():
         with urlopen(request, timeout=30) as response:
-            payload = json.load(response)
+            return json.load(response)
+
+    try:
+        # This POST only looks up bibliography records, so retrying is safe.
+        payload = retry_http(fetch)
     except (HTTPError, URLError, TimeoutError, ValueError) as error:
         raise RuntimeError(
             f"ELIB: Failed to fetch bibliography from {url}: {error}"
