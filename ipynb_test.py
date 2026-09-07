@@ -17,29 +17,29 @@ from nbconvert.exporters import PythonExporter
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def _prepare_nbconvert_template() -> None:
+def _prepare_nbconvert_template() -> Path:
     temp_jupyter_dir = Path("/tmp/jupyter_templates")
     template_dir = temp_jupyter_dir / "nbconvert" / "templates" / "python"
     template_dir.mkdir(parents=True, exist_ok=True)
     template_file = template_dir / "index.py.j2"
-    if not template_file.exists():
-        template_file.write_text(
-            """# coding: utf-8
+    template = """# coding: utf-8
 {%- for cell in nb.cells -%}
 {%- if cell.cell_type == 'code' -%}
-{% for line in cell.source.splitlines() %}
-{{ line }}
-{% endfor %}
+{{ cell.source | ipython2python }}
 {% if not loop.last %}
 
 {% endif %}
 {%- endif -%}
 {%- endfor -%}
-""",
-            encoding="utf-8",
-        )
+"""
+    if (
+        not template_file.exists()
+        or template_file.read_text(encoding="utf-8") != template
+    ):
+        template_file.write_text(template, encoding="utf-8")
     os.environ.setdefault("JUPYTER_DATA_DIR", str(temp_jupyter_dir))
     os.environ.setdefault("JUPYTER_CONFIG_DIR", "/tmp")
+    return template_file
 
 
 def _startup_prelude() -> str:
@@ -80,9 +80,9 @@ def _notebook_source(notebook_path: Path) -> str:
 
         warnings.simplefilter("error", DrakeDeprecationWarning)
 
-    _prepare_nbconvert_template()
+    template_file = _prepare_nbconvert_template()
     notebook = nbformat.read(notebook_path, as_version=4)
-    exporter = PythonExporter()
+    exporter = PythonExporter(template_file=str(template_file))
     source, _ = exporter.from_notebook_node(notebook)
     return _startup_prelude() + source
 
