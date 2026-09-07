@@ -3,7 +3,6 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import nbformat
-
 from htmlbook import ipynb_test
 
 
