@@ -3,12 +3,65 @@ import json
 import os
 import re
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
-import mysql.connector
 from lxml.html import document_fromstring, parse
 
 change_detected = False
 READ_ONLY = False
+
+
+def reference_tags(s):
+    doc = document_fromstring(s)
+    return list(
+        dict.fromkeys(
+            tag.strip() for ref in doc.findall(".//elib") for tag in ref.text.split("+")
+        )
+    )
+
+
+def fetch_bibliography(url, tags):
+    """Fetch all requested entries before the installer changes any files."""
+    tags = list(dict.fromkeys(tags))
+    if not tags:
+        return {}
+    if not isinstance(url, str) or not url.startswith("https://"):
+        raise RuntimeError("Set elib_url in chapters.json to the HTTPS elib.cgi URL.")
+    request = Request(
+        url,
+        data=json.dumps(tags).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=30) as response:
+            payload = json.load(response)
+    except (HTTPError, URLError, TimeoutError, ValueError) as error:
+        raise RuntimeError(
+            f"ELIB: Failed to fetch bibliography from {url}: {error}"
+        ) from error
+    if not isinstance(payload, dict):
+        raise RuntimeError("ELIB: Invalid bibliography response.")
+    entries = payload.get("entries")
+    missing = payload.get("missing")
+    if (
+        not isinstance(entries, dict)
+        or not isinstance(missing, list)
+        or any(not isinstance(tag, str) for tag in missing)
+        or len(missing) != len(set(missing))
+        or set(entries) & set(missing)
+        or set(entries) | set(missing) != set(tags)
+    ):
+        raise RuntimeError("ELIB: Incomplete or invalid bibliography response.")
+    if missing:
+        raise RuntimeError("ELIB: Could not find references: " + ", ".join(missing))
+    for tag, entry in entries.items():
+        if not isinstance(entry, dict) or entry.get("bibtag") != tag:
+            raise RuntimeError(f"ELIB: Invalid bibliography entry for {tag}.")
+        # Validate renderability before writing any files; the renderer mutates its input.
+        bibtex_entry_to_html(entry.copy())
+    return entries
 
 
 def get_file_as_string(filename):
@@ -195,28 +248,20 @@ def bibtex_entry_to_html(entry):
 
 def write_references(elib, s, filename):
     global change_detected
-    refs = []
-
-    doc = document_fromstring(s)
-    for ref in doc.findall(".//elib"):
-        refs += ref.text.split("+")
+    refs = reference_tags(s)
 
     if not refs:
         return s
 
-    refs = map(str.strip, refs)  # Strip whitespace
-    refs = list(dict.fromkeys(refs))  # Remove duplicates (preserving order)
-
     html = ""
     for r in refs:
-        elib.execute(f"SELECT * FROM bibtex WHERE bibtag = '{r}'")
-        x = elib.fetchone()
+        x = elib.get(r)
         if not x:
             print(f"ELIB: Could not find reference {r} referenced from {filename}")
             change_detected = True
             continue
 
-        html += bibtex_entry_to_html(x)
+        html += bibtex_entry_to_html(x.copy())
 
     html = f"<section><h1>References</h1>\n<ol>\n{html}" "\n</ol>\n</section><p/>\n"
 
@@ -264,6 +309,11 @@ def install_html_meta_data(
         chapters = json.load(open("chapters.json"))
         chapter_ids = chapters["chapter_ids"]
         parts = chapters["parts"]
+
+        tags = []
+        for id in chapter_ids + chapters["draft_chapter_ids"]:
+            tags.extend(reference_tags(get_file_as_string(id + ".html")))
+        elib = fetch_bibliography(chapters.get("elib_url"), tags)
 
         # Build TOC
         toc = "\n<h1>Table of Contents</h1>\n"
@@ -358,14 +408,6 @@ def install_html_meta_data(
             s, '<section id="table_of_contents">', "</section>", toc
         )
         write_file_as_string("index.html", s)
-
-        elib_connector = mysql.connector.connect(
-            host="mysql.csail.mit.edu",
-            user="elibuser",
-            password="readonly678",
-            database="elib",
-        )
-        elib = elib_connector.cursor(dictionary=True)
 
         # Write common headers / footers
         header = get_file_as_string("header.html.in")
