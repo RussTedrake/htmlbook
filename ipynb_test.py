@@ -73,7 +73,7 @@ def _chdir(path: Path):
         os.chdir(old)
 
 
-def _notebook_source(notebook_path: Path) -> str:
+def _notebook_source(notebook_path: Path, *, grader_throws: bool = False) -> str:
     warnings.filterwarnings("ignore", category=SyntaxWarning)
     with contextlib.suppress(Exception):
         from pydrake.common.deprecation import DrakeDeprecationWarning
@@ -84,11 +84,18 @@ def _notebook_source(notebook_path: Path) -> str:
     notebook = nbformat.read(notebook_path, as_version=4)
     exporter = PythonExporter(template_file=str(template_file))
     source, _ = exporter.from_notebook_node(notebook)
-    return _startup_prelude() + source
+    prelude = _startup_prelude()
+    if grader_throws:
+        project_module = get_project_name().replace("-", "_")
+        prelude += (
+            f"from {project_module}.exercises.grader import set_grader_throws\n"
+            "set_grader_throws(True)\n"
+        )
+    return prelude + source
 
 
-def _run_notebook(notebook_path: Path) -> None:
-    source = _notebook_source(notebook_path)
+def _run_notebook(notebook_path: Path, *, grader_throws: bool = False) -> None:
+    source = _notebook_source(notebook_path, grader_throws=grader_throws)
 
     with tempfile.NamedTemporaryFile(
         mode="w",
@@ -138,7 +145,10 @@ def _run_notebook(notebook_path: Path) -> None:
         pytest.fail("\n\n".join(details))
 
 
-def ipynb_test(path: str, *, name: str | None = None) -> None:
+def ipynb_test(
+    path: str, *, name: str | None = None, grader_throws: bool = False
+) -> None:
+    """Register a notebook test; optionally require full exercise grader scores."""
     frame = inspect.currentframe()
     assert frame is not None
     caller = frame.f_back
@@ -152,7 +162,7 @@ def ipynb_test(path: str, *, name: str | None = None) -> None:
 
     @pytest.mark.notebook
     def _test() -> None:
-        _run_notebook(notebook_path)
+        _run_notebook(notebook_path, grader_throws=grader_throws)
 
     _test.__name__ = test_name
     _test.__qualname__ = test_name
