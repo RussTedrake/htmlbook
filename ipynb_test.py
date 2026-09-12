@@ -22,15 +22,14 @@ def _prepare_nbconvert_template() -> Path:
     template_dir = temp_jupyter_dir / "nbconvert" / "templates" / "python"
     template_dir.mkdir(parents=True, exist_ok=True)
     template_file = template_dir / "index.py.j2"
+    # Preserve the newline after the encoding cookie and between code cells.
+    # Jinja's whitespace-trimming markers can join the first import to the cookie.
     template = """# coding: utf-8
-{%- for cell in nb.cells -%}
-{%- if cell.cell_type == 'code' -%}
+{% for cell in nb.cells %}
+{% if cell.cell_type == 'code' %}
 {{ cell.source | ipython2python }}
-{% if not loop.last %}
-
 {% endif %}
-{%- endif -%}
-{%- endfor -%}
+{% endfor %}
 """
     if (
         not template_file.exists()
