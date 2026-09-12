@@ -87,8 +87,14 @@ def _notebook_source(notebook_path: Path) -> str:
     return _startup_prelude() + source
 
 
-def _run_notebook(notebook_path: Path) -> None:
+def _run_notebook(notebook_path: Path, *, grader_throws: bool = False) -> None:
     source = _notebook_source(notebook_path)
+    if grader_throws:
+        project_module = get_project_name().replace("-", "_")
+        source = (
+            f"from {project_module}.exercises.grader import set_grader_throws\n"
+            "set_grader_throws(True)\n\n" + source
+        )
 
     with tempfile.NamedTemporaryFile(
         mode="w",
@@ -138,7 +144,9 @@ def _run_notebook(notebook_path: Path) -> None:
         pytest.fail("\n\n".join(details))
 
 
-def ipynb_test(path: str, *, name: str | None = None) -> None:
+def ipynb_test(
+    path: str, *, name: str | None = None, grader_throws: bool = False
+) -> None:
     frame = inspect.currentframe()
     assert frame is not None
     caller = frame.f_back
@@ -152,7 +160,7 @@ def ipynb_test(path: str, *, name: str | None = None) -> None:
 
     @pytest.mark.notebook
     def _test() -> None:
-        _run_notebook(notebook_path)
+        _run_notebook(notebook_path, grader_throws=grader_throws)
 
     _test.__name__ = test_name
     _test.__qualname__ = test_name
