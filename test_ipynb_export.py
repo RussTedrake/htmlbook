@@ -3,8 +3,8 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import nbformat
-from jinja2 import Environment
 from htmlbook import ipynb_test
+from jinja2 import Environment
 
 
 def test_export_conditional_magic_and_refresh_cached_template(tmp_path, monkeypatch):
