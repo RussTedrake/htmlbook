@@ -19,8 +19,28 @@ and readable by the CGI account. The service only returns fields used by the
 renderer, and never returns private paper URLs. Requests are limited to 1000
 tags and 128 KiB. Database failures return HTTP 503; invalid requests return 4xx.
 
-To enable MathJax without an internet connection, do
+MathJax 4 pages load `mathjax-config.js`, then `mathjax-loader.js`, both with
+`defer`. The loader pins MathJax 4.1.3 and uses CommonHTML with the default New
+Computer Modern font. Call `typesetMath()` after inserting or transforming
+content; its promise resolves after startup and asynchronous typesetting.
+`loadChapter()` waits before scrolling to the URL fragment. The HTML capture
+script also waits for typesetting and web fonts before saving the page.
+
+The loader uses the CDN first and falls back to an optional local installation
+if the runtime script cannot be fetched. To install the matching runtime and
+fonts, run this from the htmlbook root:
+
+```sh
+npm install --prefix MathJax --no-save mathjax@4.1.3
 ```
-git clone https://github.com/mathjax/MathJax --depth 1
+
+The fallback points both the runtime and default font data at that installation.
+A partial CDN failure after the runtime has loaded is reported by MathJax; it
+does not trigger a second runtime. The previous v3 `MathJax/es5` checkout is not
+used by this loader.
+
+Run the loading and asynchronous typesetting tests with:
+
+```sh
+node --test test_mathjax.js
 ```
-in the htmlbook root directory.
