@@ -123,15 +123,25 @@ function forwardOldChapterLink() {
   }
 }
 
+// Expose completion to callers that capture the rendered page (e.g. PDF export).
+// Waiting for startup is also necessary when fonts or extensions load on demand.
+function typesetMath() {
+  window.mathTypesetPromise = (async function () {
+    await (window.mathjaxReady || MathJax.startup.promise);
+    await MathJax.typesetPromise();
+  })();
+  return window.mathTypesetPromise;
+}
+
 function loadIndex()  {
   forwardOldChapterLink();
   customTags();
   var mathjax = document.getElementById("mathjax");
   mathjax.innerHTML = mathjax_setup + mathjax.innerHTML;
-  MathJax.typeset();
+  return typesetMath();
 }
 
-function loadChapter(project)  {
+async function loadChapter(project)  {
   var url = window.location.pathname;
   var filename = url.substring(url.lastIndexOf('/')+1);
   var chapter_id = filename.slice(0, -5);
@@ -225,7 +235,7 @@ function loadChapter(project)  {
   if (navigator.appVersion.indexOf("Mac")>=0) { platform = 'mac'; }
   setPlatform(platform);
 
-  MathJax.typeset();
+  await typesetMath();
 
   // Process any anchors again now that the proper elements are visible.
   var hash = document.getElementById(location.hash.substr(1));
