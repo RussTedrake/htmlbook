@@ -25,7 +25,7 @@ def test_registered_notebook_forwards_grading_option(tmp_path, monkeypatch):
 )
 def test_notebook_grading(tmp_path, monkeypatch, grader_throws, score, should_fail):
     monkeypatch.setattr(runner, "_startup_prelude", lambda: "")
-    monkeypatch.setattr(runner, "get_project_name", lambda: "manipulation")
+    project_module = runner.get_project_name().replace("-", "_")
     result = {
         "score": score,
         "tests": [{"name": "example", "score": score, "max_score": 1}],
@@ -34,7 +34,7 @@ def test_notebook_grading(tmp_path, monkeypatch, grader_throws, score, should_fa
         cells=[
             nbformat.v4.new_code_cell(
                 "from pathlib import Path\n"
-                "from manipulation.exercises.grader import Grader\n"
+                f"from {project_module}.exercises.grader import Grader\n"
                 f"Path('results.json').write_text({json.dumps(result)!r})\n"
                 "Grader.print_test_results('results.json')\n"
             )
