@@ -7,7 +7,6 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 import pytest
-
 from htmlbook.http_retry import retry_http
 from htmlbook.notifier_health import check_health
 

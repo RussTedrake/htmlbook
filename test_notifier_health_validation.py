@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from htmlbook.notifier_health import check_health
 
 NOW = datetime(2026, 9, 13, tzinfo=timezone.utc)
