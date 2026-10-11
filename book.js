@@ -130,7 +130,25 @@ function typesetMath() {
     await (window.mathjaxReady || MathJax.startup.promise);
     await MathJax.typesetPromise();
   })();
+  // Run deferred scripts whether or not typesetting succeeds.
+  window.mathTypesetPromise.then(runScriptsDeferredUntilTypeset,
+                                 runScriptsDeferredUntilTypeset);
   return window.mathTypesetPromise;
+}
+
+// Scripts that modify the text of the page (e.g. Hypothesis highlights) must
+// not run while MathJax is typesetting, since MathJax records text node offsets
+// and then awaits font loading.  Pages mark such scripts with
+// <script type="text/plain" data-run-after="mathjax" src="...">.
+function runScriptsDeferredUntilTypeset() {
+  var placeholders =
+    document.querySelectorAll('script[data-run-after="mathjax"]');
+  for (let placeholder of placeholders) {
+    var script = document.createElement('script');
+    script.src = placeholder.getAttribute('src');
+    script.async = true;
+    placeholder.replaceWith(script);
+  }
 }
 
 function loadIndex()  {

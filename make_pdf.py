@@ -86,6 +86,11 @@ for c in chapter_ids:
 
     # Remove hypothesis
     s = s.replace('<script src="https://hypothes.is/embed.js" async></script>', "")
+    s = s.replace(
+        '<script type="text/plain" data-run-after="mathjax" '
+        'src="https://hypothes.is/embed.js"></script>',
+        "",
+    )
 
     # links to data should point to online version
     s = s.replace('href="data/', f'href="http://{basename}.csail.mit.edu/data/')

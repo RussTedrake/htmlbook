@@ -86,7 +86,7 @@ for (const useLoader of [false, true]) {
     const ctx = context({MathJax: {
       startup: {promise: ready.promise},
       typesetPromise: () => { called = true; return typeset.promise; }
-    }});
+    }, document: {querySelectorAll: () => []}});
     if (useLoader) ctx.mathjaxReady = ready.promise;
     run(ctx, 'book.js');
     const result = ctx.typesetMath();
@@ -102,5 +102,52 @@ for (const useLoader of [false, true]) {
     typeset.resolve();
     await result;
     assert.equal(finished, true);
+  });
+}
+
+function placeholderDocument() {
+  const created = [];
+  const placeholder = {
+    getAttribute: name => name === 'src' ? 'https://hypothes.is/embed.js' : null,
+    replacedWith: null,
+    replaceWith(node) { this.replacedWith = node; }
+  };
+  const document = {
+    querySelectorAll: selector => {
+      assert.equal(selector, 'script[data-run-after="mathjax"]');
+      return placeholder.replacedWith ? [] : [placeholder];
+    },
+    createElement: tag => { const el = {tag}; created.push(el); return el; }
+  };
+  return {document, placeholder, created};
+}
+
+for (const outcome of ['resolves', 'rejects']) {
+  test(`deferred scripts run only after typesetting ${outcome}`, async () => {
+    const typeset = deferred();
+    let rejectTypeset;
+    const failed = new Promise((_, reject) => { rejectTypeset = reject; });
+    const {document, placeholder, created} = placeholderDocument();
+    const ctx = context({MathJax: {
+      startup: {promise: Promise.resolve()},
+      typesetPromise: () => outcome === 'resolves' ? typeset.promise : failed
+    }, document});
+    run(ctx, 'book.js');
+    const result = ctx.typesetMath();
+    await new Promise(setImmediate);
+    assert.equal(placeholder.replacedWith, null);
+    if (outcome === 'resolves') {
+      typeset.resolve();
+      await result;
+    } else {
+      rejectTypeset(new Error('typeset failed'));
+      await assert.rejects(result, /typeset failed/);
+    }
+    await new Promise(setImmediate);
+    assert.equal(created.length, 1);
+    assert.equal(placeholder.replacedWith, created[0]);
+    assert.equal(created[0].tag, 'script');
+    assert.equal(created[0].src, 'https://hypothes.is/embed.js');
+    assert.equal(created[0].async, true);
   });
 }
