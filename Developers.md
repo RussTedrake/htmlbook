@@ -64,12 +64,10 @@ to update your virtual environment.
 Library and dependency changes require a new package release. Keep the source
 release and its published artifacts in this order:
 
-1. Include a new version in `pyproject.toml` in the code PR, and apply the
-   `requires new pip wheels` label. Run local lint and source tests, including
-   changed files in this submodule, before pushing.
-2. Merge the PR after the relevant CI checks pass. A job testing the installed
-   PyPI package may need the release before it can pass; check that its failure
-   is caused by the unpublished version rather than a source regression.
+1. Include a new version in `pyproject.toml` in the code PR. Run local lint and
+   source tests, including changed files in this submodule, before pushing.
+2. Merge the PR after CI passes. The pip CI job builds and tests a wheel from
+   the commit under test, so it does not wait for the release.
 3. Check out the merged commit with a clean working tree and initialized
    submodules. Build from that commit, so the published version has an exact
    source revision. From the repository root, use a fresh output directory:
@@ -86,7 +84,7 @@ release and its published artifacts in this order:
    ```
 
 5. Verify that PyPI serves the expected version and artifacts, and test a fresh
-   installation. Rerun any CI jobs that were waiting for the package release.
+   installation.
 6. Update public notebook links and instructions that depend on the release
    only after the package is available. Smoke-test the notebooks in Colab,
    including their Meshcat links.
